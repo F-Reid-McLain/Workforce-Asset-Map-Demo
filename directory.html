@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workforce Directory - Greater Macon Chamber of Commerce</title>
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/viz.css">
+        <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <h1>WORKFORCE <span class="accent">macon</span></h1>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html" class="nav-link">Asset Map</a></li>
+                    <li><a href="workforcedata.html" class="nav-link">Workforce Data</a></li>
+                    <li><a href="directory.html" class="nav-link">Directory</a></li>
+                    <li><a href="about.html" class="nav-link">About</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="page-header">
+                <h2>Workforce Asset Directory</h2>
+                <p>Complete listing of workforce development resources in Greater Macon</p>
+            </section>
+
+            <div class="directory-grid">
+                <!-- Colleges -->
+                <section class="directory-group">
+                    <h3><a href="index.html#colleges" class="group-link">Higher Education Institutions, Colleges & Universities</a></h3>
+                    <ul class="asset-list">
+                        <li><a href="#mercer" class="asset-link">Mercer University</a></li>
+                        <li><a href="#wesleyan" class="asset-link">Wesleyan College</a></li>
+                        <li><a href="#central-ga-tech" class="asset-link">Central Georgia Technical College</a></li>
+                        <li><a href="#middle-ga-state" class="asset-link">Middle Georgia State University</a></li>
+                    </ul>
+                </section>
+
+                <!-- K-12 and Secondary -->
+                <section class="directory-group">
+                    <h3><a href="index.html#k12" class="group-link">Secondary Education & Career Academy Programs (K-12)</a></h3>
+                    <ul class="asset-list">
+                        <li><a href="#hutchings" class="asset-link">W.S. Hutchings College & Career Academy</a></li>
+                        <li><a href="#bibb-schools" class="asset-link">Bibb County School District</a></li>
+                        <li><a href="#innovation-tech" class="asset-link">Macon-Bibb County Innovation & Technology Academy</a></li>
+                    </ul>
+                </section>
+
+                <!-- Community and Economic Development -->
+                <section class="directory-group">
+                    <h3><a href="index.html#community" class="group-link">Community & Economic Development Partners</a></h3>
+                    <ul class="asset-list">
+                        <li><a href="#chamber" class="asset-link">Greater Macon Chamber of Commerce</a></li>
+                        <li><a href="#mbcia" class="asset-link">Macon-Bibb County Industrial Authority</a></li>
+                        <li><a href="#choose-macon" class="asset-link">Choose Macon Initiative</a></li>
+                        <li><a href="#library" class="asset-link">Middle Georgia Regional Library</a></li>
+                        <li><a href="#workforce-alliance" class="asset-link">Greater Macon Workforce Alliance</a></li>
+                        <li><a href="#newtown" class="asset-link">NewTown Macon</a></li>
+                        <li><a href="#mgrc" class="asset-link">Middle Georgia Regional Commission</a></li>
+                    </ul>
+                </section>
+
+                <!-- Job Training and Career Services -->
+                <section class="directory-group">
+                    <h3><a href="index.html#job-training" class="group-link">Job Training & Career Services, Adult & Workforce Programs</a></h3>
+                    <ul class="asset-list">
+                        <li><a href="#ga-dol" class="asset-link">Georgia Department of Labor</a></li>
+                        <li><a href="#goodwill" class="asset-link">Goodwill Industries of Middle Georgia</a></li>
+                        <li><a href="#eckerd" class="asset-link">Eckerd Connects, Paxen Youth Program</a></li>
+                        <li><a href="#ibew" class="asset-link">IBEW Local 1316</a></li>
+                        <li><a href="#job-corps" class="asset-link">Job Corps Admissions Office</a></li>
+                        <li><a href="#arc-macon" class="asset-link">The Arc Macon</a></li>
+                        <li><a href="#greater-career-works" class="asset-link">Greater Career Works</a></li>
+                        <li><a href="#worksource" class="asset-link">WorkSource Middle Georgia</a></li>
+                        <li><a href="#gvra" class="asset-link">Georgia Vocational Rehabilitation Agency</a></li>
+                        <li><a href="#adult-ed" class="asset-link">Adult Education Programs</a></li>
+                        <li><a href="#workforce-dev" class="asset-link">Macon-Bibb County Office of Workforce Development</a></li>
+                    </ul>
+                </section>
+
+                <!-- Faith Based -->
+                <section class="directory-group">
+                    <h3><a href="index.html#faith-based" class="group-link">Faith-Based and Community Workforce Initiatives</a></h3>
+                    <ul class="asset-list">
+                        <li><a href="#salvation-army" class="asset-link">The Salvation Army of Macon</a></li>
+                        <li><a href="#rescue-mission" class="asset-link">Rescue Mission of Middle Georgia</a></li>
+                        <li><a href="#other-faith" class="asset-link">Other Faith/Community Programs</a></li>
+                    </ul>
+                </section>
+
+                <!-- Special Population and Re-entry -->
+                <section class="directory-group">
+                    <h3><a href="index.html#reentry" class="group-link">Special Population & Re-entry Programs</a></h3>
+                    <ul class="asset-list">
+                        <li><a href="#transitional-center" class="asset-link">Macon Transitional Center Work Release Program</a></li>
+                        <li><a href="#drc" class="asset-link">Macon Day Reporting Center</a></li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="asset-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Asset Name</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="modal-content">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/directory.js"></script>
+</body>
+</html>

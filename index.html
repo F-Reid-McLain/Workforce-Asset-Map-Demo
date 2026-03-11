@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workforce Asset Map - Greater Macon Chamber of Commerce</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/viz.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <h1>WORKFORCE <span class="accent">macon</span></h1>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html" class="nav-link">Asset Map</a></li>
+                    <li><a href="workforcedata.html" class="nav-link">Workforce Data</a></li>
+                    <li><a href="directory.html" class="nav-link">Directory</a></li>
+                    <li><a href="about.html" class="nav-link">About</a></li>
+
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="visualization-section">
+            <div class="container">
+                <div class="viz-header">
+                    <h2>Macon Workforce Asset Network</h2>
+                    <p>Explore the interconnected workforce ecosystem that drives Macon's economy</p>
+                </div>
+                <div id="network-visualization" class="viz-container">
+                    <!-- Network visualization will be created by JavaScript -->
+                    <div class="viz-overlay" id="viz-overlay">
+                        <div class="viz-overlay-content">
+                            <div class="viz-overlay-icon">&#9654;</div>
+                            <p>Tap to Interact with Map</p>
+                            <span class="viz-overlay-hint">Swipe up or down to scroll past</span>
+                        </div>
+                    </div>
+                    <button class="viz-exit-btn" id="viz-exit-btn">&#10005; Exit Map</button>
+                    <button class="viz-fullscreen-btn" id="fullscreen-btn" title="Toggle Fullscreen">&#x26F6;</button>
+                </div>
+                <div class="viz-controls">
+                    <button class="control-btn" id="reset-btn">Reset View</button>
+                    <button class="control-btn">Filter Assets</button>
+                    
+                    <div class="control-group">
+                        <label for="hub-distance-slider">Hub Distance:</label>
+                        <input type="range" id="hub-distance-slider" min="20" max="80" value="35" class="slider">
+                        <span id="hub-distance-value">35</span>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="asset-ratio-slider">Asset Distance Ratio:</label>
+                        <input type="range" id="asset-ratio-slider" min="2" max="4" step="0.1" value="3.0" class="slider">
+                        <span id="asset-ratio-value">3.0</span>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="size-slider">Node Size:</label>
+                        <input type="range" id="size-slider" min="0.5" max="2" step="0.1" value="1" class="slider">
+                        <span id="size-value">1.0</span>
+                    </div>
+                    
+                    <a href="directory.html" class="directory-link">View Full Directory →</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2026 Greater Macon Chamber of Commerce</p>
+        </div>
+    </footer>
+
+   <!-- Order is critical: Library first, then engine (data), then main (UI) -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/viz-engine.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</body>
+</html>
