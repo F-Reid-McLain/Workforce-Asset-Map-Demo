@@ -66,31 +66,35 @@
 
             <!-- Charts Section -->
             <section class="charts-section">
-    <div class="chart-container">
-        <h3>Industry Employment Distribution</h3>
-        <div id="industry-chart" class="chart">
-            <img src="" alt="Industry Employment Distribution Chart" class="chart-image">
-        </div>
-    </div>
+                <div class="chart-container">
+                    <h3>Industry Employment — Bibb County</h3>
+                    <p class="chart-subtitle">Total employment and average annual wages by industry sector</p>
+                    <div id="industry-chart" class="chart"></div>
+                </div>
 
-    <div class="chart-container">
-        <h3>Educational Attainment</h3>
-        <div id="education-chart" class="chart">
-            <img src="" alt="Educational Attainment Chart" class="chart-image">
-        </div>
-    </div>
+                <div class="chart-container">
+                    <h3>Top Hiring Industries — Bibb County</h3>
+                    <p class="chart-subtitle">Active job postings by industry sector</p>
+                    <div id="hiring-chart" class="chart"></div>
+                    <div class="chart-expand-row">
+                        <button class="chart-expand-btn" id="hiring-toggle">▼ Show All Industries</button>
+                    </div>
+                </div>
 
-    <div class="chart-container">
-        <h3>Employment Trends (5-Year)</h3>
-        <div id="trends-chart" class="chart">
-            <img src="" alt="Employment Trends Chart" class="chart-image">
-        </div>
-    </div>
-</section>
+                <div class="chart-container">
+                    <h3>Top Employers — Bibb County</h3>
+                    <p class="chart-subtitle">Employers with the most active job listings</p>
+                    <div id="employers-chart" class="chart"></div>
+                    <div class="chart-expand-row">
+                        <button class="chart-expand-btn" id="employers-toggle">▼ Show All Employers</button>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
-     <script src="js/dashboard.js"></script>
-     <script src="js/nav.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/nav.js"></script>
 </body>
 </html>
