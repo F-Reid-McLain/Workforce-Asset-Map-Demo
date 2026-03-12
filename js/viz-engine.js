@@ -75,7 +75,7 @@ workforceData.nodes.forEach(node => { originalSizes[node.id] = node.size; });
 
 const container = d3.select("#network-visualization");
 const width = container.node().getBoundingClientRect().width;
-const height = 720; // Fixed height for consistency
+const height = 612; // Fixed height for consistency
 
 const svg = container.append("svg")
   .attr("width", "100%")

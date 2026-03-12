@@ -3,7 +3,7 @@
     background-color: var(--color-bg-surface-deep);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    height: 720px;
+    height: 612px;
     margin: 2rem 0;
     display: flex;
     align-items: stretch;
@@ -18,13 +18,13 @@
     width: 100%;
     height: 100%;
     display: flex;
-    min-height: 720px;
+    min-height: 612px;
 }
 
 #network-visualization svg {
     width: 100%;
     height: 100% !important;
-    min-height: 720px;
+    min-height: 612px;
     border-radius: var(--radius-md);
     background: radial-gradient(circle at center, #2a2a2a 0%, var(--color-bg-page) 100%);
     display: block;
@@ -83,6 +83,11 @@
 }
 
 /* ===== MOBILE SCROLL PROTECTION OVERLAY ===== */
+/* Only enabled on touch devices — pointer: coarse excludes desktop browsers */
+@media (pointer: coarse) {
+    .viz-overlay { display: flex; }
+}
+
 .viz-overlay {
     display: none; /* Desktop: hidden by default */
     position: absolute;
@@ -110,16 +115,16 @@
 }
 
 .viz-overlay-icon {
-    font-size: 2.5rem;
+    font-size: 2rem;
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     opacity: 0.9;
 }
 
 .viz-overlay-content p {
     font-size: var(--font-size-lg);
     font-weight: 600;
-    margin: 0 0 0.4rem;
+    margin: 0 0 0.25rem;
 }
 
 .viz-overlay-hint {
@@ -147,25 +152,6 @@
 
 .viz-exit-btn:hover { background: rgba(60, 60, 60, 0.9); }
 
-/* Fullscreen toggle button — always visible */
-.viz-fullscreen-btn {
-    position: absolute;
-    top: 0.75rem;
-    left: 0.75rem;
-    z-index: 20;
-    background: rgba(0, 0, 0, 0.75);
-    color: var(--color-text-primary);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 6px;
-    padding: 0.4rem 0.65rem;
-    cursor: pointer;
-    font-size: var(--font-size-base);
-    line-height: 1;
-    transition: background var(--transition-fast);
-}
-
-.viz-fullscreen-btn:hover { background: rgba(60, 60, 60, 0.9); }
-
 /* Interactive state — D3 gets full touch control (show/hide handled by JS) */
 .viz-container.interactive svg { touch-action: none; }
 
@@ -180,10 +166,101 @@
     margin: 0;
 }
 
+/* ===== FULLSCREEN INLINE CONTROLS ===== */
+.viz-fs-controls {
+    display: none; /* shown only in fullscreen via JS */
+    position: absolute;
+    top: 0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    align-items: center;
+    gap: 0.25rem; /* matches gap between zoom buttons */
+    white-space: nowrap;
+}
+
+/* Each control group and reset button styled as individual pills matching zoom buttons */
+.fs-control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    height: 28px;
+    padding: 0 0.65rem;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.fs-control-group label {
+    opacity: 0.8;
+    font-size: var(--font-size-xs);
+}
+
+.fs-slider {
+    width: 72px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 2px;
+    outline: none;
+}
+
+.fs-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+}
+
+.fs-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+}
+
+.fs-slider::-moz-range-track {
+    height: 3px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 2px;
+}
+
+.fs-control-group span {
+    min-width: 1.6em;
+    text-align: right;
+    font-size: var(--font-size-xs);
+    opacity: 0.7;
+}
+
+.fs-reset-btn {
+    height: 28px;
+    padding: 0 0.65rem;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.fs-reset-btn:hover { background: rgba(60, 60, 60, 0.9); }
+
 /* ===== ZOOM CONTROLS ===== */
 .viz-zoom-controls {
     position: absolute;
-    top: 3rem;
+    top: 0.75rem;
     right: 0.75rem;
     z-index: 20;
     display: flex;
@@ -191,6 +268,7 @@
     gap: 0.25rem;
 }
 
+.viz-fullscreen-btn,
 .viz-zoom-btn {
     background: rgba(0, 0, 0, 0.75);
     color: var(--color-text-primary);
@@ -205,15 +283,17 @@
     transition: background var(--transition-fast);
 }
 
+.viz-fullscreen-btn:hover,
 .viz-zoom-btn:hover { background: rgba(60, 60, 60, 0.9); }
 
-@media (max-width: 768px) {
+@media (pointer: coarse) {
     .viz-zoom-controls { display: none; }
 }
 
 /* ===== INLINE ASSET INFO PANEL ===== */
+/* Portrait (default): slides up from bottom */
 .viz-info-panel {
-    display: none;
+    display: block;
     position: absolute;
     bottom: 0;
     left: 0;
@@ -223,7 +303,33 @@
     border-top: 1px solid var(--color-border-subtle);
     z-index: 30;
     overflow-y: auto;
-    animation: slideUp 0.25s ease;
+    transform: translateY(100%);
+    transition: transform 0.25s ease;
+    pointer-events: none;
+}
+
+.viz-info-panel.open {
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Landscape (any state): slides in from left */
+@media (orientation: landscape) {
+    .viz-info-panel {
+        top: 0;
+        bottom: 0;
+        right: auto;
+        left: 0;
+        width: 336px;
+        height: 100%;
+        max-height: 100%;
+        border-top: none;
+        border-right: 1px solid var(--color-border-subtle);
+        transform: translateX(-100%);
+    }
+    .viz-info-panel.open {
+        transform: translateX(0);
+    }
 }
 
 .viz-info-header {
@@ -292,21 +398,14 @@
     color: #fff;
 }
 
-@keyframes slideUp {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
-}
 
 /* ===== MOBILE VIZ ===== */
 @media (max-width: 768px) {
     .viz-container, #network-visualization, #network-visualization svg {
-        height: 460px;
-        min-height: 460px;
+        height: 391px;
+        min-height: 391px;
     }
     .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-
-    /* Enable overlay on mobile */
-    .viz-overlay { display: flex; }
 
     /* show/hide toggled by JS in enterInteractiveMode / exitInteractiveMode */
 }

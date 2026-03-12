@@ -47,7 +47,7 @@ function setupModalListeners() {
     const vizInfoClose = document.getElementById('viz-info-close');
     if (vizInfoClose) {
         vizInfoClose.onclick = () => {
-            document.getElementById('viz-info-panel').style.display = 'none';
+            document.getElementById('viz-info-panel').classList.remove('open');
         };
     }
 
@@ -74,24 +74,22 @@ function setupModalListeners() {
 
 function openAssetModal(assetId) {
     const asset = assetData[assetId];
-    const vizContainer = document.getElementById('network-visualization');
     const inlinePanel  = document.getElementById('viz-info-panel');
-    const isFullscreen = vizContainer && vizContainer.classList.contains('fullscreen');
 
     // Build shared HTML content
     let html = `<p>${asset ? (asset.description || '') : 'Information coming soon...'}</p>`;
     if (asset && asset.impact)   html += `<p><strong>Community Impact:</strong> ${asset.impact}</p>`;
     if (asset && asset.website)  html += `<p><strong>Website:</strong> <a href="${asset.website}" target="_blank">${asset.website.replace('https://', '')}</a></p>`;
 
-    // Use inline slide-up panel when it exists and we're NOT in fullscreen
-    if (inlinePanel && !isFullscreen) {
+    // Use inline panel when it exists (orientation handles portrait/landscape layout)
+    if (inlinePanel) {
         document.getElementById('viz-info-title').textContent = asset ? asset.name : 'Asset Information';
         document.getElementById('viz-info-body').innerHTML = html;
-        inlinePanel.style.display = 'block';
+        inlinePanel.classList.add('open');
         return;
     }
 
-    // Fullscreen or directory page: use the regular fixed modal
+    // Directory page (no inline panel): use the regular fixed modal
     const modal   = document.getElementById('asset-modal');
     const title   = document.getElementById('modal-title');
     const content = document.getElementById('modal-content');
