@@ -73,55 +73,9 @@ function updateDistances() {
     simulation.alpha(0.4).restart();
 }
 
-// ===== MOBILE SCROLL PROTECTION & FULLSCREEN =====
-const vizContainer = document.getElementById('network-visualization');
-const vizOverlay   = document.getElementById('viz-overlay');
-const vizExitBtn   = document.getElementById('viz-exit-btn');
+// ===== VIZ CONTAINER =====
+const vizContainer  = document.getElementById('network-visualization');
 const fullscreenBtn = document.getElementById('fullscreen-btn');
-const mobileQuery  = window.matchMedia('(pointer: coarse)');
-
-function enterInteractiveMode() {
-    vizContainer.classList.add('interactive');
-    if (vizOverlay)  vizOverlay.style.display  = 'none';
-    if (vizExitBtn)  vizExitBtn.style.display  = 'block';
-    document.body.style.overflow = 'hidden';
-}
-
-function exitInteractiveMode() {
-    vizContainer.classList.remove('interactive');
-    // Restore overlay only on mobile — desktop never shows it
-    if (vizOverlay)  vizOverlay.style.display  = mobileQuery.matches ? 'flex' : 'none';
-    if (vizExitBtn)  vizExitBtn.style.display  = '';
-    document.body.style.overflow = '';
-}
-
-// Initialize: force-hide overlay on desktop regardless of CSS
-if (vizOverlay) {
-    vizOverlay.style.display = mobileQuery.matches ? 'flex' : 'none';
-
-    if (mobileQuery.matches) {
-        vizOverlay.addEventListener('click', enterInteractiveMode);
-        vizOverlay.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            enterInteractiveMode();
-        }, { passive: false });
-    }
-}
-
-if (vizExitBtn) {
-    vizExitBtn.addEventListener('click', exitInteractiveMode);
-}
-
-// Keep in sync if user resizes across the breakpoint
-mobileQuery.addEventListener('change', function(e) {
-    if (!e.matches) {
-        // Crossed to desktop — ensure overlay is gone and scroll is restored
-        exitInteractiveMode();
-        if (vizOverlay) vizOverlay.style.display = 'none';
-    } else {
-        if (vizOverlay) vizOverlay.style.display = 'flex';
-    }
-});
 
 // ===== VIZ RESIZE HANDLER =====
 function fitVizToContainer() {
@@ -134,8 +88,8 @@ function fitVizToContainer() {
 }
 
 // ===== ZOOM BUTTONS =====
-const zoomInBtn      = document.getElementById('zoom-in-btn');
-const zoomOutBtn     = document.getElementById('zoom-out-btn');
+const zoomInBtn       = document.getElementById('zoom-in-btn');
+const zoomOutBtn      = document.getElementById('zoom-out-btn');
 const vizZoomControls = document.getElementById('viz-zoom-controls');
 
 if (zoomInBtn)  zoomInBtn.addEventListener('click',  () => zoom.scaleBy(svg.transition().duration(300), 1.3));
@@ -155,9 +109,9 @@ function adjustZoomForOverlap() {
         return;
     }
 
-    const containerRect  = vizContainer.getBoundingClientRect();
-    const zoomRect       = vizZoomControls.getBoundingClientRect();
-    const fsWidth        = fsControls.offsetWidth;
+    const containerRect = vizContainer.getBoundingClientRect();
+    const zoomRect      = vizZoomControls.getBoundingClientRect();
+    const fsWidth       = fsControls.offsetWidth;
 
     // Where the right edge of fs-controls would be if perfectly centered
     const centeredRight = containerRect.left + containerRect.width / 2 + fsWidth / 2;
@@ -183,7 +137,7 @@ function adjustZoomForOverlap() {
 
 window.addEventListener('resize', adjustZoomForOverlap);
 
-// Fullscreen toggle
+// ===== FULLSCREEN TOGGLE =====
 let isFullscreen = false;
 
 function setFullscreenControls(active) {
@@ -191,47 +145,46 @@ function setFullscreenControls(active) {
     requestAnimationFrame(adjustZoomForOverlap);
 }
 
+function enterFullscreen() {
+    isFullscreen = true;
+    vizContainer.classList.add('fullscreen', 'interactive');
+    fullscreenBtn.textContent = '\u2715';
+    document.body.style.overflow = 'hidden';
+    setWheelZoomEnabled(true);
+    setFullscreenControls(true);
+    requestAnimationFrame(fitVizToContainer);
+}
+
+function exitFullscreen() {
+    isFullscreen = false;
+    vizContainer.classList.remove('fullscreen', 'interactive');
+    fullscreenBtn.textContent = '\u26F6';
+    document.body.style.overflow = '';
+    setWheelZoomEnabled(false);
+    setFullscreenControls(false);
+    requestAnimationFrame(() => { fitVizToContainer(); adjustZoomForOverlap(); });
+}
+
 if (fullscreenBtn) {
     fullscreenBtn.addEventListener('click', function() {
-        isFullscreen = !isFullscreen;
-        vizContainer.classList.toggle('fullscreen', isFullscreen);
-        fullscreenBtn.textContent = isFullscreen ? '\u2715' : '\u26F6';
-        setWheelZoomEnabled(isFullscreen);
-        setFullscreenControls(isFullscreen);
-        requestAnimationFrame(fitVizToContainer);
+        isFullscreen ? exitFullscreen() : enterFullscreen();
     });
 }
 
-// ESC exits both interactive and fullscreen states
+// ESC exits fullscreen
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        if (isFullscreen) {
-            isFullscreen = false;
-            vizContainer.classList.remove('fullscreen');
-            fullscreenBtn.textContent = '\u26F6';
-            setWheelZoomEnabled(false);
-            setFullscreenControls(false);
-            requestAnimationFrame(() => { fitVizToContainer(); adjustZoomForOverlap(); });
-        }
-        exitInteractiveMode();
-    }
+    if (e.key === 'Escape' && isFullscreen) exitFullscreen();
 });
 
-// Shared reset logic
+// ===== SHARED RESET LOGIC =====
 function doReset() {
     svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
     applyHubDistance(35);
     applySizeScale(1);
 }
 
-// Below-viz reset button
 const resetBtn = document.getElementById('reset-btn');
-if (resetBtn) {
-    resetBtn.addEventListener('click', doReset);
-}
+if (resetBtn) resetBtn.addEventListener('click', doReset);
 
-// Fullscreen reset button
 const fsResetBtn = document.getElementById('fs-reset-btn');
-if (fsResetBtn) {
-    fsResetBtn.addEventListener('click', doReset);
-}
+if (fsResetBtn) fsResetBtn.addEventListener('click', doReset);
