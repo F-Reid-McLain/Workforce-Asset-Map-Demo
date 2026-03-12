@@ -43,6 +43,14 @@ function setupModalListeners() {
         });
     });
 
+    // Close inline viz panel
+    const vizInfoClose = document.getElementById('viz-info-close');
+    if (vizInfoClose) {
+        vizInfoClose.onclick = () => {
+            document.getElementById('viz-info-panel').style.display = 'none';
+        };
+    }
+
     const modal = document.getElementById('asset-modal');
     const closeBtn = document.querySelector('.close');
 
@@ -65,36 +73,32 @@ function setupModalListeners() {
 }
 
 function openAssetModal(assetId) {
-    const modal = document.getElementById('asset-modal');
-    const title = document.getElementById('modal-title');
+    const asset = assetData[assetId];
+    const vizContainer = document.getElementById('network-visualization');
+    const inlinePanel  = document.getElementById('viz-info-panel');
+    const isFullscreen = vizContainer && vizContainer.classList.contains('fullscreen');
+
+    // Build shared HTML content
+    let html = `<p>${asset ? (asset.description || '') : 'Information coming soon...'}</p>`;
+    if (asset && asset.impact)   html += `<p><strong>Community Impact:</strong> ${asset.impact}</p>`;
+    if (asset && asset.website)  html += `<p><strong>Website:</strong> <a href="${asset.website}" target="_blank">${asset.website.replace('https://', '')}</a></p>`;
+
+    // Use inline slide-up panel when it exists and we're NOT in fullscreen
+    if (inlinePanel && !isFullscreen) {
+        document.getElementById('viz-info-title').textContent = asset ? asset.name : 'Asset Information';
+        document.getElementById('viz-info-body').innerHTML = html;
+        inlinePanel.style.display = 'block';
+        return;
+    }
+
+    // Fullscreen or directory page: use the regular fixed modal
+    const modal   = document.getElementById('asset-modal');
+    const title   = document.getElementById('modal-title');
     const content = document.getElementById('modal-content');
-    
     if (!modal || !title || !content) return;
 
-    const asset = assetData[assetId];
-    
-    if (asset) {
-        title.textContent = asset.name;
-        
-        // Build the HTML string piece by piece
-        let html = `<p>${asset.description || ''}</p>`;
-        
-        // Check if "impact" exists in the JSON for this asset
-        if (asset.impact) {
-            html += `<p><strong>Community Impact:</strong> ${asset.impact}</p>`;
-        }
-        
-        // Add the website link
-        if (asset.website) {
-            html += `<p><strong>Website:</strong> <a href="${asset.website}" target="_blank">${asset.website.replace('https://', '')}</a></p>`;
-        }
-        
-        content.innerHTML = html;
-    } else {
-        title.textContent = 'Asset Information';
-        content.innerHTML = '<p>Information coming soon...</p>';
-    }
-    
+    title.textContent  = asset ? asset.name : 'Asset Information';
+    content.innerHTML  = html;
     modal.style.display = 'block';
 }
 

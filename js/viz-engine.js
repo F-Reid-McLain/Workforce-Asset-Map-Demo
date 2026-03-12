@@ -17,16 +17,16 @@ const workforceData = {
     { id: "hutchings", name: "Hutchings Career Academy", type: "asset", size: 12, image: "" },
     { id: "bibb-schools", name: "Bibb County Schools", type: "asset", size: 12, image: "" },
     { id: "chamber", name: "Greater Macon Chamber of Commerce", type: "asset", size: 12, image: "" },
-    { id: "industrial-authority", name: "Macon Bibb Industrial Authority", type: "asset", size: 12, image: "" },
+    { id: "mbcia", name: "Macon Bibb Industrial Authority", type: "asset", size: 12, image: "" },
     { id: "choose-macon", name: "Choose Macon", type: "asset", size: 12, image: "" },
-    { id: "library-system", name: "Bibb County Library System", type: "asset", size: 12, image: "" },
+    { id: "library", name: "Bibb County Library System", type: "asset", size: 12, image: "" },
     { id: "workforce-alliance", name: "Workforce Alliance", type: "asset", size: 12, image: "" },
-    { id: "newtown-macon", name: "Newtown Macon", type: "asset", size: 12, image: "" },
-    { id: "ga-dept-labor", name: "Georgia Department of Labor", type: "asset", size: 12, image: "" },
+    { id: "newtown", name: "Newtown Macon", type: "asset", size: 12, image: "" },
+    { id: "ga-dol", name: "Georgia Department of Labor", type: "asset", size: 12, image: "" },
     { id: "goodwill", name: "Goodwill", type: "asset", size: 12, image: "" },
-    { id: "eckhard", name: "Eckhard", type: "asset", size: 12, image: "" },
+    { id: "eckerd", name: "Eckerd Connects", type: "asset", size: 12, image: "" },
     { id: "ibew", name: "IBEW", type: "asset", size: 12, image: "" },
-    { id: "job-core", name: "Job Core", type: "asset", size: 12, image: "" },
+    { id: "job-corps", name: "Job Corps", type: "asset", size: 12, image: "" },
     { id: "arc-macon", name: "Arc Macon", type: "asset", size: 12, image: "" },
     { id: "greater-career-works", name: "Greater Career Works", type: "asset", size: 12, image: "" },
     { id: "salvation-army", name: "Salvation Army", type: "asset", size: 12, image: "" },
@@ -49,16 +49,16 @@ const workforceData = {
     { source: "hutchings", target: "k12-secondary" },
     { source: "bibb-schools", target: "k12-secondary" },
     { source: "chamber", target: "community-dev" },
-    { source: "industrial-authority", target: "community-dev" },
+    { source: "mbcia", target: "community-dev" },
     { source: "choose-macon", target: "community-dev" },
-    { source: "library-system", target: "community-dev" },
+    { source: "library", target: "community-dev" },
     { source: "workforce-alliance", target: "community-dev" },
-    { source: "newtown-macon", target: "community-dev" },
-    { source: "ga-dept-labor", target: "job-training" },
+    { source: "newtown", target: "community-dev" },
+    { source: "ga-dol", target: "job-training" },
     { source: "goodwill", target: "job-training" },
-    { source: "eckhard", target: "job-training" },
+    { source: "eckerd", target: "job-training" },
     { source: "ibew", target: "job-training" },
-    { source: "job-core", target: "job-training" },
+    { source: "job-corps", target: "job-training" },
     { source: "arc-macon", target: "job-training" },
     { source: "greater-career-works", target: "job-training" },
     { source: "salvation-army", target: "faith-based" },
@@ -82,8 +82,19 @@ const svg = container.append("svg")
   .attr("height", "100%")
   .attr("viewBox", `0 0 ${width} ${height}`);
 
-const zoom = d3.zoom().scaleExtent([0.3, 2]).on("zoom", (event) => { g.attr("transform", event.transform); });
+const zoom = d3.zoom()
+  .scaleExtent([0.3, 3])
+  .filter(event => event.type !== 'wheel' && !event.ctrlKey && !event.button)
+  .on("zoom", (event) => { g.attr("transform", event.transform); });
 svg.call(zoom);
+
+// Called by main.js when fullscreen state changes
+function setWheelZoomEnabled(enabled) {
+  zoom.filter(enabled
+    ? event => !event.ctrlKey && !event.button
+    : event => event.type !== 'wheel' && !event.ctrlKey && !event.button
+  );
+}
 const g = svg.append("g");
 
 const colorScale = d3.scaleOrdinal()
@@ -113,7 +124,7 @@ node.append("text").text(d => d.name).attr("dy", d => d.size + 18).attr("text-an
 // 4. INTERACTION
 node.on("mouseover", function(e, d) { d3.select(this).select("circle").attr("stroke-width", 4).attr("filter", "brightness(1.3)"); })
     .on("mouseout", function(e, d) { d3.select(this).select("circle").attr("stroke-width", 2).attr("filter", "none"); })
-    .on("click", (e, d) => { if (d.type === "asset") window.location.href = `directory.html?asset=${d.id}`; })
+    .on("click", (e, d) => { if (d.type === "asset") openAssetModal(d.id); })
     .style("cursor", d => d.type === "asset" ? "pointer" : "default");
 
 simulation.on("tick", () => {

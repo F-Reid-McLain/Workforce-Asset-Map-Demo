@@ -99,6 +99,23 @@ mobileQuery.addEventListener('change', function(e) {
     }
 });
 
+// ===== VIZ RESIZE HANDLER =====
+function fitVizToContainer() {
+    const r = vizContainer.getBoundingClientRect();
+    d3.select('#network-visualization svg')
+        .attr('viewBox', `0 0 ${r.width} ${r.height}`);
+    simulation
+        .force('center', d3.forceCenter(r.width / 2, r.height / 2))
+        .alpha(0.3).restart();
+}
+
+// ===== ZOOM BUTTONS =====
+const zoomInBtn  = document.getElementById('zoom-in-btn');
+const zoomOutBtn = document.getElementById('zoom-out-btn');
+
+if (zoomInBtn)  zoomInBtn.addEventListener('click',  () => zoom.scaleBy(svg.transition().duration(300), 1.3));
+if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => zoom.scaleBy(svg.transition().duration(300), 1 / 1.3));
+
 // Fullscreen toggle
 let isFullscreen = false;
 
@@ -107,16 +124,8 @@ if (fullscreenBtn) {
         isFullscreen = !isFullscreen;
         vizContainer.classList.toggle('fullscreen', isFullscreen);
         fullscreenBtn.textContent = isFullscreen ? '\u2715' : '\u26F6';
-
-        // Let the browser finish resizing, then recenter the simulation
-        requestAnimationFrame(function() {
-            const r = vizContainer.getBoundingClientRect();
-            d3.select('#network-visualization svg')
-                .attr('viewBox', `0 0 ${r.width} ${r.height}`);
-            simulation
-                .force('center', d3.forceCenter(r.width / 2, r.height / 2))
-                .alpha(0.3).restart();
-        });
+        setWheelZoomEnabled(isFullscreen);
+        requestAnimationFrame(fitVizToContainer);
     });
 }
 
@@ -127,12 +136,8 @@ document.addEventListener('keydown', function(e) {
             isFullscreen = false;
             vizContainer.classList.remove('fullscreen');
             fullscreenBtn.textContent = '\u26F6';
-            requestAnimationFrame(function() {
-                const r = vizContainer.getBoundingClientRect();
-                d3.select('#network-visualization svg')
-                    .attr('viewBox', `0 0 ${r.width} ${r.height}`);
-                simulation.force('center', d3.forceCenter(r.width / 2, r.height / 2)).alpha(0.3).restart();
-            });
+            setWheelZoomEnabled(false);
+            requestAnimationFrame(fitVizToContainer);
         }
         exitInteractiveMode();
     }

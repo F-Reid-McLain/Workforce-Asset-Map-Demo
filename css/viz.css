@@ -1,8 +1,8 @@
 /* ===== VISUALIZATION ENGINE ===== */
 .viz-container {
-    background-color: #252525;
-    border: 1px solid #444;
-    border-radius: 8px;
+    background-color: var(--color-bg-surface-deep);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     height: 720px;
     margin: 2rem 0;
     display: flex;
@@ -25,8 +25,8 @@
     width: 100%;
     height: 100% !important;
     min-height: 720px;
-    border-radius: 8px;
-    background: radial-gradient(circle at center, #2a2a2a 0%, #1a1a1a 100%);
+    border-radius: var(--radius-md);
+    background: radial-gradient(circle at center, #2a2a2a 0%, var(--color-bg-page) 100%);
     display: block;
 }
 
@@ -48,16 +48,16 @@
 }
 
 .stat-card {
-    background: #2d2d2d;
-    border: 1px solid #444;
-    border-radius: 8px;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     padding: 1.5rem;
     text-align: center;
 }
 
 .stat-value {
     font: bold 1.8rem inherit;
-    color: #ffffff;
+    color: var(--color-text-primary);
 }
 
 .charts-section {
@@ -69,17 +69,17 @@
 
 .chart-container {
     margin: 2rem 0;
-    background: #252525;
-    border: 1px solid #444;
+    background: var(--color-bg-surface-deep);
+    border: 1px solid var(--color-border);
     padding: 1.5rem;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
 }
 
 .chart {
     min-height: 300px;
     width: 100%;
-    background: #1a1a1a;
-    border-radius: 4px;
+    background: var(--color-bg-page);
+    border-radius: var(--radius-sm);
 }
 
 /* ===== MOBILE SCROLL PROTECTION OVERLAY ===== */
@@ -92,7 +92,7 @@
     justify-content: center;
     z-index: 10;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     transition: opacity 0.25s ease;
@@ -105,7 +105,7 @@
 
 .viz-overlay-content {
     text-align: center;
-    color: #fff;
+    color: var(--color-text-primary);
     user-select: none;
 }
 
@@ -117,13 +117,13 @@
 }
 
 .viz-overlay-content p {
-    font-size: 1.1rem;
+    font-size: var(--font-size-lg);
     font-weight: 600;
     margin: 0 0 0.4rem;
 }
 
 .viz-overlay-hint {
-    font-size: 0.8rem;
+    font-size: var(--font-size-xs);
     opacity: 0.65;
 }
 
@@ -134,7 +134,7 @@
     right: 0.75rem;
     z-index: 20;
     background: rgba(0, 0, 0, 0.75);
-    color: #fff;
+    color: var(--color-text-primary);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 6px;
     padding: 0.4rem 0.85rem;
@@ -142,7 +142,7 @@
     font-size: 0.82rem;
     letter-spacing: 0.02em;
     display: none;
-    transition: background 0.2s ease;
+    transition: background var(--transition-fast);
 }
 
 .viz-exit-btn:hover { background: rgba(60, 60, 60, 0.9); }
@@ -154,14 +154,14 @@
     left: 0.75rem;
     z-index: 20;
     background: rgba(0, 0, 0, 0.75);
-    color: #fff;
+    color: var(--color-text-primary);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 6px;
     padding: 0.4rem 0.65rem;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     line-height: 1;
-    transition: background 0.2s ease;
+    transition: background var(--transition-fast);
 }
 
 .viz-fullscreen-btn:hover { background: rgba(60, 60, 60, 0.9); }
@@ -178,6 +178,123 @@
     border-radius: 0;
     z-index: 1000;
     margin: 0;
+}
+
+/* ===== ZOOM CONTROLS ===== */
+.viz-zoom-controls {
+    position: absolute;
+    top: 3rem;
+    right: 0.75rem;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.viz-zoom-btn {
+    background: rgba(0, 0, 0, 0.75);
+    color: var(--color-text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    width: 32px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 1.15rem;
+    line-height: 1;
+    text-align: center;
+    transition: background var(--transition-fast);
+}
+
+.viz-zoom-btn:hover { background: rgba(60, 60, 60, 0.9); }
+
+@media (max-width: 768px) {
+    .viz-zoom-controls { display: none; }
+}
+
+/* ===== INLINE ASSET INFO PANEL ===== */
+.viz-info-panel {
+    display: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 45%;
+    background: rgba(22, 22, 22, 0.96);
+    border-top: 1px solid var(--color-border-subtle);
+    z-index: 30;
+    overflow-y: auto;
+    animation: slideUp 0.25s ease;
+}
+
+.viz-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    background: rgba(28, 28, 28, 0.99);
+}
+
+.viz-info-header h3 {
+    margin: 0;
+    font-size: var(--font-size-md);
+    color: var(--color-accent);
+}
+
+.viz-info-close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    line-height: 1;
+    transition: color var(--transition-fast);
+}
+
+.viz-info-close:hover { color: var(--color-text-primary); }
+
+.viz-info-body {
+    padding: 0.75rem 1.25rem 1rem;
+    font-size: var(--font-size-footer);
+    line-height: var(--line-height-body);
+    color: var(--color-text-secondary);
+}
+
+.viz-info-body p { margin: 0 0 0.5rem; }
+
+.viz-info-body strong {
+    color: var(--color-accent);
+    display: block;
+    margin-top: 0.75rem;
+    text-transform: uppercase;
+    font-size: var(--font-size-xs);
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.viz-info-body a {
+    color: var(--color-accent);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 0.3rem;
+    padding: 0.2rem 0.7rem;
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.viz-info-body a:hover {
+    background: var(--color-accent);
+    color: #fff;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
 }
 
 /* ===== MOBILE VIZ ===== */
