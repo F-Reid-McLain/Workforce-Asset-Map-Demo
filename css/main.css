@@ -71,6 +71,11 @@ body {
 .nav-toggle.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
+.logo a {
+    text-decoration: none;
+    color: inherit;
+}
+
 .logo h1 {
     font: 700 var(--font-logo-size)/1 var(--font-heading);
     letter-spacing: 2px;
