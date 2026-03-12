@@ -128,11 +128,14 @@ body {
     margin: -0.5rem 0 1rem;
 }
 
-/* ===== CHART EXPAND BUTTON ===== */
+/* ===== CHART EXPAND / DOWNLOAD ROW ===== */
 .chart-expand-row {
     display: flex;
     justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
     margin-top: 0.75rem;
+    position: relative;
 }
 
 .chart-expand-btn {
@@ -147,6 +150,25 @@ body {
 }
 
 .chart-expand-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.chart-download-btn {
+    position: absolute;
+    right: 0;
+    background: none;
+    border: 1px solid var(--color-border-control);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    padding: 0.35rem 0.8rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.chart-download-btn:hover {
     border-color: var(--color-accent);
     color: var(--color-accent);
 }
