@@ -140,7 +140,7 @@
 
     <div class="field">
       <label for="f-category">Category</label>
-      <select id="f-category" onchange="onCategoryChange()">
+      <select id="f-category">
         <option value="">— select a category —</option>
         <option value="colleges">Colleges</option>
         <option value="k12-secondary">K-12 and Secondary</option>
@@ -151,11 +151,9 @@
       </select>
     </div>
 
-    <div class="field" id="parent-field" style="display:none">
-      <label for="f-parent">Parent Node <span>(optional — branch off an existing asset instead of the category)</span></label>
-      <select id="f-parent">
-        <option value="">None — link directly to category</option>
-      </select>
+    <div class="field">
+      <label for="f-parent">Parent Node ID <span>(optional — the slug of an existing asset to branch off instead of the category)</span></label>
+      <input type="text" id="f-parent" placeholder="e.g. mercer — leave blank to link directly to category">
     </div>
 
     <div class="field">
@@ -193,38 +191,6 @@
 </div>
 
 <script>
-  // Load assets.json once for parent dropdown population
-  let assetsCache = {};
-  fetch('content/assets.json')
-    .then(r => r.json())
-    .then(data => { assetsCache = data; })
-    .catch(() => { /* offline or file:// — parent dropdown will stay empty */ });
-
-  function onCategoryChange() {
-    const category = document.getElementById('f-category').value;
-    const parentField = document.getElementById('parent-field');
-    const parentSelect = document.getElementById('f-parent');
-
-    // Reset dropdown
-    parentSelect.innerHTML = '<option value="">None — link directly to category</option>';
-
-    if (!category) { parentField.style.display = 'none'; return; }
-
-    // Populate with existing assets in the selected category
-    const matches = Object.entries(assetsCache)
-      .filter(([, d]) => d.category === category)
-      .sort(([, a], [, b]) => a.name.localeCompare(b.name));
-
-    matches.forEach(([id, d]) => {
-      const opt = document.createElement('option');
-      opt.value = id;
-      opt.textContent = d.name;
-      parentSelect.appendChild(opt);
-    });
-
-    parentField.style.display = 'block';
-  }
-
   // Auto-format slug
   function syncSlug() {
     const raw = document.getElementById('f-id').value;
@@ -246,7 +212,8 @@
     const id          = getSlug();
     const name        = document.getElementById('f-name').value.trim();
     const category    = document.getElementById('f-category').value;
-    const parent      = document.getElementById('f-parent').value;
+    const parent      = document.getElementById('f-parent').value.trim()
+                          .toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     const description = document.getElementById('f-description').value.trim();
     const impact      = document.getElementById('f-impact').value.trim();
     const website     = document.getElementById('f-website').value.trim();
@@ -294,7 +261,6 @@
     });
     document.getElementById('f-category').value = '';
     document.getElementById('f-parent').value = '';
-    document.getElementById('parent-field').style.display = 'none';
     document.getElementById('slug-hint').textContent = '';
     document.getElementById('output-section').style.display = 'none';
     document.getElementById('f-id').focus();
