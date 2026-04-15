@@ -203,15 +203,6 @@
     "website": "https://gdc.georgia.gov/locations/macon-transitional-center"
   },
 
-    "test": {
-    "name": "test",
-    "category": "colleges",
-    "parent": "mercer",
-    "description": "test",
-    "impact": "test",
-    "website": "test"
-  },
-  
   "drc": {
     "name": "Macon Day Reporting Center",
     "category": "special-population",
