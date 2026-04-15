@@ -1,182 +1,223 @@
 {
   "middle-ga-state": {
     "name": "Middle Georgia State University",
+    "category": "colleges",
     "description": "A public university with its Macon Campus along I-475. MGA offers a range of career-ready degree programs in business, IT, nursing, and aviation.",
-    "impact": "Graduates hundreds of students annually with associate, bachelor’s, and master’s degrees, supplying local industries with skilled graduates in high-demand fields.",
+    "impact": "Graduates hundreds of students annually with associate, bachelor's, and master's degrees, supplying local industries with skilled graduates in high-demand fields.",
     "website": "https://www.mga.edu/center-career-leadership-development/index.php"
   },
   "mercer": {
     "name": "Mercer University",
+    "category": "colleges",
     "description": "A private research university known for its comprehensive programs and professional schools, offering degrees in liberal arts, engineering, business, medicine, law, and more.",
     "impact": "Consistently ranked among top national universities; the School of Engineering provides a vital pipeline of skilled professionals in technical and STEM fields.",
     "website": "https://career.mercer.edu/"
   },
   "wesleyan": {
     "name": "Wesleyan College",
+    "category": "colleges",
     "description": "A private liberal arts college recognized as the first college in the world chartered to grant degrees to women.",
     "impact": "Provides undergraduate programs emphasizing career development and leadership, helping students find unique purpose through strong academics.",
     "website": "https://www.wesleyancollege.edu/studentlife/career/career-development.cfm"
   },
   "central-ga-tech": {
     "name": "Central Georgia Technical College",
+    "category": "colleges",
     "description": "A public technical college offering over 120 programs in trades, health sciences, business, and public safety.",
     "impact": "A key workforce trainer providing certificates and associate degrees aligned with local industry; operates adult education and apprenticeship partnerships.",
     "website": "https://www.centralgatech.edu/"
   },
   "hutchings": {
     "name": "W.S. Hutchings College & Career Academy",
+    "category": "k12-secondary",
     "description": "A dedicated career academy serving Bibb County high school students with vocational and technical pathways in healthcare, construction, and culinary arts.",
     "impact": "Allows students to earn industry certifications or college credits while in high school through partnerships with local employers and CGTC.",
     "website": "https://hutchings.bcsdk12.net/"
   },
   "bibb-schools": {
     "name": "Bibb County School District",
-    "description": "Offers career pathway programs across all public high schools aligned with Georgia’s CTAE curriculum, including engineering and IT.",
+    "category": "k12-secondary",
+    "description": "Offers career pathway programs across all public high schools aligned with Georgia's CTAE curriculum, including engineering and IT.",
     "impact": "Ensures graduates gain technical skills and work-based learning experiences to enhance employability immediately after graduation.",
     "website": "https://www.bcsdk12.net/"
   },
   "innovation-tech": {
     "name": "Macon-Bibb County Innovation & Technology Academy",
+    "category": "k12-secondary",
     "description": "A state-of-the-art extension of Hutchings Career Academy focused on emerging technology, robotics, cybersecurity, and electric vehicle technology.",
     "impact": "Cultivates a tech-savvy workforce straight out of high school through a unique city-school partnership.",
     "website": "https://www.bcsdk12.net/departments/career-technical-and-agricultural-education"
   },
   "chamber": {
     "name": "Greater Macon Chamber of Commerce",
+    "category": "community-dev",
     "description": "Convenes employers and educational institutions to align workforce initiatives with regional economic growth.",
     "impact": "Spearheaded the Workforce Asset Map and Greater Career Works; serves as a hub for employer input on talent needs.",
     "website": "https://maconchamber.com/"
   },
   "mbcia": {
     "name": "Macon-Bibb County Industrial Authority",
+    "category": "community-dev",
     "description": "An economic development agency that recruits industries and facilitates job training incentives for expanding companies.",
-    "impact": "Connects companies with Georgia’s Quick Start program and custom training at CGTC.",
+    "impact": "Connects companies with Georgia's Quick Start program and custom training at CGTC.",
     "website": "https://mbcia.com/"
   },
   "choose-macon": {
     "name": "Choose Macon Initiative",
-    "description": "A talent attraction platform showcasing Macon’s quality of life and career opportunities to newcomers.",
+    "category": "community-dev",
+    "description": "A talent attraction platform showcasing Macon's quality of life and career opportunities to newcomers.",
     "impact": "Aids employers in recruiting skilled workers from outside the region and encourages local graduates to stay.",
     "website": "https://choosemacon.com/"
   },
   "library": {
     "name": "Middle Georgia Regional Library",
+    "category": "community-dev",
     "description": "Offers free access to technology, resume software, and job search workshops through the Business and Nonprofit Center (BANC).",
     "impact": "Lowers access barriers for residents to develop marketable skills in a supportive environment.",
     "website": "https://bibblib.org/"
   },
   "workforce-alliance": {
     "name": "Greater Macon Workforce Alliance",
+    "category": "community-dev",
     "description": "A consortium of agencies focused on research, data analysis, and sustainable workforce solutions for the region.",
     "impact": "Instrumental in the research behind the Workforce Asset Map and regional collaboration.",
     "website": "https://maconchamber.com/"
   },
   "newtown": {
     "name": "NewTown Macon",
+    "category": "community-dev",
     "description": "Focused on downtown revitalization and small business incubators to attract and retain young professionals.",
     "impact": "Contributes to the broader environment in which workforce development thrives through quality of place and entrepreneurship support.",
     "website": "https://newtownmacon.com/"
   },
   "mgrc": {
     "name": "Middle Georgia Regional Commission",
+    "category": "community-dev",
     "description": "Provides staff support to the Workforce Development Board and manages regional WIOA funds.",
     "impact": "Brings technical expertise and labor market research to regional workforce efforts and multi-county collaboration.",
     "website": "https://www.middlegeorgiarc.org/"
   },
   "ga-dol": {
     "name": "Georgia Department of Labor",
+    "category": "job-training",
     "description": "A state-operated career center providing employment services and unemployment insurance assistance.",
     "impact": "Official resource for filing unemployment claims and accessing veteran and disability employment services.",
     "website": "https://dol.georgia.gov/locations/macon"
   },
   "goodwill": {
     "name": "Goodwill Industries of Middle Georgia",
+    "category": "job-training",
     "description": "Operates a comprehensive career campus including Helms College, offering short-term courses in health, trades, and hospitality.",
     "impact": "Provides free GED preparation, ESL classes, and job connection services to individuals with barriers to employment.",
     "website": "https://www.goodwillworks.org/"
   },
   "eckerd": {
     "name": "Eckerd Connects, Paxen Youth Program",
+    "category": "job-training",
     "description": "Provides out-of-school youth (ages 16-24) with career guidance, GED support, and industry certifications.",
     "impact": "Removes barriers via transportation and childcare assistance while placing youth into work experiences and internships.",
     "website": "https://eckerd.org/jobs-training/ga-middlega/"
   },
   "ibew": {
     "name": "IBEW Local 1316",
+    "category": "job-training",
     "description": "Operates a registered 'earn-and-learn' apprenticeship combining full-time work with technical classroom instruction for electricians.",
     "impact": "Key pathway into high-demand skilled trades with no cost for training beyond nominal fees.",
     "website": "https://www.ibew1316.org/"
   },
   "job-corps": {
     "name": "Job Corps Admissions Office",
+    "category": "job-training",
     "description": "A free residential training program for low-income youth ages 16-24 in trades like construction and healthcare.",
     "impact": "The Macon admissions office assists youth in enrolling in regional centers and helps graduates with local job placement.",
     "website": "https://www.jobcorps.gov/"
   },
   "arc-macon": {
     "name": "The Arc Macon",
+    "category": "job-training",
     "description": "Serves adults with developmental and intellectual disabilities through supported employment programs.",
     "impact": "Provides job coaching and works with local employers to create tailored opportunities in retail, food service, and custodial work.",
     "website": "https://thearc.org/"
   },
   "greater-career-works": {
     "name": "Greater Career Works",
+    "category": "job-training",
     "description": "A free web-based platform featuring 900+ 'career cards' with videos, salary data, and local training links.",
     "impact": "Enables career exploration for students and job matching for adults and local employers in Central Georgia.",
     "website": "https://www.greatercareerworks.org/"
   },
   "worksource": {
     "name": "WorkSource Middle Georgia",
-    "description": "The region’s federally-funded Workforce Innovation and Opportunity Act (WIOA) program hub.",
+    "category": "job-training",
+    "description": "The region's federally-funded Workforce Innovation and Opportunity Act (WIOA) program hub.",
     "impact": "Offers tuition assistance for vocational training, on-the-job training opportunities, and career counseling.",
     "website": "https://middlegaworks.com/"
   },
   "gvra": {
     "name": "Georgia Vocational Rehabilitation Agency",
+    "category": "job-training",
     "description": "Helps individuals with disabilities access employment through counseling, job coaching, and assistive technology.",
     "impact": "Provides vocational evaluation and support for post-secondary education to help clients find meaningful work.",
     "website": "https://gvs.georgia.gov/"
   },
   "adult-ed": {
     "name": "Adult Education Programs",
-    "description": "Free adult basic education and GED prep through Central Georgia Technical College’s Adult Education division.",
+    "category": "job-training",
+    "description": "Free adult basic education and GED prep through Central Georgia Technical College's Adult Education division.",
     "impact": "Enables adults to earn technical certifications and diplomas simultaneously to thrive in the modern workforce.",
     "website": "https://www.centralgatech.edu/adult-education"
   },
   "workforce-dev": {
     "name": "Macon-Bibb County Office of Workforce Development",
+    "category": "job-training",
     "description": "A local government division focused on improving employability of residents through programs like the E3 Career Jumpstart.",
     "impact": "Helps citizens, including ex-offenders and those in poverty, overcome barriers to gain education and trades training.",
     "website": "https://www.maconbibb.us/workforcetrainingprograms/"
   },
   "salvation-army": {
     "name": "The Salvation Army of Macon",
+    "category": "faith-based",
     "description": "Provides free on-site job training classes to shelter residents through a partnership with Helms Career Education.",
     "impact": "Breaks the cycle of homelessness by addressing both spiritual needs and practical employment skills.",
     "website": "https://southernusa.salvationarmy.org/macon/"
   },
   "rescue-mission": {
     "name": "Rescue Mission of Middle Georgia",
+    "category": "faith-based",
     "description": "A faith-based recovery program for men and women that integrates work therapy and vocational skills.",
     "impact": "Prepares clients for re-entry into the workforce through supervised work assignments and GED support.",
     "website": "https://www.rescuemissionga.com/"
   },
   "other-faith": {
     "name": "Other Faith/Community Programs",
+    "category": "faith-based",
     "description": "Various local churches and nonprofits that incorporate workforce readiness, soft skills, and job fairs into their outreach.",
     "impact": "Provides a holistic community support system including internship placements and emergency assistance referrals.",
     "website": "https://maconchamber.com/"
   },
   "transitional-center": {
     "name": "Macon Transitional Center Work Release Program",
+    "category": "special-population",
     "description": "A residential facility that allows non-violent offenders to work paid community jobs during the final months of their sentence.",
     "impact": "Enables successful re-entry by allowing offenders to build work history and save money before release.",
     "website": "https://gdc.georgia.gov/locations/macon-transitional-center"
   },
+
+    "test": {
+    "name": "test",
+    "category": "colleges",
+    "parent": "mercer",
+    "description": "test",
+    "impact": "test",
+    "website": "test"
+  },
+  
   "drc": {
     "name": "Macon Day Reporting Center",
+    "category": "special-population",
     "description": "A court-referred intensive outpatient program for justice-involved individuals focused on reducing criminal behavior through education.",
     "impact": "Increases employability and restores justice-involved individuals to their community through job skills training.",
     "website": "https://dcs.georgia.gov/reentry-services/community-resources"
   }
+
 }

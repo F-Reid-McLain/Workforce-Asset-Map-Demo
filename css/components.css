@@ -88,6 +88,61 @@ COMPONENTS CRITERIA FOR INCLUSION:
 
 .control-btn:hover, .directory-link:hover { background-color: #444; }
 
+/* Full-map toggle in below-viz controls — styled to match .control-btn */
+.control-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    flex: 1 1 0;
+    max-width: 220px;
+    min-width: 140px;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--color-border-control);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-base);
+    font-family: var(--font-body);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color var(--transition-base), color var(--transition-base), background var(--transition-base);
+}
+.control-toggle:has(input:checked) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: rgba(74, 158, 255, 0.08);
+}
+
+/* Custom toggle switch track */
+.control-toggle input {
+    -webkit-appearance: none;
+    appearance: none;
+    flex-shrink: 0;
+    width: 28px;
+    height: 16px;
+    border-radius: 8px;
+    background: #555;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.control-toggle input::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #aaa;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s, background 0.2s;
+}
+.control-toggle input:checked { background: rgba(74, 158, 255, 0.3); }
+.control-toggle input:checked::after {
+    transform: translateX(12px);
+    background: var(--color-accent);
+}
+
 .control-group {
     display: flex;
     flex-direction: column;

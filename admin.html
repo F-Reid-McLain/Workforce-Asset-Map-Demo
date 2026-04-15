@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Entry Generator — Workforce Macon Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    /* ===== MAIN FORM ===== */
+    #app { width: 100%; max-width: 680px; }
+
+    header {
+      margin-bottom: 2rem;
+    }
+    header h1 { font-size: 1.6rem; }
+    header p   { color: #888; font-size: 0.9rem; margin-top: 0.25rem; }
+
+    .card {
+      background: #2d2d2d;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .field { margin-bottom: 1.25rem; }
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #ccc;
+      margin-bottom: 0.4rem;
+      font-weight: 500;
+    }
+    label span { color: #888; font-weight: 400; }
+
+    input[type="text"],
+    input[type="url"],
+    select,
+    textarea {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid #555;
+      border-radius: 4px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 0.55rem 0.75rem;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]:focus,
+    input[type="url"]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #4a9eff;
+    }
+    textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+    select option { background: #2d2d2d; }
+
+    /* slug hint */
+    .slug-hint { font-size: 0.78rem; color: #888; margin-top: 0.3rem; }
+
+    /* ===== BUTTONS ===== */
+    .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+    button {
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 4px;
+      padding: 0.6rem 1.2rem;
+      transition: background 0.15s;
+    }
+    .btn-primary { background: #4a9eff; color: #fff; }
+    .btn-primary:hover { background: #3a8eef; }
+    .btn-secondary { background: #444; color: #ccc; }
+    .btn-secondary:hover { background: #555; }
+    /* ===== OUTPUT BLOCK ===== */
+    #output-section { display: none; }
+
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .output-header h2 { font-size: 1rem; }
+    .copy-feedback { font-size: 0.8rem; color: #66bb6a; opacity: 0; transition: opacity 0.3s; }
+    .copy-feedback.visible { opacity: 1; }
+
+    pre {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 1rem;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre;
+      color: #ccc;
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <h1>Asset Entry Generator</h1>
+    <p>Fill out the form and copy the generated JSON into <code>content/assets.json</code>.</p>
+  </header>
+
+  <div class="card">
+    <div class="field">
+      <label for="f-id">Asset ID / Slug <span>(used as the JSON key and node ID)</span></label>
+      <input type="text" id="f-id" placeholder="e.g. my-org" oninput="syncSlug()">
+      <div class="slug-hint" id="slug-hint"></div>
+    </div>
+
+    <div class="field">
+      <label for="f-name">Display Name</label>
+      <input type="text" id="f-name" placeholder="e.g. My Organization">
+    </div>
+
+    <div class="field">
+      <label for="f-category">Category</label>
+      <select id="f-category" onchange="onCategoryChange()">
+        <option value="">— select a category —</option>
+        <option value="colleges">Colleges</option>
+        <option value="k12-secondary">K-12 and Secondary</option>
+        <option value="community-dev">Community and Economic Development</option>
+        <option value="job-training">Job Training and Career Services</option>
+        <option value="faith-based">Faith Based</option>
+        <option value="special-population">Special Population and Re-Entry</option>
+      </select>
+    </div>
+
+    <div class="field" id="parent-field" style="display:none">
+      <label for="f-parent">Parent Node <span>(optional — branch off an existing asset instead of the category)</span></label>
+      <select id="f-parent">
+        <option value="">None — link directly to category</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="f-description">Description</label>
+      <textarea id="f-description" placeholder="What does this organization do?"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="f-impact">Community Impact</label>
+      <textarea id="f-impact" placeholder="What impact does it have on the local workforce?"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="f-website">Website URL</label>
+      <input type="url" id="f-website" placeholder="https://example.org/">
+    </div>
+  </div>
+
+  <div class="btn-row" style="margin-bottom:1.5rem">
+    <button class="btn-primary" onclick="generate()">Generate JSON</button>
+    <button class="btn-secondary" onclick="clearForm()">Clear</button>
+  </div>
+
+  <!-- OUTPUT -->
+  <div id="output-section" class="card">
+    <div class="output-header">
+      <h2>Generated JSON — paste this into assets.json</h2>
+      <span class="copy-feedback" id="copy-feedback">Copied!</span>
+    </div>
+    <pre id="output-pre"></pre>
+    <div class="btn-row" style="margin-top:1rem">
+      <button class="btn-primary" onclick="copyOutput()">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Load assets.json once for parent dropdown population
+  let assetsCache = {};
+  fetch('content/assets.json')
+    .then(r => r.json())
+    .then(data => { assetsCache = data; })
+    .catch(() => { /* offline or file:// — parent dropdown will stay empty */ });
+
+  function onCategoryChange() {
+    const category = document.getElementById('f-category').value;
+    const parentField = document.getElementById('parent-field');
+    const parentSelect = document.getElementById('f-parent');
+
+    // Reset dropdown
+    parentSelect.innerHTML = '<option value="">None — link directly to category</option>';
+
+    if (!category) { parentField.style.display = 'none'; return; }
+
+    // Populate with existing assets in the selected category
+    const matches = Object.entries(assetsCache)
+      .filter(([, d]) => d.category === category)
+      .sort(([, a], [, b]) => a.name.localeCompare(b.name));
+
+    matches.forEach(([id, d]) => {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = d.name;
+      parentSelect.appendChild(opt);
+    });
+
+    parentField.style.display = 'block';
+  }
+
+  // Auto-format slug
+  function syncSlug() {
+    const raw = document.getElementById('f-id').value;
+    const clean = raw.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const hint = document.getElementById('slug-hint');
+    if (clean && clean !== raw) {
+      hint.textContent = `Will be stored as: "${clean}" — use only lowercase letters, numbers, and hyphens.`;
+    } else {
+      hint.textContent = '';
+    }
+  }
+
+  function getSlug() {
+    return document.getElementById('f-id').value.trim()
+      .toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  }
+
+  function generate() {
+    const id          = getSlug();
+    const name        = document.getElementById('f-name').value.trim();
+    const category    = document.getElementById('f-category').value;
+    const parent      = document.getElementById('f-parent').value;
+    const description = document.getElementById('f-description').value.trim();
+    const impact      = document.getElementById('f-impact').value.trim();
+    const website     = document.getElementById('f-website').value.trim();
+
+    const errors = [];
+    if (!id)       errors.push('Asset ID is required.');
+    if (!name)     errors.push('Display Name is required.');
+    if (!category) errors.push('Category is required.');
+    if (errors.length) { alert(errors.join('\n')); return; }
+
+    const entry = { name, category };
+    if (parent)      entry.parent      = parent;
+    if (description) entry.description = description;
+    if (impact)      entry.impact      = impact;
+    if (website)     entry.website     = website;
+
+    // Format as a JSON object fragment the user can paste in
+    const inner = JSON.stringify(entry, null, 2)
+      .replace(/^{/, '')
+      .replace(/}$/, '')
+      .split('\n').slice(1, -1).join('\n');
+
+    const output =
+      `  "${id}": {\n` +
+      inner.split('\n').map(l => '  ' + l).join('\n') +
+      `\n  },`;
+
+    document.getElementById('output-pre').textContent = output;
+    document.getElementById('output-section').style.display = 'block';
+    document.getElementById('output-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function copyOutput() {
+    const text = document.getElementById('output-pre').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const fb = document.getElementById('copy-feedback');
+      fb.classList.add('visible');
+      setTimeout(() => fb.classList.remove('visible'), 1800);
+    });
+  }
+
+  function clearForm() {
+    ['f-id','f-name','f-description','f-impact','f-website'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('f-category').value = '';
+    document.getElementById('f-parent').value = '';
+    document.getElementById('parent-field').style.display = 'none';
+    document.getElementById('slug-hint').textContent = '';
+    document.getElementById('output-section').style.display = 'none';
+    document.getElementById('f-id').focus();
+  }
+</script>
+</body>
+</html>

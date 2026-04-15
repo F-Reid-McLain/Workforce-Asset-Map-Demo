@@ -188,3 +188,16 @@ if (resetBtn) resetBtn.addEventListener('click', doReset);
 
 const fsResetBtn = document.getElementById('fs-reset-btn');
 if (fsResetBtn) fsResetBtn.addEventListener('click', doReset);
+
+// ===== FULL MAP TOGGLE =====
+const fullMapToggle   = document.getElementById('full-map-toggle');
+const fsFullMapToggle = document.getElementById('fs-full-map-toggle');
+
+function applyFullMapToggle(checked) {
+    if (fullMapToggle)   fullMapToggle.checked   = checked;
+    if (fsFullMapToggle) fsFullMapToggle.checked = checked;
+    setChildNodesVisible(checked);
+}
+
+if (fullMapToggle)   fullMapToggle.addEventListener('change',   function() { applyFullMapToggle(this.checked); });
+if (fsFullMapToggle) fsFullMapToggle.addEventListener('change', function() { applyFullMapToggle(this.checked); });
