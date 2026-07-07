@@ -39,6 +39,13 @@
                 </div>
                 <div id="network-visualization" class="viz-container">
                     <!-- Network visualization will be created by JavaScript -->
+                    <div class="viz-search" id="viz-search">
+                        <div class="viz-search-input-row">
+                            <input type="text" id="map-search-input" class="search-input" placeholder="Search the map…" aria-label="Search the map">
+                            <button type="button" id="map-search-clear" class="search-clear-btn" title="Clear search" aria-label="Clear search">&times;</button>
+                        </div>
+                        <ul class="viz-search-results" id="viz-search-results" hidden></ul>
+                    </div>
                     <div class="viz-zoom-controls" id="viz-zoom-controls">
                         <button class="viz-fullscreen-btn" id="fullscreen-btn" title="Toggle Fullscreen">&#x26F6;</button>
                         <button class="viz-zoom-btn" id="zoom-in-btn" title="Zoom In">+</button>
@@ -111,6 +118,7 @@
     <script src="js/viz-engine.js"></script>
     <script src="js/main.js"></script>
     <script src="js/directory.js"></script>
+    <script src="js/search.js"></script>
     <script src="js/nav.js"></script>
 </body>
 </body>

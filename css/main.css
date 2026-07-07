@@ -238,6 +238,37 @@ body {
     }
 }
 
+/* ===== DIRECTORY SEARCH ===== */
+.directory-search {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 420px;
+    margin: 0 auto 1.5rem;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 0.35rem 0.5rem 0.35rem 0.9rem;
+    transition: border-color var(--transition-fast);
+}
+
+.directory-search:focus-within { border-color: var(--color-accent); }
+
+.directory-search .search-input {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 0.4rem 0;
+}
+
+.directory-search .search-input:focus { border: none; }
+
+.directory-empty {
+    text-align: center;
+    color: var(--color-text-muted);
+    padding: 2rem 0;
+}
+
 /* ===== DIRECTORY GRID STYLES ===== */
 .directory-grid {
     display: grid;

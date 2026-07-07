@@ -36,6 +36,12 @@
                 <p>Complete listing of workforce development resources in Greater Macon</p>
             </section>
 
+            <div class="directory-search">
+                <input type="text" id="directory-search-input" class="search-input" placeholder="Search organizations or categories…" aria-label="Search the directory">
+                <button type="button" id="directory-search-clear" class="search-clear-btn" title="Clear search" aria-label="Clear search">&times;</button>
+            </div>
+            <p class="directory-empty" id="directory-empty" hidden>No matching assets. Try a different search.</p>
+
             <div class="directory-grid">
                 <!-- Colleges -->
                 <section class="directory-group">
@@ -127,6 +133,7 @@
 
     <script src="js/main.js"></script>
     <script src="js/directory.js"></script>
+    <script src="js/search.js"></script>
     <script src="js/nav.js"></script>
 </body>
 </html>

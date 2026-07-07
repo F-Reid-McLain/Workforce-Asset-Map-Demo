@@ -4,6 +4,7 @@
 // capture the variable reference (not the value) and read correctly on use.
 let originalSizes = {};
 let simulation, svg, zoom, g;
+let nodeSelection, linkSelection;
 
 // Called by main.js when fullscreen state changes
 function setWheelZoomEnabled(enabled) {
@@ -94,6 +95,7 @@ const structuralLinks = [
 
   const link = g.append("g").selectAll("line").data(workforceData.links).join("line")
     .attr("stroke", "#666").attr("stroke-width", d => d.source.type === "hub" ? 3 : 1.5).attr("stroke-opacity", 0.6);
+  linkSelection = link;
 
   // Define a clipPath per node so images are clipped to their circle
   const defs = svg.append("defs");
@@ -106,6 +108,7 @@ const structuralLinks = [
 
   const node = g.append("g").selectAll("g").data(workforceData.nodes).join("g")
     .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
+  nodeSelection = node;
 
   node.append("circle").attr("r", d => d.size).attr("fill", d => d.image ? "#ffffff" : colorScale(d.type)).attr("stroke", "#fff")
     .attr("stroke-width", 2).attr("stroke-dasharray", d => d.image ? "0" : "5,5").attr("opacity", 0.9);

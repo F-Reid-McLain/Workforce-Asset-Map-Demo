@@ -192,6 +192,87 @@
 
 .fs-reset-btn:hover { background: rgba(60, 60, 60, 0.9); }
 
+/* ===== MAP SEARCH ===== */
+.viz-search {
+    position: absolute;
+    top: 0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    width: 210px;
+}
+
+/* Fullscreen shows the Size/Hub Distance/Reset bar in this same top-center
+   spot — drop search below it so the two never overlap. */
+.viz-container.fullscreen .viz-search {
+    top: 3.5rem;
+}
+
+.viz-search-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    padding: 0 0.35rem 0 0.65rem;
+    transition: border-color var(--transition-fast);
+}
+
+.viz-search-input-row:focus-within { border-color: var(--color-accent); }
+
+.viz-search .search-input {
+    flex: 1;
+    min-width: 0;
+    background: none;
+    border: none;
+    padding: 0.4rem 0;
+    font-size: var(--font-size-xs);
+}
+
+.viz-search .search-input:focus { border: none; }
+
+.viz-search .search-clear-btn {
+    font-size: 1rem;
+    padding: 0.1rem 0.25rem;
+}
+
+.viz-search-results {
+    list-style: none;
+    margin: 0.35rem 0 0;
+    padding: 0.25rem 0;
+    max-height: 220px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+}
+
+.viz-search-result {
+    padding: 0.45rem 0.75rem;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.viz-search-result:hover,
+.viz-search-result.active { background: rgba(74, 158, 255, 0.25); }
+
+.viz-search-result .result-type {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Touch devices: larger tap targets, matches zoom controls */
+@media (pointer: coarse) {
+    .viz-search { width: 180px; }
+    .viz-search-result { padding: 0.6rem 0.75rem; }
+}
+
 /* ===== ZOOM CONTROLS ===== */
 .viz-zoom-controls {
     position: absolute;
