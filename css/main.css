@@ -204,6 +204,10 @@ body {
     margin: 0 auto;
 }
 
+.page-header-actions {
+    margin-top: 1.25rem;
+}
+
 /* ===== RESPONSIVE BASE ===== */
 @media (max-width: 768px) {
     .viz-header h2, .page-header h2 { font-size: 2rem; }
