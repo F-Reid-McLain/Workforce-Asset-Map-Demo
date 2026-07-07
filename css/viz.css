@@ -69,16 +69,21 @@
 
 .chart-container {
     margin: 2rem 0;
-    background: var(--color-bg-surface-deep);
+    background: var(--color-bg-surface);
     border: 1px solid var(--color-border);
-    padding: 1.5rem;
+    padding: 22px 22px 18px;
     border-radius: var(--radius-md);
+}
+
+.chart-container h3 {
+    font: 700 var(--font-heading-size-sm)/1.3 var(--font-heading);
+    color: var(--color-text-primary);
+    margin-bottom: 4px;
 }
 
 .chart {
     min-height: 300px;
     width: 100%;
-    background: var(--color-bg-page);
     border-radius: var(--radius-sm);
 }
 
@@ -334,6 +339,295 @@
     color: #fff;
 }
 
+
+/* ===== KPI BLOCKS (hero) ===== */
+.kpi-block {
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+}
+
+.kpi-val {
+    font-size: 1.7rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--color-text-primary);
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.kpi-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+/* ===== REGIONAL MAP ===== */
+#region-map {
+    width: 100%;
+    height: 616px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    background: var(--color-bg-surface-deep);
+    position: relative;
+}
+
+#region-map svg { display: block; }
+
+.map-county-tip {
+    position: absolute;
+    background: #1a1a1a;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    color: var(--color-text-primary);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    padding: 0.5rem 0.8rem;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+    display: none;
+    z-index: 20;
+}
+
+.map-dl-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    padding: 5px 11px;
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.map-dl-btn:hover { background: rgba(60, 60, 60, 0.9); }
+
+/* ===== INDUSTRY TREEMAP ===== */
+.treemap-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.treemap-bc {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--font-size-sm);
+}
+
+.bc-back {
+    background: var(--color-bg-surface-deep);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-family: inherit;
+    transition: background var(--transition-fast);
+}
+
+.bc-back:hover { background: var(--color-border); }
+.bc-sep { color: var(--color-text-muted); }
+.bc-current { color: var(--color-text-primary); font-weight: 600; }
+
+.treemap-hint {
+    font-size: 0.68rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+}
+
+.treemap-canvas {
+    position: relative;
+    width: 100%;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-bg-surface-deep);
+    border: 1px solid var(--color-border);
+}
+
+.treemap-cell {
+    position: absolute;
+    box-sizing: border-box;
+    border: 1.5px solid rgba(0, 0, 0, 0.5);
+    padding: 8px;
+    overflow: hidden;
+    transition: opacity var(--transition-fast), filter var(--transition-fast);
+}
+
+.treemap-cell.drillable { cursor: pointer; }
+.treemap-cell.drillable:hover { filter: brightness(1.15); }
+
+.tc-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.85);
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.tc-empl {
+    font-size: 0.65rem;
+    color: rgba(0, 0, 0, 0.65);
+    margin-top: 3px;
+}
+
+/* ===== DEMOGRAPHICS ===== */
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.demo-card {
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 22px 22px 18px;
+}
+
+.demo-card-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.demo-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 9px;
+}
+
+.demo-bar-label {
+    font-size: 0.75rem;
+    color: var(--color-text-primary);
+    width: 120px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.demo-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--color-bg-surface-deep);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.demo-bar-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.demo-bar-pct {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.demo-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.demo-stat {
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+}
+
+.demo-stat-val {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.02em;
+}
+
+.demo-stat-key {
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+}
+
+/* ===== OCCUPATION INTELLIGENCE GRID ===== */
+.occ-charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.occ-demand-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.occ-chart-card {
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+}
+
+.occ-chart-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+}
+
+.occ-chart-sub {
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    margin-bottom: 14px;
+}
+
+.occ-bar-val {
+    font-size: 0.68rem;
+    color: var(--color-text-muted);
+    width: 50px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* ===== RESPONSIVE (workforce data sections) ===== */
+@media (max-width: 900px) {
+    .demo-grid { grid-template-columns: 1fr; }
+    .occ-charts-grid { grid-template-columns: 1fr; }
+    .occ-demand-grid { grid-template-columns: 1fr; }
+    .demo-stat-grid { grid-template-columns: repeat(2, 1fr); }
+    #region-map { height: 480px; }
+}
 
 /* ===== MOBILE VIZ ===== */
 @media (max-width: 768px) {

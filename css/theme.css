@@ -27,6 +27,8 @@ entire site. Other CSS files must not hardcode these values.
     /* ===== ACCENT / BRAND ===== */
     --color-accent:          #4a9eff;   /* Chamber Blue — links, highlights */
     --color-accent-hover:    #3a8eef;   /* Darker on hover */
+    --color-accent-teal:     #2dd4bf;   /* Positive / growth indicators */
+    --color-accent-orange:   #fb923c;   /* Negative / attention indicators */
 
     /* ===== DIRECTORY ===== */
     --color-directory-group-heading: #4a9eff;  /* Group category headers */

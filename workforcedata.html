@@ -36,70 +36,276 @@
                 <p>Economic indicators and workforce trends for the Greater Macon region</p>
             </section>
 
-            <!-- Economic Stats Section -->
+            <!-- Hero KPIs -->
             <section class="stats-section">
                 <h3>Key Economic Indicators</h3>
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <h4>Population</h4>
-                        <div class="stat-value" id="population-stat">156,000</div>
+                    <div class="kpi-block">
+                        <div class="kpi-val" id="kpi-jobs">—</div>
+                        <div class="kpi-label">Total Jobs</div>
+                        <div class="kpi-note">Payroll positions (QCEW) — counts jobs, not unique workers</div>
                     </div>
-                    <div class="stat-card">
-                        <h4>Labor Force</h4>
-                        <div class="stat-value" id="labor-force-stat">68,500</div>
+                    <div class="kpi-block">
+                        <div class="kpi-val" id="kpi-wage">—</div>
+                        <div class="kpi-label">Avg Annual Wage</div>
+                        <div class="kpi-note">Mean payroll wage per job · not household income</div>
                     </div>
-                    <div class="stat-card">
-                        <h4>Unemployment Rate</h4>
-                        <div class="stat-value" id="unemployment-stat">4.2%</div>
+                    <div class="kpi-block">
+                        <div class="kpi-val" id="kpi-pop">—</div>
+                        <div class="kpi-label">Population</div>
+                        <div class="kpi-note">ACS 2024 estimate · residents, not workforce</div>
                     </div>
-                    <div class="stat-card">
-                        <h4>Median Income</h4>
-                        <div class="stat-value" id="income-stat">41,000</div>
+                    <div class="kpi-block">
+                        <div class="kpi-val" id="kpi-commute">—</div>
+                        <div class="kpi-label">Daily In-Commuters</div>
+                        <div class="kpi-note">Net figure — workers entering Bibb minus residents leaving</div>
                     </div>
-                    <div class="stat-card">
-                        <h4>Job Growth</h4>
-                        <div class="stat-value" id="job-growth-stat">+1.8%</div>
-                    </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Charts Section -->
-            <section class="charts-section">
-                <div class="chart-container">
-                    <h3>Industry Employment — Bibb County</h3>
-                    <p class="chart-subtitle">Total employment and average annual wages by industry sector</p>
-                    <div id="industry-chart" class="chart"></div>
-                    <div class="chart-expand-row">
-                        <a href="data/Bibb Industries.csv" download class="chart-download-btn">&#11015; Download CSV</a>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <h3>Top Hiring Industries — Bibb County</h3>
-                    <p class="chart-subtitle">Active job postings by industry sector</p>
-                    <div id="hiring-chart" class="chart"></div>
-                    <div class="chart-expand-row">
-                        <button class="chart-expand-btn" id="hiring-toggle">▼ Show All Industries</button>
-                        <a href="data/Top Hiring Industries.csv" download class="chart-download-btn">&#11015; Download CSV</a>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <h3>Top Employers — Bibb County</h3>
-                    <p class="chart-subtitle">Employers with the most active job listings</p>
-                    <div id="employers-chart" class="chart"></div>
-                    <div class="chart-expand-row">
-                        <button class="chart-expand-btn" id="employers-toggle">▼ Show All Employers</button>
-                        <a href="data/Bibb Top Employers.csv" download class="chart-download-btn">&#11015; Download CSV</a>
+                    <div class="kpi-block">
+                        <div class="kpi-val" id="kpi-top">—</div>
+                        <div class="kpi-label">Largest Employer Sector</div>
                     </div>
                 </div>
             </section>
+        </div>
+
+        <!-- Regional Map -->
+        <div class="section">
+            <div class="section-label teal">Regional Context</div>
+            <div class="section-title">Regional Commuting Patterns</div>
+            <p class="section-desc">Nearly every surrounding county has a negative net commuting balance, reflecting a regional workforce that flows toward Macon-Bibb for employment. Net commuting = a county's total in-commuters minus its out-commuters. Hover any county for detail.</p>
+            <div id="region-map"></div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Adjusted Metrics -->
+        <div class="section">
+            <div class="section-label teal">Beyond the Headline Numbers</div>
+            <div class="section-title">Macon-Bibb's Adjusted Economic Picture</div>
+            <p class="section-desc">About 40% of workers employed in Macon-Bibb live outside it. Standard Census metrics follow the worker home — understating the county's income and overstating its neighbors'. The figures below are adjusted for where the work actually happens.</p>
+
+            <div class="adj-intro">
+                <strong>Why the gap exists:</strong> About 40% of workers <em>employed</em> in Bibb County reside outside its borders. Residence-based income surveys assign those wages to surrounding counties, suppressing Macon-Bibb's reported income while inflating neighbors' figures — especially Houston County, whose high household-income ranking collapses once workplace-adjusted.
+            </div>
+
+            <div class="adj-metrics-grid">
+                <div class="adj-card">
+                    <div class="adj-card-label">Median Earnings — Job Site vs. Residence</div>
+                    <div class="adj-compare">
+                        <div class="adj-row">
+                            <span class="adj-row-label">Adjusted (job-site)</span>
+                            <span class="adj-row-val highlight">$68,900</span>
+                        </div>
+                        <hr class="adj-divider">
+                        <div class="adj-row">
+                            <span class="adj-row-label">Official household median</span>
+                            <span class="adj-row-val muted">$50,747</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="adj-card">
+                    <div class="adj-card-label">Per-Capita GDP — Macon-Bibb vs. Houston Co.</div>
+                    <div class="adj-compare">
+                        <div class="adj-row">
+                            <span class="adj-row-label">Macon-Bibb (workplace)</span>
+                            <span class="adj-row-val highlight">$67,292</span>
+                        </div>
+                        <hr class="adj-divider">
+                        <div class="adj-row">
+                            <span class="adj-row-label">Houston County (adjusted)</span>
+                            <span class="adj-row-val muted">$54,547</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="adj-card">
+                    <div class="adj-card-label">Unemployment Rate — Adjusted vs. Official</div>
+                    <div class="adj-compare">
+                        <div class="adj-row">
+                            <span class="adj-row-label">Workplace-weighted (WWUR)</span>
+                            <span class="adj-row-val highlight">3.2%</span>
+                        </div>
+                        <hr class="adj-divider">
+                        <div class="adj-row">
+                            <span class="adj-row-label">Official residence-based rate</span>
+                            <span class="adj-row-val muted">4.3%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="adj-callouts">
+                <div class="adj-callout">
+                    <div class="adj-callout-val teal">60–70%</div>
+                    <div class="adj-callout-desc">of retail spending in Macon-Bibb originates from <strong>non-residents</strong> — commuters and regional visitors — a direct economic multiplier not captured in local income surveys.</div>
+                </div>
+                <div class="adj-callout">
+                    <div class="adj-callout-val teal">~$50K</div>
+                    <div class="adj-callout-desc">Houston County's workplace-adjusted household income <strong>drops below $50,000</strong> once commuter wage flows are removed — reversing its perceived advantage over Macon-Bibb.</div>
+                </div>
+                <div class="adj-callout">
+                    <div class="adj-callout-val teal">Near Full</div>
+                    <div class="adj-callout-desc">Occupancy of Bibb County Industrial Authority parcels as of 2024 — indicating tight supply and strong demand for industrial space in the region.</div>
+                </div>
+            </div>
+
+            <div class="adj-source">
+                Source: George, A. (2025). <em>Reclassifying Municipal Realities: How Regional Data Distortions Undermine Investment in Middle Georgia.</em> Data derived from U.S. Census Quick Facts, BLS, LEHD/LODES Origin-Destination Employment Statistics, and BEA GDP data.
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Industry Treemap -->
+        <div class="section">
+            <div class="section-label">Industry Landscape</div>
+            <div class="section-title">Where Macon Works</div>
+            <p class="section-desc">Employment by industry sector, sized by total jobs. Click any sector to explore the sub-industries within it.</p>
+            <div class="treemap-header">
+                <div class="treemap-bc" id="treemap-bc">
+                    <span class="bc-current">All Industries</span>
+                </div>
+                <span class="treemap-hint" id="treemap-hint">Click a sector to drill in →</span>
+            </div>
+            <div class="treemap-canvas" id="treemap-canvas"></div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Demographics -->
+        <div class="section">
+            <div class="section-label orange">Workforce Demographics</div>
+            <div class="section-title">Who Lives Here</div>
+            <p class="section-desc">American Community Survey 2024 estimates for Macon-Bibb County residents. Median household income ($50,747) reflects all income sources for households living here — distinct from the avg annual wage above, which measures payroll per job regardless of where the worker lives.</p>
+
+            <div class="demo-stat-grid">
+                <div class="demo-stat">
+                    <div class="demo-stat-val" id="demo-population">—</div>
+                    <div class="demo-stat-key">Population</div>
+                </div>
+                <div class="demo-stat">
+                    <div class="demo-stat-val" id="demo-lfpr">—</div>
+                    <div class="demo-stat-key">Labor Force Participation · Age 16+</div>
+                </div>
+                <div class="demo-stat">
+                    <div class="demo-stat-val" id="demo-primeage">—</div>
+                    <div class="demo-stat-key">Prime-Age Participation · Ages 25–54</div>
+                </div>
+                <div class="demo-stat">
+                    <div class="demo-stat-val" id="demo-wfh">—</div>
+                    <div class="demo-stat-key">Work From Home</div>
+                </div>
+            </div>
+
+            <div class="demo-grid">
+                <div class="demo-card">
+                    <div class="demo-card-title">Age Distribution</div>
+                    <div id="age-bars"></div>
+                </div>
+                <div class="demo-card">
+                    <div class="demo-card-title">Race &amp; Ethnicity</div>
+                    <div id="race-bars"></div>
+                </div>
+                <div class="demo-card">
+                    <div class="demo-card-title">Educational Attainment (Age 25–64)</div>
+                    <div id="edu-bars"></div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Occupations -->
+        <div class="section">
+            <div class="section-label teal">Top Occupations</div>
+            <div class="section-title">In-Demand Roles</div>
+            <p class="section-desc">Top 15 occupations by employment in Macon-Bibb County (OES estimates). Employment figures count filled positions by occupation — totals differ from the QCEW payroll count above due to classification methodology. Avg Annual Wage is the mean OES wage for that occupation in this area; individual earnings vary.</p>
+            <div class="occ-table-wrap">
+                <table class="occ-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Occupation</th>
+                            <th>Employment</th>
+                            <th>Avg Annual Wage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="occ-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Occupation Intelligence Grid -->
+        <div class="section">
+            <div class="section-label teal">Occupation Intelligence</div>
+            <div class="section-title">Labor Market Signals</div>
+            <p class="section-desc">Views on Macon-Bibb's occupation landscape — where employment is growing, where workers are exiting or transferring, and where wages are highest.</p>
+            <div class="occ-charts-grid">
+                <div class="occ-chart-card">
+                    <div class="occ-chart-title">Top Growing Occupations</div>
+                    <div class="occ-chart-sub">1-year forecast growth rate · 3-digit SOC group · min. 50 employees</div>
+                    <div id="occ-proj-growth"></div>
+                </div>
+                <div class="occ-chart-card">
+                    <div class="occ-chart-title">Top Paying Jobs</div>
+                    <div class="occ-chart-sub">Mean annual wage</div>
+                    <div id="occ-wage-mean"></div>
+                </div>
+            </div>
+
+            <div class="occ-demand-grid">
+                <div class="occ-chart-card">
+                    <div class="occ-chart-title">Job Exits</div>
+                    <div class="occ-chart-sub">Workers permanently leaving the occupation annually</div>
+                    <div id="occ-exits"></div>
+                </div>
+                <div class="occ-chart-card">
+                    <div class="occ-chart-title">Occupational Transfers</div>
+                    <div class="occ-chart-sub">Workers moving into a different occupation annually</div>
+                    <div id="occ-transfers"></div>
+                </div>
+                <div class="occ-chart-card">
+                    <div class="occ-chart-title">Net New Positions</div>
+                    <div class="occ-chart-sub">Projected net employment growth (absolute jobs added)</div>
+                    <div id="occ-net-growth"></div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Hiring Demand -->
+        <div class="section">
+            <div class="section-label orange">Hiring Demand</div>
+            <div class="section-title">Where Employers Are Hiring Now</div>
+            <p class="section-desc">Real-time job posting data showing which industries and employers have the most active openings in Bibb County.</p>
+
+            <div class="chart-container">
+                <h3>Top Hiring Industries — Bibb County</h3>
+                <p class="chart-subtitle">Active job postings by industry sector</p>
+                <div id="hiring-chart" class="chart"></div>
+                <div class="chart-expand-row">
+                    <button class="chart-expand-btn" id="hiring-toggle">▼ Show All Industries</button>
+                    <a href="data/Top Hiring Industries.csv" download class="chart-download-btn">&#11015; Download CSV</a>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Top Employers — Bibb County</h3>
+                <p class="chart-subtitle">Employers with the most active job listings</p>
+                <div id="employers-chart" class="chart"></div>
+                <div class="chart-expand-row">
+                    <button class="chart-expand-btn" id="employers-toggle">▼ Show All Employers</button>
+                    <a href="data/Bibb Top Employers.csv" download class="chart-download-btn">&#11015; Download CSV</a>
+                </div>
+            </div>
         </div>
     </main>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="js/charts.js"></script>
+    <script src="js/workforce-data.js"></script>
     <script src="js/nav.js"></script>
 </body>
 </html>
