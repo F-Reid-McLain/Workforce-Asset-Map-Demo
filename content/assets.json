@@ -51,6 +51,7 @@
   "chamber": {
     "name": "Greater Macon Chamber of Commerce",
     "category": "community-dev",
+    "image": "assets/logos/greater macon chamber .png",
     "description": "Convenes employers and educational institutions to align workforce initiatives with regional economic growth.",
     "impact": "Spearheaded the Workforce Asset Map and Greater Career Works; serves as a hub for employer input on talent needs.",
     "website": "https://maconchamber.com/"
@@ -58,6 +59,7 @@
   "mbcia": {
     "name": "Macon-Bibb County Industrial Authority",
     "category": "community-dev",
+    "image": "assets/logos/mbciauthority_logo.jpeg",
     "description": "An economic development agency that recruits industries and facilitates job training incentives for expanding companies.",
     "impact": "Connects companies with Georgia's Quick Start program and custom training at CGTC.",
     "website": "https://mbcia.com/"
@@ -65,6 +67,7 @@
   "choose-macon": {
     "name": "Choose Macon Initiative",
     "category": "community-dev",
+    "image": "assets/logos/Choose Macon .jpeg",
     "description": "A talent attraction platform showcasing Macon's quality of life and career opportunities to newcomers.",
     "impact": "Aids employers in recruiting skilled workers from outside the region and encourages local graduates to stay.",
     "website": "https://choosemacon.com/"
@@ -72,6 +75,7 @@
   "library": {
     "name": "Middle Georgia Regional Library",
     "category": "community-dev",
+    "image": "assets/logos/middle georgia regional library .png",
     "description": "Offers free access to technology, resume software, and job search workshops through the Business and Nonprofit Center (BANC).",
     "impact": "Lowers access barriers for residents to develop marketable skills in a supportive environment.",
     "website": "https://bibblib.org/"
@@ -86,6 +90,7 @@
   "newtown": {
     "name": "NewTown Macon",
     "category": "community-dev",
+    "image": "assets/logos/newtown macon .png",
     "description": "Focused on downtown revitalization and small business incubators to attract and retain young professionals.",
     "impact": "Contributes to the broader environment in which workforce development thrives through quality of place and entrepreneurship support.",
     "website": "https://newtownmacon.com/"
@@ -149,6 +154,7 @@
   "worksource": {
     "name": "WorkSource Middle Georgia",
     "category": "job-training",
+    "image": "assets/logos/worksource middle ga.png",
     "description": "The region's federally-funded Workforce Innovation and Opportunity Act (WIOA) program hub.",
     "impact": "Offers tuition assistance for vocational training, on-the-job training opportunities, and career counseling.",
     "website": "https://middlegaworks.com/"
@@ -177,6 +183,7 @@
   "salvation-army": {
     "name": "The Salvation Army of Macon",
     "category": "faith-based",
+    "image": "assets/logos/salvation army.png",
     "description": "Provides free on-site job training classes to shelter residents through a partnership with Helms Career Education.",
     "impact": "Breaks the cycle of homelessness by addressing both spiritual needs and practical employment skills.",
     "website": "https://southernusa.salvationarmy.org/macon/"
@@ -184,6 +191,7 @@
   "rescue-mission": {
     "name": "Rescue Mission of Middle Georgia",
     "category": "faith-based",
+    "image": "assets/logos/rescue mission of ga.png",
     "description": "A faith-based recovery program for men and women that integrates work therapy and vocational skills.",
     "impact": "Prepares clients for re-entry into the workforce through supervised work assignments and GED support.",
     "website": "https://www.rescuemissionga.com/"
@@ -198,6 +206,7 @@
   "transitional-center": {
     "name": "Macon Transitional Center Work Release Program",
     "category": "special-population",
+    "image": "assets/logos/Transitional center.jpeg",
     "description": "A residential facility that allows non-violent offenders to work paid community jobs during the final months of their sentence.",
     "impact": "Enables successful re-entry by allowing offenders to build work history and save money before release.",
     "website": "https://gdc.georgia.gov/locations/macon-transitional-center"

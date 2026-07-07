@@ -95,11 +95,31 @@ const structuralLinks = [
   const link = g.append("g").selectAll("line").data(workforceData.links).join("line")
     .attr("stroke", "#666").attr("stroke-width", d => d.source.type === "hub" ? 3 : 1.5).attr("stroke-opacity", 0.6);
 
+  // Define a clipPath per node so images are clipped to their circle
+  const defs = svg.append("defs");
+  workforceData.nodes.filter(d => d.image).forEach(d => {
+    defs.append("clipPath")
+      .attr("id", `clip-${d.id}`)
+      .append("circle")
+      .attr("r", d.size);
+  });
+
   const node = g.append("g").selectAll("g").data(workforceData.nodes).join("g")
     .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
 
-  node.append("circle").attr("r", d => d.size).attr("fill", d => colorScale(d.type)).attr("stroke", "#fff")
+  node.append("circle").attr("r", d => d.size).attr("fill", d => d.image ? "#ffffff" : colorScale(d.type)).attr("stroke", "#fff")
     .attr("stroke-width", 2).attr("stroke-dasharray", d => d.image ? "0" : "5,5").attr("opacity", 0.9);
+
+  // Render logo inside circle for nodes that have an image
+  node.filter(d => d.image)
+    .append("image")
+    .attr("href", d => d.image)
+    .attr("x", d => -d.size)
+    .attr("y", d => -d.size)
+    .attr("width",  d => d.size * 2)
+    .attr("height", d => d.size * 2)
+    .attr("clip-path", d => `url(#clip-${d.id})`)
+    .attr("preserveAspectRatio", "xMidYMid slice");
 
   node.append("text").text(d => d.name).attr("dy", d => d.size + 18).attr("text-anchor", "middle").attr("fill", "#fff")
     .attr("font-size", d => d.type === "hub" ? "14px" : "11px").style("text-shadow", "1px 1px 2px rgba(0,0,0,0.8)");

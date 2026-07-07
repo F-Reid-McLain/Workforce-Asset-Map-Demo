@@ -25,6 +25,18 @@ function applySizeScale(val) {
     d3.selectAll('.asset-node circle, g circle')
         .transition().duration(200)
         .attr('r', d => originalSizes[d.id] * currentSizeScale);
+    d3.selectAll('g image')
+        .transition().duration(200)
+        .attr('x',      d => -(originalSizes[d.id] * currentSizeScale))
+        .attr('y',      d => -(originalSizes[d.id] * currentSizeScale))
+        .attr('width',  d =>   originalSizes[d.id] * currentSizeScale * 2)
+        .attr('height', d =>   originalSizes[d.id] * currentSizeScale * 2);
+    d3.selectAll('defs clipPath circle')
+        .attr('r', function() {
+            const clipId = d3.select(this.parentNode).attr('id'); // e.g. "clip-mercer"
+            const nodeId = clipId.replace('clip-', '');
+            return (originalSizes[nodeId] || 12) * currentSizeScale;
+        });
     d3.selectAll('g text')
         .transition().duration(200)
         .attr('dy', d => (originalSizes[d.id] * currentSizeScale) + 18);
