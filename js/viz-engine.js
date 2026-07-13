@@ -181,10 +181,15 @@ const structuralLinks = [
     .attr("height", "100%")
     .attr("viewBox", `0 0 ${width} ${height}`);
 
+  // Tracked so flow-particle radius can be counter-scaled against it below —
+  // on a narrow/mobile container the fit-to-view zoom can land well under
+  // 1:1, and a fixed SVG-unit radius shrinks to sub-pixel and disappears.
+  let currentZoomScale = 1;
+
   zoom = d3.zoom()
     .scaleExtent([0.3, 3])
     .filter(event => event.type !== 'wheel' && !event.ctrlKey && !event.button)
-    .on("zoom", (event) => { g.attr("transform", event.transform); });
+    .on("zoom", (event) => { g.attr("transform", event.transform); currentZoomScale = event.transform.k; });
   svg.call(zoom);
 
   g = svg.append("g");
@@ -373,7 +378,12 @@ const structuralLinks = [
     node.attr("transform", d => `translate(${d.x},${d.y})`);
     if (particle) {
       const now = Date.now();
+      // Counter-scaled against the current zoom so the dot stays a constant
+      // on-screen size — at a heavily zoomed-out fit (e.g. a narrow mobile
+      // container) a fixed SVG-unit radius shrinks to sub-pixel and vanishes.
+      const particleR = Math.max(1.5, Math.min(6, 2.5 / currentZoomScale));
       particle
+        .attr("r", particleR)
         .attr("cx", d => { const t = ((now + d.__phase) % PARTICLE_PERIOD) / PARTICLE_PERIOD; return d.__flowFrom.x + (d.__flowTo.x - d.__flowFrom.x) * t; })
         .attr("cy", d => { const t = ((now + d.__phase) % PARTICLE_PERIOD) / PARTICLE_PERIOD; return d.__flowFrom.y + (d.__flowTo.y - d.__flowFrom.y) * t; })
         // sin envelope: fades in leaving the outer node, peaks mid-link, fades out arriving
