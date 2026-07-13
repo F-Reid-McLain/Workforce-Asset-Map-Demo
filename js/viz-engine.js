@@ -6,6 +6,11 @@ let originalSizes = {};
 let simulation, svg, zoom, g;
 let nodeSelection, linkSelection;
 
+// Simulation never fully cools to this floor instead of 0, so the graph
+// keeps a faint perpetual drift at rest instead of freezing solid.
+// main.js's drag handler restores this same value on drag-end.
+const IDLE_ALPHA_TARGET = 0.008;
+
 // Asset names run long ("Macon-Bibb County Office of Workforce Development") —
 // truncate the always-on label so the map stays scannable; the full name is
 // still one hover (native title tooltip) or click (info panel) away.
@@ -137,7 +142,11 @@ const structuralLinks = [
         return (d.source.type === "hub" || d.target.type === "hub") ? 35 : 130;
     }))
     .force("charge", d3.forceManyBody().strength(-550))
-    .force("center", d3.forceCenter(width / 2, height / 2));
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    // Keeps nodes (and the labels hanging below them) from overlapping —
+    // padding is generous since it has to clear the label text, not just the circle.
+    .force("collide", d3.forceCollide(d => d.size + 34).strength(0.8))
+    .alphaTarget(IDLE_ALPHA_TARGET);
 
   const link = g.append("g").selectAll("line").data(workforceData.links).join("line")
     .attr("stroke", "#666").attr("stroke-width", d => d.source.type === "hub" ? 3 : 1.5).attr("stroke-opacity", 0.6);
@@ -225,5 +234,5 @@ const structuralLinks = [
 
   function dragstarted(event, d) { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; }
   function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
-  function dragended(event, d) { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }
+  function dragended(event, d) { if (!event.active) simulation.alphaTarget(IDLE_ALPHA_TARGET); d.fx = null; d.fy = null; }
 })();
