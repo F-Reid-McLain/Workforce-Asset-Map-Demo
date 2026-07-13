@@ -123,7 +123,7 @@
     padding: 0 0.65rem;
     background: rgba(0, 0, 0, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 6px;
+    border-radius: var(--radius-pill);
     color: var(--color-text-primary);
     font-size: var(--font-size-sm);
 }
@@ -181,7 +181,7 @@
     padding: 0 0.65rem;
     background: rgba(0, 0, 0, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 6px;
+    border-radius: var(--radius-pill);
     color: var(--color-text-primary);
     font-size: var(--font-size-sm);
     cursor: pointer;
@@ -289,7 +289,7 @@
     background: rgba(0, 0, 0, 0.75);
     color: var(--color-text-primary);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 6px;
+    border-radius: var(--radius-pill);
     width: 32px;
     height: 28px;
     cursor: pointer;
@@ -410,7 +410,7 @@
     margin-top: 0.3rem;
     padding: 0.2rem 0.7rem;
     border: 1px solid var(--color-accent);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-pill);
     font-size: var(--font-size-sm);
     transition: background var(--transition-fast), color var(--transition-fast);
 }
@@ -481,7 +481,7 @@
     right: 14px;
     background: rgba(0, 0, 0, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 6px;
+    border-radius: var(--radius-pill);
     padding: 5px 11px;
     font-family: var(--font-body);
     font-size: 0.72rem;
@@ -515,7 +515,7 @@
     border: 1px solid var(--color-border);
     color: var(--color-text-primary);
     padding: 5px 12px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-pill);
     cursor: pointer;
     font-size: 0.78rem;
     font-family: inherit;
@@ -607,6 +607,12 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Wider label column for full-width charts (Hiring Demand) vs. the small
+   grid-cell panels (Demographics, Occupation Intelligence) */
+.demo-bar-label.wide-label {
+    width: 240px;
 }
 
 .demo-bar-track {
@@ -708,6 +714,13 @@
     .occ-demand-grid { grid-template-columns: 1fr; }
     .demo-stat-grid { grid-template-columns: repeat(2, 1fr); }
     #region-map { height: 480px; }
+}
+
+@media (max-width: 640px) {
+    /* A 240px label leaves almost no room for the bar itself on narrow
+       screens — shrink it so the track stays visible (still truncates
+       via ellipsis, same as the default 120px label). */
+    .demo-bar-label.wide-label { width: 130px; }
 }
 
 /* ===== MOBILE VIZ ===== */
