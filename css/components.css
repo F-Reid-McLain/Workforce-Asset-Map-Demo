@@ -88,6 +88,132 @@ COMPONENTS CRITERIA FOR INCLUSION:
 
 .control-btn:hover, .directory-link:hover { background-color: #444; }
 
+/* ===== ICON BUTTON (circular, low-emphasis — e.g. report download) ===== */
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.icon-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+/* Icon + always-visible caption, e.g. the report download button */
+.icon-btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.icon-btn-caption {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    transition: color var(--transition-fast);
+}
+
+.icon-btn-group:hover .icon-btn {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.icon-btn-group:hover .icon-btn-caption {
+    color: var(--color-accent);
+}
+
+/* ===== INFO BUTTON + POPOVER (chart data/source explanations) ===== */
+.info-btn-wrap {
+    position: relative;
+    display: inline-flex;
+    vertical-align: middle;
+}
+
+.info-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border-control);
+    background: none;
+    color: var(--color-text-muted);
+    font: italic 700 0.68rem Georgia, serif;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.info-btn:hover, .info-btn.active {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.info-popover {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    z-index: 30;
+    width: 300px;
+    max-width: 80vw;
+    background: #1a1a1a;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 0.9rem 1.05rem;
+    font-family: var(--font-body);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.info-popover.open { display: block; }
+
+/* Anchoring to the button overflows narrow viewports — dock to the bottom
+   of the screen instead, regardless of where the button sits horizontally. */
+@media (max-width: 560px) {
+    .info-popover {
+        position: fixed;
+        top: auto;
+        bottom: 16px;
+        left: 16px;
+        right: 16px;
+        width: auto;
+        max-width: none;
+    }
+}
+
+.info-popover p {
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-body);
+    margin: 0 0 0.6rem;
+}
+
+.info-popover p:last-child { margin-bottom: 0; }
+
+.info-popover strong {
+    color: var(--color-text-primary);
+    display: block;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    font-size: var(--font-size-xs);
+    letter-spacing: 0.04em;
+}
+
 /* ===== SEARCH INPUT (shared: directory + map) ===== */
 .search-input {
     background: var(--color-bg-page);

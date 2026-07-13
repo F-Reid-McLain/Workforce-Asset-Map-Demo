@@ -358,9 +358,18 @@ body {
 .section-label.orange::before { background: var(--color-accent-orange); }
 
 .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font: var(--font-heading-weight) var(--font-heading-size-lg)/1.2 var(--font-heading);
     color: var(--color-text-primary);
     margin-bottom: 8px;
+}
+
+.stats-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .section-desc {

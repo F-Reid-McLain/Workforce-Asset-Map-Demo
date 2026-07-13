@@ -35,13 +35,24 @@
                 <h2>Macon-Bibb County Workforce Data</h2>
                 <p>Economic indicators and workforce trends for the Greater Macon region</p>
                 <div class="page-header-actions">
-                    <a href="reports/macon-overview.pdf" download class="control-btn">&#11015; Download Regional Overview Report (PDF)</a>
+                    <a href="reports/macon-overview.pdf" download class="icon-btn-group" title="Download Regional Overview Report (PDF)">
+                        <span class="icon-btn" aria-hidden="true">&#11015;</span>
+                        <span class="icon-btn-caption">Download PDF</span>
+                    </a>
                 </div>
             </section>
 
             <!-- Hero KPIs -->
             <section class="stats-section">
-                <h3>Key Economic Indicators</h3>
+                <h3>Key Economic Indicators
+                    <span class="info-btn-wrap">
+                        <button type="button" class="info-btn" aria-label="About this data">i</button>
+                        <div class="info-popover">
+                            <strong>What this shows</strong>
+                            <p>Total Jobs and Avg Annual Wage are payroll figures from the regional industry snapshot (QCEW-based). Population and Daily In-Commuters come from ACS 2024 estimates and LEHD/LODES origin-destination commuting data. Largest Employer Sector is the top 2-digit NAICS sector by total employment.</p>
+                        </div>
+                    </span>
+                </h3>
                 <div class="stats-grid">
                     <div class="kpi-block">
                         <div class="kpi-val" id="kpi-jobs">—</div>
@@ -74,7 +85,15 @@
         <!-- Regional Map -->
         <div class="section">
             <div class="section-label teal">Regional Context</div>
-            <div class="section-title">Regional Commuting Patterns</div>
+            <div class="section-title">Regional Commuting Patterns
+                <span class="info-btn-wrap">
+                    <button type="button" class="info-btn" aria-label="About this data">i</button>
+                    <div class="info-popover">
+                        <strong>What this shows</strong>
+                        <p>County population (ACS 2024 estimates) and net commuting balances for the 17-county Middle Georgia region, from LEHD/LODES Origin-Destination Employment Statistics. Net commuting = in-commuters minus out-commuters.</p>
+                    </div>
+                </span>
+            </div>
             <p class="section-desc">Nearly every surrounding county has a negative net commuting balance, reflecting a regional workforce that flows toward Macon-Bibb for employment. Net commuting = a county's total in-commuters minus its out-commuters. Hover any county for detail.</p>
             <div id="region-map"></div>
         </div>
@@ -161,7 +180,15 @@
         <!-- Industry Treemap -->
         <div class="section">
             <div class="section-label">Industry Landscape</div>
-            <div class="section-title">Where Macon Works</div>
+            <div class="section-title">Where Macon Works
+                <span class="info-btn-wrap">
+                    <button type="button" class="info-btn" aria-label="About this data">i</button>
+                    <div class="info-popover">
+                        <strong>What this shows</strong>
+                        <p>Regional labor market data (QCEW-based) for Bibb County, broken out by 6-digit NAICS industry — total employment and average annual wage, grouped into 2-digit NAICS sectors.</p>
+                    </div>
+                </span>
+            </div>
             <p class="section-desc">Employment by industry sector, sized by total jobs. Click any sector to explore the sub-industries within it.</p>
             <div class="treemap-header">
                 <div class="treemap-bc" id="treemap-bc">
@@ -177,7 +204,15 @@
         <!-- Demographics -->
         <div class="section">
             <div class="section-label orange">Workforce Demographics</div>
-            <div class="section-title">Who Lives Here</div>
+            <div class="section-title">Who Lives Here
+                <span class="info-btn-wrap">
+                    <button type="button" class="info-btn" aria-label="About this data">i</button>
+                    <div class="info-popover">
+                        <strong>What this shows</strong>
+                        <p>American Community Survey (ACS) 2024 estimates for Macon-Bibb County residents — age distribution, race &amp; ethnicity, educational attainment, and labor force participation.</p>
+                    </div>
+                </span>
+            </div>
             <p class="section-desc">American Community Survey 2024 estimates for Macon-Bibb County residents. Median household income ($50,747) reflects all income sources for households living here — distinct from the avg annual wage above, which measures payroll per job regardless of where the worker lives.</p>
 
             <div class="demo-stat-grid">
@@ -220,7 +255,15 @@
         <!-- Occupations -->
         <div class="section">
             <div class="section-label teal">Top Occupations</div>
-            <div class="section-title">In-Demand Roles</div>
+            <div class="section-title">In-Demand Roles
+                <span class="info-btn-wrap">
+                    <button type="button" class="info-btn" aria-label="About this data">i</button>
+                    <div class="info-popover">
+                        <strong>What this shows</strong>
+                        <p>Occupational Employment and Wage Statistics (OES) estimates for Macon-Bibb County — employment and mean annual wage by occupation (SOC code). Totals differ from the QCEW payroll count above due to classification methodology.</p>
+                    </div>
+                </span>
+            </div>
             <p class="section-desc">Top 15 occupations by employment in Macon-Bibb County (OES estimates). Employment figures count filled positions by occupation — totals differ from the QCEW payroll count above due to classification methodology. Avg Annual Wage is the mean OES wage for that occupation in this area; individual earnings vary.</p>
             <div class="occ-table-wrap">
                 <table class="occ-table">
@@ -242,7 +285,15 @@
         <!-- Occupation Intelligence Grid -->
         <div class="section">
             <div class="section-label teal">Occupation Intelligence</div>
-            <div class="section-title">Labor Market Signals</div>
+            <div class="section-title">Labor Market Signals
+                <span class="info-btn-wrap">
+                    <button type="button" class="info-btn" aria-label="About this data">i</button>
+                    <div class="info-popover">
+                        <strong>What this shows</strong>
+                        <p>Regional labor market projections by occupation (SOC code): 1-year growth forecasts, mean annual wages, and annual exits/transfers/net-growth from job changes and retirements. Same source dataset as the table above.</p>
+                    </div>
+                </span>
+            </div>
             <p class="section-desc">Views on Macon-Bibb's occupation landscape — where employment is growing, where workers are exiting or transferring, and where wages are highest.</p>
             <div class="occ-charts-grid">
                 <div class="occ-chart-card">
@@ -281,7 +332,15 @@
         <!-- Hiring Demand -->
         <div class="section">
             <div class="section-label orange">Hiring Demand</div>
-            <div class="section-title">Where Employers Are Hiring Now</div>
+            <div class="section-title">Where Employers Are Hiring Now
+                <span class="info-btn-wrap">
+                    <button type="button" class="info-btn" aria-label="About this data">i</button>
+                    <div class="info-popover">
+                        <strong>What this shows</strong>
+                        <p>Active online job postings aggregated by industry and employer for Bibb County — reflects real-time hiring demand (open ads), not filled positions or total employment.</p>
+                    </div>
+                </span>
+            </div>
             <p class="section-desc">Real-time job posting data showing which industries and employers have the most active openings in Bibb County.</p>
 
             <div class="chart-container">

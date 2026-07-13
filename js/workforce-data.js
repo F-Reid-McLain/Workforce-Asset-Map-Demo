@@ -631,3 +631,31 @@
     }, 250));
 
 })();
+
+/* ===== INFO POPOVERS (chart data/source explanations) ===== */
+(function () {
+    const buttons = document.querySelectorAll('.info-btn');
+    if (!buttons.length) return;
+
+    function closeAll() {
+        document.querySelectorAll('.info-popover.open').forEach(p => p.classList.remove('open'));
+        document.querySelectorAll('.info-btn.active').forEach(b => b.classList.remove('active'));
+    }
+
+    buttons.forEach(btn => {
+        const popover = btn.nextElementSibling;
+        if (!popover) return;
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const wasOpen = popover.classList.contains('open');
+            closeAll();
+            if (!wasOpen) {
+                popover.classList.add('open');
+                btn.classList.add('active');
+            }
+        });
+    });
+
+    document.addEventListener('click', closeAll);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAll(); });
+})();
