@@ -5,6 +5,26 @@
 let originalSizes = {};
 let simulation, svg, zoom, g;
 let nodeSelection, linkSelection;
+let workforceData; // hoisted so main.js can re-fit the view (e.g. on Reset)
+
+// Fixed hue per category — CVD-checked as a set (see dataviz palette) — used
+// for major-group node fill and as the glow/link tint for everything under it,
+// so the map reads as six identifiable neighborhoods instead of one blue blob.
+const CATEGORY_COLORS = {
+  "colleges":            "#3987e5",
+  "faith-based":         "#199e70",
+  "special-population":  "#c98500",
+  "job-training":        "#008300",
+  "community-dev":       "#9085e9",
+  "k12-secondary":       "#e66767"
+};
+
+// Applied as an attribute (not a CSS rule) so it composes with the hover
+// handler's inline "filter" attribute below instead of being silently
+// out-prioritized by it — presentation attributes and inline JS .attr()
+// calls share the same low cascade tier, but a stylesheet rule would win
+// over both and break the hover brighten.
+const GLOW_FILTER = "drop-shadow(0 0 1px currentColor) drop-shadow(0 0 4px currentColor)";
 
 // Simulation never fully cools to this floor instead of 0, so the graph
 // keeps a faint perpetual drift at rest instead of freezing solid.
@@ -16,6 +36,37 @@ const IDLE_ALPHA_TARGET = 0.008;
 // still one hover (native title tooltip) or click (info panel) away.
 function truncateLabel(name, maxLen) {
   return name.length > maxLen ? name.slice(0, maxLen - 1).trimEnd() + '…' : name;
+}
+
+// Computes the zoom transform that frames every current node within a
+// width x height viewport, so the default/reset view shows the whole graph
+// instead of whatever the force layout happened to center on.
+function computeFitTransform(width, height, padding = 60) {
+  if (!workforceData || !workforceData.nodes.length) return d3.zoomIdentity;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  workforceData.nodes.forEach(d => {
+    const r = d.size + 20; // clear the label hanging below each node
+    minX = Math.min(minX, d.x - r);
+    maxX = Math.max(maxX, d.x + r);
+    minY = Math.min(minY, d.y - r);
+    maxY = Math.max(maxY, d.y + r + 16); // label text sits below the node
+  });
+  const graphWidth = Math.max(maxX - minX, 1);
+  const graphHeight = Math.max(maxY - minY, 1);
+  const scale = Math.min((width - padding * 2) / graphWidth, (height - padding * 2) / graphHeight, 1);
+  const tx = width / 2 - scale * (minX + maxX) / 2;
+  const ty = height / 2 - scale * (minY + maxY) / 2;
+  return d3.zoomIdentity.translate(tx, ty).scale(scale);
+}
+
+// Called on load and by main.js's Reset View so the graph re-frames to fit
+// the current container instead of resetting to an arbitrary 1:1 view.
+function fitVizView(duration = 0) {
+  if (!svg || !zoom) return;
+  const r = document.getElementById('network-visualization').getBoundingClientRect();
+  const transform = computeFitTransform(r.width, r.height);
+  if (duration > 0) svg.transition().duration(duration).call(zoom.transform, transform);
+  else svg.call(zoom.transform, transform);
 }
 
 // Called by main.js when fullscreen state changes
@@ -99,6 +150,7 @@ const structuralLinks = [
     id,
     name: data.name,
     type: "asset",
+    category: data.category || "",
     size: data.size || 17,
     image: data.image || "",
     logoFit: data.logoFit || "cover",
@@ -111,7 +163,7 @@ const structuralLinks = [
     .filter(([, data]) => data.category)
     .map(([id, data]) => ({ source: id, target: data.category }));
 
-  const workforceData = {
+  workforceData = {
     nodes: [...structuralNodes, ...assetNodes],
     links: [...structuralLinks, ...assetLinks]
   };
@@ -139,6 +191,26 @@ const structuralLinks = [
     .domain(["hub", "major-group", "asset"])
     .range(["#ffffff", "#4a9eff", "#66bb6a"]);
 
+  // The node's own circle color — logos keep a neutral backing plate (their
+  // own logoBg, or white) so the artwork stays legible; everything else takes
+  // its category's hue so the six neighborhoods are visually distinct.
+  function fillColor(d) {
+    if (d.logoBg) return d.logoBg;
+    if (d.image) return "#ffffff";
+    if (d.type === "hub") return "#ffffff";
+    if (d.type === "major-group") return CATEGORY_COLORS[d.id] || colorScale(d.type);
+    return CATEGORY_COLORS[d.category] || colorScale(d.type);
+  }
+
+  // The color the CSS glow (drop-shadow currentColor) reads — tracks the
+  // category hue even for logo nodes, so the glow still marks which
+  // neighborhood a photographic logo belongs to.
+  function glowColor(d) {
+    if (d.type === "hub") return "#4a9eff";
+    if (d.type === "major-group") return CATEGORY_COLORS[d.id] || "#4a9eff";
+    return CATEGORY_COLORS[d.category] || "#66bb6a";
+  }
+
   // 3. SIMULATION SETUP
   simulation = d3.forceSimulation(workforceData.nodes)
     .force("link", d3.forceLink(workforceData.links).id(d => d.id).distance(d => {
@@ -148,11 +220,26 @@ const structuralLinks = [
     .force("center", d3.forceCenter(width / 2, height / 2))
     // Keeps nodes (and the labels hanging below them) from overlapping —
     // padding is generous since it has to clear the label text, not just the circle.
-    .force("collide", d3.forceCollide(d => d.size + 34).strength(0.8))
-    .alphaTarget(IDLE_ALPHA_TARGET);
+    .force("collide", d3.forceCollide(d => d.size + 34).strength(0.8));
+
+  // Warm-start: run the layout to near-equilibrium synchronously before the
+  // first paint, so the initial fit-to-view (below) frames settled positions
+  // instead of the starting jumble.
+  simulation.stop();
+  for (let i = 0; i < 300; i++) simulation.tick();
+
+  // A link's color follows whichever end is the category node — asset links
+  // read as belonging to their category's color, hub links stay accent blue.
+  function linkColor(d) {
+    if (d.source.type === "hub" || d.target.type === "hub") return "#4a9eff";
+    const catNode = d.source.type === "major-group" ? d.source : d.target;
+    return CATEGORY_COLORS[catNode.id] || "#666";
+  }
 
   const link = g.append("g").selectAll("line").data(workforceData.links).join("line")
-    .attr("stroke", "#666").attr("stroke-width", d => d.source.type === "hub" ? 3 : 1.5).attr("stroke-opacity", 0.6);
+    .attr("stroke", linkColor)
+    .attr("stroke-width", d => d.source.type === "hub" ? 3 : 1.5)
+    .attr("stroke-opacity", d => d.source.type === "hub" || d.target.type === "hub" ? 0.55 : 0.4);
   linkSelection = link;
 
   // Define a clipPath per node so images are clipped to their circle
@@ -168,10 +255,12 @@ const structuralLinks = [
     .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
   nodeSelection = node;
 
-  node.append("circle").attr("r", d => d.size).attr("fill", d => d.logoBg || (d.image ? "#ffffff" : colorScale(d.type))).attr("stroke", "#fff")
+  node.append("circle").attr("r", d => d.size).attr("fill", fillColor).attr("stroke", "#fff")
     .attr("stroke-width", 2)
     .attr("stroke-dasharray", d => d.type === "asset" && !d.image && !d.placeholder ? "5,5" : "0")
-    .attr("opacity", 0.9);
+    .attr("opacity", 0.9)
+    .style("color", glowColor)
+    .attr("filter", GLOW_FILTER);
 
   // Render a themed icon inside category ("major-group") nodes so they read
   // as purposeful, distinct from both the plain hub and the asset logos
@@ -237,15 +326,24 @@ const structuralLinks = [
   node.filter(d => d.type === "asset").append("title").text(d => d.name);
 
   // 4. INTERACTION
-  node.on("mouseover", function() { d3.select(this).select("circle").attr("stroke-width", 4).attr("filter", "brightness(1.3)"); })
-      .on("mouseout", function() { d3.select(this).select("circle").attr("stroke-width", 2).attr("filter", "none"); })
+  node.on("mouseover", function() { d3.select(this).select("circle").attr("stroke-width", 4).attr("filter", GLOW_FILTER + " brightness(1.3)"); })
+      .on("mouseout", function() { d3.select(this).select("circle").attr("stroke-width", 2).attr("filter", GLOW_FILTER); })
       .on("click", (_e, d) => { if (d.type === "asset") openAssetModal(d.id); })
       .style("cursor", d => d.type === "asset" ? "pointer" : "default");
 
-  simulation.on("tick", () => {
+  function renderTick() {
     link.attr("x1", d => d.source.x).attr("y1", d => d.source.y).attr("x2", d => d.target.x).attr("y2", d => d.target.y);
     node.attr("transform", d => `translate(${d.x},${d.y})`);
-  });
+  }
+
+  // Paint the warm-started layout immediately, then frame it — rather than
+  // starting at 1:1 wherever the force layout happened to center — so the
+  // full graph is visible on load instead of just its middle.
+  renderTick();
+  fitVizView(0);
+
+  simulation.alphaTarget(IDLE_ALPHA_TARGET).restart();
+  simulation.on("tick", renderTick);
 
   function dragstarted(event, d) { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; }
   function dragged(event, d) { d.fx = event.x; d.fy = event.y; }

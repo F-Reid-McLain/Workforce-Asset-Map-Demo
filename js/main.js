@@ -199,7 +199,7 @@ document.addEventListener('keydown', function(e) {
 
 // ===== SHARED RESET LOGIC =====
 function doReset() {
-    svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+    fitVizView(750); // reframes to fit every node, not just a fixed 1:1 view
     applyHubDistance(35);
     applySizeScale(1);
 }
