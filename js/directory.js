@@ -72,6 +72,17 @@ function setupModalListeners() {
     });
 }
 
+// Shows just the domain instead of the full URL — a full path (e.g.
+// "www.mga.edu/center-career-leadership-development/index.php") is long
+// enough to overflow the fixed-width info panel/modal.
+function shortenUrl(url) {
+    try {
+        return new URL(url).hostname.replace(/^www\./, '');
+    } catch (e) {
+        return url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+    }
+}
+
 function openAssetModal(assetId) {
     const asset = assetData[assetId];
     const inlinePanel  = document.getElementById('viz-info-panel');
@@ -84,7 +95,7 @@ function openAssetModal(assetId) {
         html += asset.links.map(l => `<a href="${l.url}" target="_blank">${l.label}</a>`).join('');
         html += `</div>`;
     }
-    if (asset && asset.website)  html += `<p><strong>Website:</strong> <a href="${asset.website}" target="_blank">${asset.website.replace('https://', '')}</a></p>`;
+    if (asset && asset.website)  html += `<p><strong>Website:</strong> <a href="${asset.website}" target="_blank">${shortenUrl(asset.website)}</a></p>`;
 
     // Use inline panel when it exists (orientation handles portrait/landscape layout)
     if (inlinePanel) {

@@ -389,6 +389,8 @@ COMPONENTS CRITERIA FOR INCLUSION:
     border: 1px solid var(--color-accent);
     border-radius: var(--radius-pill);
     font-size: var(--font-size-sm);
+    max-width: 100%;
+    overflow-wrap: break-word;
     transition: background var(--transition-fast), color var(--transition-fast);
 }
 
