@@ -3,7 +3,9 @@
     "name": "Middle Georgia State University",
     "category": "colleges",
     "tags": ["Technology", "Career Services", "Healthcare"],
-    "image": "assets/logos/middle georgia state university.png",
+    "image": "assets/logos/mga new.jpg",
+    "logoFit": "contain",
+    "logoBg": "#623393",
     "description": "A public university with its Macon Campus along I-475. MGA offers a range of career-ready degree programs in business, IT, nursing, and aviation.",
     "impact": "Graduates hundreds of students annually with associate, bachelor's, and master's degrees, supplying local industries with skilled graduates in high-demand fields.",
     "website": "https://www.mga.edu/center-career-leadership-development/index.php"
@@ -12,7 +14,7 @@
     "name": "Mercer University",
     "category": "colleges",
     "tags": ["Healthcare", "Technology", "Career Services"],
-    "image": "assets/logos/mercer university.png",
+    "image": "assets/logos/mercer use with white backgroiund.png",
     "description": "A private research university known for its comprehensive programs and professional schools, offering degrees in liberal arts, engineering, business, medicine, law, and more.",
     "impact": "Consistently ranked among top national universities; the School of Engineering provides a vital pipeline of skilled professionals in technical and STEM fields.",
     "website": "https://career.mercer.edu/"
@@ -21,7 +23,7 @@
     "name": "Wesleyan College",
     "category": "colleges",
     "tags": ["Career Services", "Economic Development"],
-    "image": "assets/logos/Logo_Wesleyan-College.png",
+    "image": "assets/logos/wesleyan college new.jpeg",
     "description": "A private liberal arts college recognized as the first college in the world chartered to grant degrees to women.",
     "impact": "Provides undergraduate programs emphasizing career development and leadership, helping students find unique purpose through strong academics.",
     "website": "https://www.wesleyancollege.edu/studentlife/career/career-development.cfm"
@@ -48,7 +50,7 @@
     "name": "Bibb County School District",
     "category": "k12-secondary",
     "tags": ["Technology", "Trades", "Career Services"],
-    "image": "assets/logos/bibb county school district.png",
+    "image": "assets/logos/bibb county school new.jpg",
     "description": "Offers career pathway programs across all public high schools aligned with Georgia's CTAE curriculum, including engineering and IT.",
     "impact": "Ensures graduates gain technical skills and work-based learning experiences to enhance employability immediately after graduation.",
     "website": "https://www.bcsdk12.net/"
@@ -57,7 +59,7 @@
     "name": "Macon-Bibb County Innovation & Technology Academy",
     "category": "k12-secondary",
     "tags": ["Technology", "Trades", "Career Services"],
-    "image": "assets/logos/bibb county school district.png",
+    "image": "assets/logos/bibb county innovation center new.png",
     "description": "A state-of-the-art extension of Hutchings Career Academy focused on emerging technology, robotics, cybersecurity, and electric vehicle technology.",
     "impact": "Cultivates a tech-savvy workforce straight out of high school through a unique city-school partnership.",
     "website": "https://www.bcsdk12.net/departments/career-technical-and-agricultural-education"
@@ -121,6 +123,7 @@
     "category": "community-dev",
     "tags": ["Economic Development", "Career Services", "Trades"],
     "image": "assets/logos/mgrc.png",
+    "logoFit": "contain",
     "description": "Provides staff support to the Workforce Development Board and manages regional WIOA funds.",
     "impact": "Brings technical expertise and labor market research to regional workforce efforts and multi-county collaboration.",
     "website": "https://www.middlegeorgiarc.org/"
@@ -138,7 +141,7 @@
     "name": "Goodwill Industries of Middle Georgia",
     "category": "job-training",
     "tags": ["Adult Education", "Healthcare", "Trades"],
-    "image": "assets/logos/goodiwll.webp",
+    "image": "assets/logos/Goodwill-Logo new.png",
     "description": "Operates a comprehensive career campus including Helms College, offering short-term courses in health, trades, and hospitality.",
     "impact": "Provides free GED preparation, ESL classes, and job connection services to individuals with barriers to employment.",
     "website": "https://www.goodwillworks.org/"
@@ -147,7 +150,7 @@
     "name": "Eckerd Connects, Paxen Youth Program",
     "category": "job-training",
     "tags": ["Youth", "Adult Education", "Career Services"],
-    "image": "assets/logos/eckerd connects.svg",
+    "image": "assets/logos/Eckerd Connects new.jpeg",
     "description": "Provides out-of-school youth (ages 16-24) with career guidance, GED support, and industry certifications.",
     "impact": "Removes barriers via transportation and childcare assistance while placing youth into work experiences and internships.",
     "website": "https://eckerd.org/jobs-training/ga-middlega/"
@@ -157,6 +160,7 @@
     "category": "job-training",
     "tags": ["Trades", "Career Services", "Economic Development"],
     "image": "assets/logos/ibew.webp",
+    "logoFit": "contain",
     "description": "Operates a registered 'earn-and-learn' apprenticeship combining full-time work with technical classroom instruction for electricians.",
     "impact": "Key pathway into high-demand skilled trades with no cost for training beyond nominal fees.",
     "website": "https://www.ibew1316.org/"
@@ -183,7 +187,7 @@
     "name": "Greater Career Works",
     "category": "job-training",
     "tags": ["Career Services", "Technology", "Youth"],
-    "image": "assets/logos/greater career works.png",
+    "image": "assets/logos/greater career works new.png",
     "description": "A free web-based platform featuring 900+ 'career cards' with videos, salary data, and local training links.",
     "impact": "Enables career exploration for students and job matching for adults and local employers in Central Georgia.",
     "website": "https://www.greatercareerworks.org/"
@@ -192,7 +196,7 @@
     "name": "WorkSource Middle Georgia",
     "category": "job-training",
     "tags": ["Career Services", "Trades", "Adult Education"],
-    "image": "assets/logos/worksource middle ga.png",
+    "image": "assets/logos/workforce ga new.jpg",
     "description": "The region's federally-funded Workforce Innovation and Opportunity Act (WIOA) program hub.",
     "impact": "Offers tuition assistance for vocational training, on-the-job training opportunities, and career counseling.",
     "website": "https://middlegaworks.com/"
@@ -246,6 +250,7 @@
     "name": "Other Faith/Community Programs",
     "category": "faith-based",
     "tags": ["Career Services", "Economic Development"],
+    "placeholder": "dots",
     "description": "Various local churches and nonprofits that incorporate workforce readiness, soft skills, and job fairs into their outreach.",
     "impact": "Provides a holistic community support system including internship placements and emergency assistance referrals.",
     "website": "https://maconchamber.com/"

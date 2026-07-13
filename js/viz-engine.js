@@ -101,6 +101,9 @@ const structuralLinks = [
     type: "asset",
     size: data.size || 17,
     image: data.image || "",
+    logoFit: data.logoFit || "cover",
+    logoBg: data.logoBg || "",
+    placeholder: data.placeholder || "",
     tags: data.tags || []
   }));
 
@@ -165,9 +168,9 @@ const structuralLinks = [
     .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
   nodeSelection = node;
 
-  node.append("circle").attr("r", d => d.size).attr("fill", d => d.image ? "#ffffff" : colorScale(d.type)).attr("stroke", "#fff")
+  node.append("circle").attr("r", d => d.size).attr("fill", d => d.logoBg || (d.image ? "#ffffff" : colorScale(d.type))).attr("stroke", "#fff")
     .attr("stroke-width", 2)
-    .attr("stroke-dasharray", d => d.type === "asset" && !d.image ? "5,5" : "0")
+    .attr("stroke-dasharray", d => d.type === "asset" && !d.image && !d.placeholder ? "5,5" : "0")
     .attr("opacity", 0.9);
 
   // Render a themed icon inside category ("major-group") nodes so they read
@@ -202,6 +205,18 @@ const structuralLinks = [
     .attr("font-size", d => d.size * 0.62)
     .attr("letter-spacing", "0.02em");
 
+  // "Other" catch-all nodes get an ellipsis instead of a photo logo or category icon
+  node.filter(d => d.placeholder === "dots")
+    .append("text")
+    .attr("class", "node-placeholder-dots")
+    .text("...")
+    .attr("text-anchor", "middle")
+    .attr("dy", "0.35em")
+    .attr("fill", "#fff")
+    .attr("font-weight", "700")
+    .attr("font-size", d => d.size * 0.62)
+    .attr("letter-spacing", "0.05em");
+
   // Render logo inside circle for nodes that have an image
   node.filter(d => d.image)
     .append("image")
@@ -211,7 +226,7 @@ const structuralLinks = [
     .attr("width",  d => d.size * 2)
     .attr("height", d => d.size * 2)
     .attr("clip-path", d => `url(#clip-${d.id})`)
-    .attr("preserveAspectRatio", "xMidYMid slice");
+    .attr("preserveAspectRatio", d => d.logoFit === "contain" ? "xMidYMid meet" : "xMidYMid slice");
 
   node.append("text").attr("class", "node-label")
     .text(d => d.type === "asset" ? truncateLabel(d.name, 24) : d.name)
