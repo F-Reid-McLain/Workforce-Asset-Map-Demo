@@ -79,6 +79,11 @@ function openAssetModal(assetId) {
     // Build shared HTML content
     let html = `<p>${asset ? (asset.description || '') : 'Information coming soon...'}</p>`;
     if (asset && asset.impact)   html += `<p><strong>Community Impact:</strong> ${asset.impact}</p>`;
+    if (asset && asset.links && asset.links.length) {
+        html += `<p><strong>Related Programs:</strong></p><div class="related-links">`;
+        html += asset.links.map(l => `<a href="${l.url}" target="_blank">${l.label}</a>`).join('');
+        html += `</div>`;
+    }
     if (asset && asset.website)  html += `<p><strong>Website:</strong> <a href="${asset.website}" target="_blank">${asset.website.replace('https://', '')}</a></p>`;
 
     // Use inline panel when it exists (orientation handles portrait/landscape layout)

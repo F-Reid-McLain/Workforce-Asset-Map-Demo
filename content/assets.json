@@ -6,8 +6,14 @@
     "image": "assets/logos/mga new.jpg",
     "logoFit": "contain",
     "logoBg": "#623393",
-    "description": "A public university with its Macon Campus along I-475. MGA offers a range of career-ready degree programs in business, IT, nursing, and aviation.",
-    "impact": "Graduates hundreds of students annually with associate, bachelor's, and master's degrees, supplying local industries with skilled graduates in high-demand fields.",
+    "description": "Middle Georgia State University is a public University System of Georgia institution with its Macon campus along I-475 and additional campuses in Cochran, Dublin, Eastman, and Warner Robins, serving more than 8,000 students. MGA offers 70+ degree programs from the associate through doctoral level across schools including Business, Computing, Health Sciences, Aviation, and Education. It's home to Georgia's flagship School of Aviation — one of only nine U.S. institutions offering FAA-certified flight training, air traffic management, and aviation maintenance together — plus an ABET-accredited BS in Information Technology and an accredited nursing program. The Center for Career & Leadership Development runs the paid Knights@Work internship program and job-search support across the Macon, Cochran, and Eastman campuses.",
+    "impact": "MGA contributed more than $312 million to the regional economy in fiscal year 2024 and supported nearly 3,000 jobs through campus-related spending, with the largest share felt in Bibb County. Most graduates stay in Middle Georgia to work, feeding local employers in aviation, healthcare, IT, and business.",
+    "links": [
+      { "label": "School of Aviation", "url": "https://www.mga.edu/aviation/index.php" },
+      { "label": "School of Business", "url": "https://www.mga.edu/business/index.php" },
+      { "label": "School of Health Sciences", "url": "https://www.mga.edu/health-sciences/index.php" },
+      { "label": "School of Computing", "url": "https://www.mga.edu/computing/index.php" }
+    ],
     "website": "https://www.mga.edu/center-career-leadership-development/index.php"
   },
   "mercer": {
@@ -15,8 +21,15 @@
     "category": "colleges",
     "tags": ["Healthcare", "Technology", "Career Services"],
     "image": "assets/logos/mercer use with white backgroiund.png",
-    "description": "A private research university known for its comprehensive programs and professional schools, offering degrees in liberal arts, engineering, business, medicine, law, and more.",
-    "impact": "Consistently ranked among top national universities; the School of Engineering provides a vital pipeline of skilled professionals in technical and STEM fields.",
+    "description": "Mercer University is a private research university headquartered in Macon, with additional campuses in Atlanta, Savannah, and Columbus. Career-relevant professional schools based in or serving Macon include the School of Engineering (750+ students across biomedical, environmental, and electrical engineering), the AACSB-accredited Stetson-Hatcher School of Business, the School of Medicine (built around a rural-health mission dating to 1982), the School of Law (founded 1873), and the College of Health Professions. Mercer's Center for Career and Professional Development supports students and alumni with career pathway resources across 13 fields and on-campus career fairs.",
+    "impact": "Mercer reports 95% of students employed or in graduate school within six months of graduation, with its Macon-based medicine, law, engineering, and business schools feeding directly into the regional healthcare, legal, and technical workforce. The Mercer Innovation Center funds Macon-area startups and its College Hill Corridor initiative has driven neighborhood revitalization near campus.",
+    "links": [
+      { "label": "School of Engineering", "url": "https://engineering.mercer.edu/" },
+      { "label": "Stetson-Hatcher School of Business", "url": "https://business.mercer.edu/" },
+      { "label": "School of Medicine", "url": "https://medicine.mercer.edu/" },
+      { "label": "School of Law", "url": "https://law.mercer.edu/" },
+      { "label": "College of Health Professions", "url": "https://chp.mercer.edu/" }
+    ],
     "website": "https://career.mercer.edu/"
   },
   "wesleyan": {
@@ -24,8 +37,8 @@
     "category": "colleges",
     "tags": ["Career Services", "Economic Development"],
     "image": "assets/logos/wesleyan college new.jpeg",
-    "description": "A private liberal arts college recognized as the first college in the world chartered to grant degrees to women.",
-    "impact": "Provides undergraduate programs emphasizing career development and leadership, helping students find unique purpose through strong academics.",
+    "description": "Wesleyan College is a private liberal arts college for women on a 200-acre campus in Macon. Founded in 1836 as Georgia Female College, it is the first college in the world chartered to grant degrees to women. It enrolls roughly 800 undergraduates from across the U.S. and about 20 countries, offering liberal arts majors, a nursing program, online degrees, and graduate programs including an MBA and M.Ed. Rather than narrow vocational training, Wesleyan pairs a broad liberal-arts curriculum with a four-year \"Here to Career Initiative\" that builds career-readiness checkpoints into every student's degree path.",
+    "impact": "Wesleyan's Center for Career Development connects current students and alumnae with employers and mentorship opportunities through the college's alumnae network, emphasizing career development and leadership as part of a Wesleyan education.",
     "website": "https://www.wesleyancollege.edu/studentlife/career/career-development.cfm"
   },
   "central-ga-tech": {
@@ -33,8 +46,8 @@
     "category": "colleges",
     "tags": ["Trades", "Adult Education", "Career Services"],
     "image": "assets/logos/central georgia technical college.svg",
-    "description": "A public technical college offering over 120 programs in trades, health sciences, business, and public safety.",
-    "impact": "A key workforce trainer providing certificates and associate degrees aligned with local industry; operates adult education and apprenticeship partnerships.",
+    "description": "Central Georgia Technical College is a public two-year college in the Technical College System of Georgia, headquartered in Warner Robins with a Macon campus serving Bibb County as part of an 11-county service area. It offers more than 200 degree, diploma, and certificate programs across five areas — Aerospace/Trade & Industry, Business & Computer Technologies, Health Sciences, Public Safety & Professional Services, and General Studies — to roughly 12,000 students annually. Beyond credit programs, CGTC runs Registered Apprenticeships, adult education (GED/HiSET, English literacy), a Quick Start customized-training division for employers, and two approved Prison Education Program sites.",
+    "impact": "CGTC's Economic Development Division delivered customized contract training to 267 companies in one recent year, logging more total training hours than any other college in the Technical College System of Georgia. CGTC has trained Bibb County workers directly for employers including a Bass Pro Shops distribution center and Freudenberg Texbond's local expansion, and delivers dual-enrollment instruction to Bibb County high schoolers.",
     "website": "https://www.centralgatech.edu/"
   },
   "hutchings": {
@@ -42,8 +55,8 @@
     "category": "k12-secondary",
     "tags": ["Healthcare", "Trades", "Career Services"],
     "image": "assets/logos/SPHutchings.jpg",
-    "description": "A dedicated career academy serving Bibb County high school students with vocational and technical pathways in healthcare, construction, and culinary arts.",
-    "impact": "Allows students to earn industry certifications or college credits while in high school through partnerships with local employers and CGTC.",
+    "description": "W.S. Hutchings College & Career Academy is a career-technical education academy within the Bibb County School District, serving students from across the district's high schools. It offers 22 career pathways spanning healthcare (phlebotomy, health science, sports medicine), skilled trades (welding, construction, automotive, aircraft), technology (cybersecurity, engineering, graphic design), and service industries (culinary arts, cosmetology), plus firefighting and teaching-as-a-profession tracks. Through a dual-enrollment partnership with Central Georgia Technical College, students can earn a technical certificate of credit and industry certifications — including Certified Nursing Assistant and EMT/EMR — while still in high school.",
+    "impact": "Bibb County's CTAE programs, anchored largely at Hutchings, posted a 99.21% graduation rate for the Class of 2021 — above both the district's overall rate and Georgia's statewide CTAE average — with district leaders crediting partnerships with the Macon-Bibb County Industrial Authority and the Greater Macon Chamber of Commerce for connecting students to local internships and jobs.",
     "website": "https://hutchings.bcsdk12.net/"
   },
   "bibb-schools": {
@@ -51,8 +64,8 @@
     "category": "k12-secondary",
     "tags": ["Technology", "Trades", "Career Services"],
     "image": "assets/logos/bibb county school new.jpg",
-    "description": "Offers career pathway programs across all public high schools aligned with Georgia's CTAE curriculum, including engineering and IT.",
-    "impact": "Ensures graduates gain technical skills and work-based learning experiences to enhance employability immediately after graduation.",
+    "description": "Bibb County School District is the public school system for Macon-Bibb County, serving more than 21,000 students across 38 schools, including specialty and magnet programs. The district provides one-to-one technology for every student and operates a dedicated Career, Technical and Agricultural Education (CTAE) department offering dual-enrollment courses and pathway coursework aligned to Georgia's CTAE framework, delivered both at comprehensive high schools and through the district's career academies. The CTAE division partners with outside organizations, including the PENCIL program, to connect classroom learning to local employers.",
+    "impact": "Bibb County's CTAE pathways achieved a 99.21% graduation rate for the Class of 2021, exceeding both the district's overall graduation rate and the state CTAE average, with the district crediting community partnerships for connecting students directly to local internships, employment, and enlistment pathways after graduation.",
     "website": "https://www.bcsdk12.net/"
   },
   "innovation-tech": {
@@ -60,8 +73,8 @@
     "category": "k12-secondary",
     "tags": ["Technology", "Trades", "Career Services"],
     "image": "assets/logos/bibb county innovation center new.png",
-    "description": "A state-of-the-art extension of Hutchings Career Academy focused on emerging technology, robotics, cybersecurity, and electric vehicle technology.",
-    "impact": "Cultivates a tech-savvy workforce straight out of high school through a unique city-school partnership.",
+    "description": "The Macon-Bibb County Innovation & Technology Academy is a career-technical education facility that opened in December 2024 as an extension of W.S. Hutchings College & Career Academy. It's a three-way partnership among the Bibb County School District, Macon-Bibb County government, and the Urban Development Authority. The Academy expands the district's existing robotics and AI/cybersecurity pathways and introduces full-year CTAE courses across five tracks — electric vehicles, advanced manufacturing, artificial intelligence, aviation, and cybersecurity — with the EV curriculum covering vehicle electronics, batteries, charging infrastructure, and renewable-energy integration.",
+    "impact": "As a workforce-focused extension of Hutchings, the Academy is designed to let Bibb County students pursue in-demand STEM and advanced-manufacturing careers immediately after high school or continue on to college.",
     "website": "https://www.bcsdk12.net/departments/career-technical-and-agricultural-education"
   },
   "chamber": {
@@ -69,8 +82,14 @@
     "category": "community-dev",
     "tags": ["Economic Development", "Career Services", "Youth"],
     "image": "assets/logos/greater macon chamber .png",
-    "description": "Convenes employers and educational institutions to align workforce initiatives with regional economic growth.",
-    "impact": "Spearheaded the Workforce Asset Map and Greater Career Works; serves as a hub for employer input on talent needs.",
+    "description": "The Greater Macon Chamber of Commerce is the region's business membership and advocacy organization, connecting employers, educational institutions, and government around economic growth in Macon-Bibb County. Workforce development is one of the Chamber's core strategic pillars, alongside events, business partnerships, and pro-business policy advocacy. The Chamber directly operates Greater Career Works, a free web-based career-navigation platform, and Choose Macon, a talent-attraction initiative. Its nonprofit arm, Forward Macon, funds longer-term workforce, talent-attraction, and neighborhood-revitalization initiatives on the Chamber's behalf.",
+    "impact": "Through Greater Career Works, the Chamber offers over 900 career cards covering high-demand local fields, free accounts for adults, school-issued access for Bibb County students, and job-posting tools for employers. The Chamber spearheaded the Workforce Asset Map and Greater Career Works, and serves as a hub for employer input on regional talent needs.",
+    "links": [
+      { "label": "Greater Career Works", "url": "https://www.greatercareerworks.org/" },
+      { "label": "Chamber Workforce Page", "url": "https://maconchamber.com/what-we-do/workforce/" },
+      { "label": "Forward Macon", "url": "https://maconchamber.com/forward-macon/" },
+      { "label": "Choose Macon", "url": "https://choosemacon.com/" }
+    ],
     "website": "https://maconchamber.com/"
   },
   "mbcia": {
@@ -78,8 +97,12 @@
     "category": "community-dev",
     "tags": ["Economic Development", "Trades", "Adult Education"],
     "image": "assets/logos/mbciauthority_logo.jpeg",
-    "description": "An economic development agency that recruits industries and facilitates job training incentives for expanding companies.",
-    "impact": "Connects companies with Georgia's Quick Start program and custom training at CGTC.",
+    "description": "The Macon-Bibb County Industrial Authority is the county's lead economic development agency, established in 1962 and governed by a board that includes the Mayor of Macon-Bibb County. It recruits and expands businesses in five targeted sectors — aerospace, food processing, warehousing & distribution, automotive, and advanced manufacturing — and holds accreditation from the International Economic Development Council. For workforce needs, MBCIA connects expanding and relocating companies to Georgia Quick Start, the state's no-cost customized industry training program, and to Central Georgia Technical College.",
+    "impact": "Since 2017, MBCIA reports more than 5,300 jobs created or retained and over $3.2 billion in private investment in Macon-Bibb, with recruited employers including Amazon, Embraer, Graphic Packaging International, Kumho Tire, and Tractor Supply Company. MBCIA, Robins Air Force Base, and CGTC have jointly launched an aviation workforce training center at the former Boeing facility at Middle Georgia Regional Airport.",
+    "links": [
+      { "label": "MBCIA Workforce Page", "url": "https://mbcia.com/doing-business/workforce/" },
+      { "label": "Aviation Workforce Training Center", "url": "https://www.centralgatech.edu/macon-bibb-industrial-authority-robins-afb-cgtc-announce-aviation-workforce-training-and-sustainment-center" }
+    ],
     "website": "https://mbcia.com/"
   },
   "choose-macon": {
@@ -87,8 +110,14 @@
     "category": "community-dev",
     "tags": ["Economic Development", "Career Services", "Youth"],
     "image": "assets/logos/Choose Macon .jpeg",
-    "description": "A talent attraction platform showcasing Macon's quality of life and career opportunities to newcomers.",
-    "impact": "Aids employers in recruiting skilled workers from outside the region and encourages local graduates to stay.",
+    "description": "Choose Macon is a talent-attraction initiative of the Greater Macon Chamber of Commerce, funded by the Peyton Anderson Foundation, that markets Macon-Bibb as a relocation and career destination. The site organizes career content by industry — aerospace & defense, advanced manufacturing, transportation & logistics, health & life sciences, automotive, information technology, and electrical engineering — and features a job board, employer spotlights, and a directory of major local employers. It also promotes Georgia's HOPE and Zell Miller Scholarships as tools for retaining local graduates, and provides resources for military and veteran transition and entrepreneurship.",
+    "impact": "Choose Macon's Reskilling & Upskilling page directly connects workers to the region's training network — WorkSource Middle Georgia, Greater Career Works, Central Georgia Technical College, Mercer, Wesleyan, and Middle Georgia State — positioning it as a coordination point across the region's workforce and education providers.",
+    "links": [
+      { "label": "Find a Job", "url": "https://choosemacon.com/find-a-job/" },
+      { "label": "Reskilling & Upskilling", "url": "https://choosemacon.com/work/reskilling-upskilling/" },
+      { "label": "Major Employers", "url": "https://choosemacon.com/work/major-employers/" },
+      { "label": "Military & Veteran Resources", "url": "https://choosemacon.com/work/military-and-veteran-resources/" }
+    ],
     "website": "https://choosemacon.com/"
   },
   "library": {
@@ -96,8 +125,12 @@
     "category": "community-dev",
     "tags": ["Career Services", "Adult Education", "Technology"],
     "image": "assets/logos/middle georgia regional library .png",
-    "description": "Offers free access to technology, resume software, and job search workshops through the Business and Nonprofit Center (BANC).",
-    "impact": "Lowers access barriers for residents to develop marketable skills in a supportive environment.",
+    "description": "Middle Georgia Regional Library is the multi-county public library system serving Baldwin, Bibb, Crawford, Jones, Macon, Twiggs, and Wilkinson counties, headquartered at Washington Memorial Library in downtown Macon. Its Business and Nonprofit Center (BANC) gives free public access to paid research databases — including Data Axle/ReferenceUSA and Candid/GuideStar funding search — plus one-on-one appointments with a BANC librarian for grant research and business planning. Separately, the library runs free computer classes, including a dedicated Resume and Job Search course, digital-literacy training, and a \"Book-a-Librarian\" one-on-one tech-help service.",
+    "impact": "BANC currently runs a Knight Foundation-funded Board Diversity Workshop series for nonprofit board members, and AT&T-supported digital literacy workshops extend free tech training further into the community — lowering the cost of gaining job-ready computer and business skills for Macon-Bibb residents.",
+    "links": [
+      { "label": "Business and Nonprofit Center", "url": "https://bibblib.org/services/business_nonprofit_center/index.php" },
+      { "label": "Computer Classes", "url": "https://bibblib.org/services/computer___internet_access/computer_classes.php" }
+    ],
     "website": "https://bibblib.org/"
   },
   "workforce-alliance": {
@@ -105,8 +138,8 @@
     "category": "community-dev",
     "tags": ["Economic Development", "Career Services", "Technology"],
     "image": "assets/logos/greater macon chamber .png",
-    "description": "A consortium of agencies focused on research, data analysis, and sustainable workforce solutions for the region.",
-    "impact": "Instrumental in the research behind the Workforce Asset Map and regional collaboration.",
+    "description": "Workforce development in Macon-Bibb is coordinated across several partner organizations rather than through one standalone office — the Chamber's Greater Career Works platform, MBCIA's industry recruitment, Central Georgia Technical College's training programs, and the Middle Georgia Regional Commission's WIOA-funded workforce board all link to and reinforce one another as parts of a shared regional workforce pipeline.",
+    "impact": "This collaborative model lets Macon-Bibb job seekers and employers move between career exploration, training, and job placement without gaps between individual programs.",
     "website": "https://maconchamber.com/"
   },
   "newtown": {
@@ -114,8 +147,14 @@
     "category": "community-dev",
     "tags": ["Economic Development", "Career Services", "Youth"],
     "image": "assets/logos/newtown macon .png",
-    "description": "Focused on downtown revitalization and small business incubators to attract and retain young professionals.",
-    "impact": "Contributes to the broader environment in which workforce development thrives through quality of place and entrepreneurship support.",
+    "description": "NewTown Macon is a downtown revitalization nonprofit that invests in local people, businesses, and real estate in Downtown Macon. It runs several structured programs, including the Entrepreneur's Academy (business coaching for launching and sustaining downtown enterprises), a Marketing Academy, and a Developer's Academy real-estate bootcamp, alongside the Downtown Diversity Initiative supporting a more diverse pool of downtown business owners. It also directly finances businesses and property redevelopment through NewTown Loans, manages the Downtown Business Improvement District and Main Street Macon program, and maintains the Ocmulgee Heritage Trail.",
+    "impact": "By combining direct small-business and real-estate lending with entrepreneurship training and affordable coworking space, NewTown Macon supports new business formation and downtown employment — contributing to the quality-of-place factors that help the region attract and retain professionals.",
+    "links": [
+      { "label": "Entrepreneur's Academy", "url": "https://newtownmacon.com/business-resources/entrepreneurs-academy/" },
+      { "label": "Small Business Loans", "url": "https://newtownmacon.com/business-resources/small-business-loans/" },
+      { "label": "Downtown Diversity Initiative", "url": "https://newtownmacon.com/business-resources/downtown-diversity-initiative/" },
+      { "label": "Coworking", "url": "https://newtownmacon.com/business-resources/coworking/" }
+    ],
     "website": "https://newtownmacon.com/"
   },
   "mgrc": {
@@ -124,8 +163,11 @@
     "tags": ["Economic Development", "Career Services", "Trades"],
     "image": "assets/logos/mgrc.png",
     "logoFit": "contain",
-    "description": "Provides staff support to the Workforce Development Board and manages regional WIOA funds.",
-    "impact": "Brings technical expertise and labor market research to regional workforce efforts and multi-county collaboration.",
+    "description": "The Middle Georgia Regional Commission is a regional planning and economic development agency serving an 11-county area including Macon-Bibb. Beyond general planning, GIS, transportation, and Area Agency on Aging services, MGRC's Workforce Development staff serve as fiscal agent and staff support for the Macon-Bibb Workforce Development Board, the federally designated WIOA Local Area 10. In that role, MGRC issues and manages the contracts that deliver federally funded career services, case management, and youth programs locally, including a contract with Paxen Learning Corporation to deliver the Career Pathways program for young adults.",
+    "impact": "MGRC directly administers WIOA federal workforce funding for Macon-Bibb County, putting it in the position of contracting and overseeing the career-services and youth-workforce providers that operate on the ground in the community.",
+    "links": [
+      { "label": "Workforce Development News", "url": "https://www.middlegeorgiarc.org/category/news/workforce-news/" }
+    ],
     "website": "https://www.middlegeorgiarc.org/"
   },
   "ga-dol": {
@@ -133,8 +175,8 @@
     "category": "job-training",
     "tags": ["Career Services", "Disability Services", "Economic Development"],
     "image": "assets/logos/georgia_department_of_labor_logo.jpeg",
-    "description": "A state-operated career center providing employment services and unemployment insurance assistance.",
-    "impact": "Official resource for filing unemployment claims and accessing veteran and disability employment services.",
+    "description": "The Georgia Department of Labor operates a state-run career center in Macon serving Bibb, Jones, Monroe, and Twiggs counties. Through its statewide network of career centers, GDOL provides job search assistance, labor market information, and unemployment insurance claims processing and orientation. Each career center has dedicated veteran program staff to assist with employment transition, credentialing military experience, and connecting veterans to state and federal benefits, and the department points individuals to partner agencies such as the Georgia Vocational Rehabilitation Agency for vocational rehabilitation support.",
+    "impact": "The Macon Career Center is the primary public access point for Bibb-area residents filing unemployment claims and searching for work, and it's staffed with veteran-specific representatives to help military-connected jobseekers in Middle Georgia find employment.",
     "website": "https://dol.georgia.gov/locations/macon"
   },
   "goodwill": {
@@ -142,8 +184,13 @@
     "category": "job-training",
     "tags": ["Adult Education", "Healthcare", "Trades"],
     "image": "assets/logos/Goodwill-Logo new.png",
-    "description": "Operates a comprehensive career campus including Helms College, offering short-term courses in health, trades, and hospitality.",
-    "impact": "Provides free GED preparation, ESL classes, and job connection services to individuals with barriers to employment.",
+    "description": "Goodwill Industries of Middle Georgia & the CSRA is a nonprofit operating a career campus in Macon that combines direct education and training with job-connection services. Current training offerings include GED preparation, ESL classes, and short-term certificate programs such as Phlebotomy Technician, EKG Technician, Certified Medical Administrative Assistant, and Forklift Operator, plus pre-apprentice construction trades training. Its Career Services team provides job leads, resume writing, and interview preparation, while Goodwill also wholly owns Helms College, an accredited nonprofit career college with a Macon campus offering HVAC/R, Electrical, Medical Assistant, and Retail Operations Management programs.",
+    "impact": "Over the last five years, Goodwill of Middle Georgia & the CSRA reports placing more than 30,800 people into competitive employment and serving over 81,000 individuals across its 35-county service territory, generating an estimated $889 million in regional economic impact. Helms College reports an 81% completion rate and 81% graduate placement rate.",
+    "links": [
+      { "label": "Helms College", "url": "https://www.helms.edu/" },
+      { "label": "Career Services", "url": "https://www.goodwillworks.org/careers-education/career-services/" },
+      { "label": "Education & Training Programs", "url": "https://www.goodwillworks.org/careers-education/education/" }
+    ],
     "website": "https://www.goodwillworks.org/"
   },
   "eckerd": {
@@ -151,8 +198,8 @@
     "category": "job-training",
     "tags": ["Youth", "Adult Education", "Career Services"],
     "image": "assets/logos/Eckerd Connects new.jpeg",
-    "description": "Provides out-of-school youth (ages 16-24) with career guidance, GED support, and industry certifications.",
-    "impact": "Removes barriers via transportation and childcare assistance while placing youth into work experiences and internships.",
+    "description": "Eckerd Connects | Paxen operates in Macon as a workforce development provider for out-of-school young adults ages 16–24 who face a barrier to employment or postsecondary enrollment. The program delivers Career Pathways training and transitional services, including GED preparation, job-readiness training, and industry certifications through on-the-job training. Participants receive individualized employment plans, career counseling, and follow-up support aimed at job placement, plus paid internships and work experience. Eckerd Connects is a national nonprofit; the Macon site operates through its Georgia-based Paxen program, which formally affiliated with Eckerd in 2019.",
+    "impact": "The program targets Macon-area youth ages 16–24 with employment barriers, connecting them to GED completion, industry credentialing, and job placement through individualized coaching and paid work experience.",
     "website": "https://eckerd.org/jobs-training/ga-middlega/"
   },
   "ibew": {
@@ -161,8 +208,12 @@
     "tags": ["Trades", "Career Services", "Economic Development"],
     "image": "assets/logos/ibew.webp",
     "logoFit": "contain",
-    "description": "Operates a registered 'earn-and-learn' apprenticeship combining full-time work with technical classroom instruction for electricians.",
-    "impact": "Key pathway into high-demand skilled trades with no cost for training beyond nominal fees.",
+    "description": "IBEW Local 1316, based in Macon, represents electrical workers across Middle Georgia and operates a registered apprenticeship in partnership with the Macon Electrical Training Center and the Electrical Training Alliance. The program is tuition-free, with apprentices paid wages from day one that increase on a set schedule, plus health benefits and pension contributions during training. To apply, candidates submit an application along with proof of a high school diploma or GED and a transcript showing one year of algebra, then sit for a proctored aptitude exam. Local 1316 has worked on major regional projects including hospitals, data centers, schools, and manufacturing facilities.",
+    "impact": "The apprenticeship is a direct, no-cost pathway into the electrical trade for Middle Georgia residents, combining paid on-the-job work with classroom instruction at the Macon Electrical Training Center — no student debt required.",
+    "links": [
+      { "label": "Apprenticeship Program", "url": "https://www.ibew1316.org/apprenticeship" },
+      { "label": "Macon Electrical Training Center", "url": "https://www.maconetc.org/" }
+    ],
     "website": "https://www.ibew1316.org/"
   },
   "job-corps": {
@@ -170,8 +221,8 @@
     "category": "job-training",
     "tags": ["Youth", "Trades", "Healthcare"],
     "image": "assets/logos/job corps.svg",
-    "description": "A free residential training program for low-income youth ages 16-24 in trades like construction and healthcare.",
-    "impact": "The Macon admissions office assists youth in enrolling in regional centers and helps graduates with local job placement.",
+    "description": "Job Corps is the nation's largest free residential career training and education program for low-income young adults ages 16–24, operating 120+ campuses nationwide with training in more than 100 occupational areas across 10 industries including healthcare, construction, and manufacturing. Students receive free housing, meals, basic medical care, and a living allowance while earning a high school diploma or equivalent alongside vocational credentials. Macon has a dedicated Job Corps Outreach, Admissions and Career Transition Services office that handles local recruitment into regional residential centers and provides career transition support to help graduates find jobs back in their home community.",
+    "impact": "The Macon office serves as the local recruitment and reintegration point for Middle Georgia youth entering Job Corps' residential trade training, and assists graduates returning to Macon-Bibb with job placement after they complete the program.",
     "website": "https://www.jobcorps.gov/"
   },
   "arc-macon": {
@@ -179,8 +230,11 @@
     "category": "job-training",
     "tags": ["Disability Services", "Career Services", "Economic Development"],
     "image": "assets/logos/ArcLogo_Color_Rev_PNG_WEB.png",
-    "description": "Serves adults with developmental and intellectual disabilities through supported employment programs.",
-    "impact": "Provides job coaching and works with local employers to create tailored opportunities in retail, food service, and custodial work.",
+    "description": "The Arc Macon (founded in 1953, renamed from the Macon Association for Retarded Children in 2019) is the official local chapter of The Arc of the United States, serving people with intellectual and developmental disabilities across residential living, day support, community integration, and supported employment. Its Supported Employment program, launched in 1998, provides job coaching, job analysis, and job development to help participants obtain and keep community jobs. The Arc Macon states it became the first Customized Employment Provider in Central Georgia through the Georgia Vocational Rehabilitation Agency.",
+    "impact": "The Arc Macon's Supported Employment program currently has individuals working in the community through active partnerships with local employers including Burger King, Kroger, Wendy's, and YKK, with ongoing outreach to grow that number of placements.",
+    "links": [
+      { "label": "Supported Employment Program", "url": "https://thearcmacon.org/supported-employment" }
+    ],
     "website": "https://thearc.org/"
   },
   "greater-career-works": {
@@ -188,8 +242,8 @@
     "category": "job-training",
     "tags": ["Career Services", "Technology", "Youth"],
     "image": "assets/logos/greater career works new.png",
-    "description": "A free web-based platform featuring 900+ 'career cards' with videos, salary data, and local training links.",
-    "impact": "Enables career exploration for students and job matching for adults and local employers in Central Georgia.",
+    "description": "Greater Career Works is a free, web-based career navigation platform developed and operated by the Greater Macon Chamber of Commerce, serving students, job seekers, and employers across Central Georgia. The platform's centerpiece is a library of 900+ \"career cards\" covering high-demand occupations, each including short videos, job descriptions, salary data, required skills, and links to local training programs. Students can log in through school-issued accounts, while adults can create free accounts directly on the site; employers can build company profiles, post jobs, and track applicants.",
+    "impact": "Operated by the Chamber specifically for Central Georgia, the platform gives Bibb County-area students and adult job seekers direct access to local salary and training data, while giving area employers a no-cost channel to post openings and recruit regional talent.",
     "website": "https://www.greatercareerworks.org/"
   },
   "worksource": {
@@ -197,8 +251,13 @@
     "category": "job-training",
     "tags": ["Career Services", "Trades", "Adult Education"],
     "image": "assets/logos/workforce ga new.jpg",
-    "description": "The region's federally-funded Workforce Innovation and Opportunity Act (WIOA) program hub.",
-    "impact": "Offers tuition assistance for vocational training, on-the-job training opportunities, and career counseling.",
+    "description": "WorkSource Middle Georgia is the federally funded Workforce Innovation and Opportunity Act (WIOA) hub for an 11-county region — including Macon-Bibb — administered by the Middle Georgia Consortium, which has operated in the region since 1974. It provides career services including job search assistance, resume help, and career/aptitude testing to all job seekers, and funds tuition, fees, and on-the-job training for individuals who qualify as WIOA-eligible Adults or Dislocated Workers. The organization also runs youth employment programs for ages 16–24 and offers employer-facing services including recruiting support, the Work Opportunity Tax Credit, and Rapid Response assistance during layoffs. Populations specifically served include veterans, people with disabilities, ex-offenders, and migrant/seasonal farm workers.",
+    "impact": "WorkSource Middle Georgia has operated in the region for nearly 50 years, paying tuition and fees for qualifying Macon-Bibb residents pursuing vocational training and connecting them with career coaching through dedicated Career Facilitators.",
+    "links": [
+      { "label": "For Job Seekers", "url": "https://middlegaworks.com/for-job-seekers/" },
+      { "label": "Apply for Services", "url": "https://middlegaworks.com/for-job-seekers/apply-now/apply-for-services/" },
+      { "label": "About WorkSource Middle Georgia", "url": "https://middlegaworks.com/about/" }
+    ],
     "website": "https://middlegaworks.com/"
   },
   "gvra": {
@@ -206,8 +265,8 @@
     "category": "job-training",
     "tags": ["Disability Services", "Career Services"],
     "image": "assets/logos/GVRA.png",
-    "description": "Helps individuals with disabilities access employment through counseling, job coaching, and assistive technology.",
-    "impact": "Provides vocational evaluation and support for post-secondary education to help clients find meaningful work.",
+    "description": "The Georgia Vocational Rehabilitation Agency helps Georgians with disabilities prepare for, obtain, and retain employment. Core services include vocational evaluation and counseling, job coaching, placement and on-the-job training, assistive technology assessment and devices, workplace and home modifications, supported and customized employment, self-employment assistance, and funding for post-secondary training and education. To qualify, an applicant must have a physical or mental impairment that is a substantial impediment to employment and be expected to benefit toward achieving competitive integrated employment. GVRA also offers free ADA workplace evaluations to employers through its Business Services team.",
+    "impact": "GVRA maintains a local Vocational Rehabilitation office in Macon, giving Macon-Bibb residents with disabilities direct, local access to counseling, job coaching, and assistive technology services close to home.",
     "website": "https://gvs.georgia.gov/"
   },
   "adult-ed": {
@@ -215,8 +274,12 @@
     "category": "job-training",
     "tags": ["Adult Education", "Career Services", "Economic Development"],
     "image": "assets/logos/central georgia technical college.svg",
-    "description": "Free adult basic education and GED prep through Central Georgia Technical College's Adult Education division.",
-    "impact": "Enables adults to earn technical certifications and diplomas simultaneously to thrive in the modern workforce.",
+    "description": "Central Georgia Technical College's Adult Education Division provides free instruction to help adult learners in the college's service region build the academic and foundational skills needed for today's workforce. Programs include GED and HiSET high-school-equivalency test preparation, the Career+ High School Diploma pathway, Integrated Education and Training that combines adult basic education with occupational skills training, and an English Literacy and Civics Education program for non-native English speakers. Out-of-school youth ages 16–24 pursuing a GED or HiSET can access WIOA funding and support services, including career counseling, transportation stipends, and tuition assistance, through the college's WIOA program in partnership with WorkSource Georgia.",
+    "impact": "Central Georgia Technical College's Adult Education division serves adult learners across its multi-county district, which includes Bibb County, giving Macon-area residents without a high school credential a free path to a GED or HiSET and, through Integrated Education and Training, direct pairing of that credential with technical career training.",
+    "links": [
+      { "label": "Adult Education Home", "url": "https://www.centralgatech.edu/adult-education" },
+      { "label": "WIOA Program", "url": "https://www.centralgatech.edu/student-services/wioa" }
+    ],
     "website": "https://www.centralgatech.edu/adult-education"
   },
   "workforce-dev": {
@@ -224,8 +287,8 @@
     "category": "job-training",
     "tags": ["Reentry", "Career Services", "Adult Education"],
     "image": "assets/logos/MBC-Color-Seal-150x150.png",
-    "description": "A local government division focused on improving employability of residents through programs like the E3 Career Jumpstart.",
-    "impact": "Helps citizens, including ex-offenders and those in poverty, overcome barriers to gain education and trades training.",
+    "description": "The Macon-Bibb County Office of Workforce Development is a local-government division that runs job-training initiatives in partnership with Central Georgia Technical College, aimed at reducing barriers to employment for county residents. Its flagship program, E3 Career Jumpstart, is a free four-week course funded through the Middle Georgia Regional Commission that trains participants for entry-level positions in advanced manufacturing and warehousing, covering soft skills, job readiness, and financial literacy, and culminating in CGTC credentials including Forklift Operations and a National Career Readiness Certificate. The office also runs an Accelerated Opportunity Program, letting participants earn a GED and an industry certification simultaneously in fields such as welding and industrial maintenance.",
+    "impact": "The office specifically serves Macon-Bibb County residents, with a stated focus on helping ex-offenders and people experiencing poverty gain trades training and education to become self-sufficient, holding free weekly information sessions about E3 Career Jumpstart.",
     "website": "https://www.maconbibb.us/workforcetrainingprograms/"
   },
   "salvation-army": {
@@ -233,8 +296,12 @@
     "category": "faith-based",
     "tags": ["Adult Education", "Career Services", "Reentry"],
     "image": "assets/logos/salvation army.png",
-    "description": "Provides free on-site job training classes to shelter residents through a partnership with Helms Career Education.",
-    "impact": "Breaks the cycle of homelessness by addressing both spiritual needs and practical employment skills.",
+    "description": "The Salvation Army of Macon Corps operates emergency and bridge-housing shelter facilities in Macon serving a five-county area, with separate housing tracks for single men, women and children, and veterans. In January 2024, the Macon Corps partnered with Goodwill Industries of Middle Georgia's workforce-training division, Helms Career Education, to launch a job-training initiative for shelter residents and other clients who hold at least a high school diploma. The program pairs roughly 90 days of intensive career coaching with six-to-eight-week certification courses in high-demand fields such as EKG technician, medical administrative assistant, forklift operator, and logistics technician.",
+    "impact": "Through the Helms Career Education partnership, the Macon Corps connects shelter residents and other low-income Middle Georgians to fast-track certifications in healthcare, logistics, and skilled trades, aiming to move participants from shelter into stable, living-wage jobs with local employers.",
+    "links": [
+      { "label": "Macon Shelter Services", "url": "https://southernusa.salvationarmy.org/macon/provide-shelter" },
+      { "label": "Helms Career Education", "url": "https://helmscareereducation.com/" }
+    ],
     "website": "https://southernusa.salvationarmy.org/macon/"
   },
   "rescue-mission": {
@@ -242,8 +309,8 @@
     "category": "faith-based",
     "tags": ["Reentry", "Adult Education", "Career Services"],
     "image": "assets/logos/rescue mission of ga.png",
-    "description": "A faith-based recovery program for men and women that integrates work therapy and vocational skills.",
-    "impact": "Prepares clients for re-entry into the workforce through supervised work assignments and GED support.",
+    "description": "Rescue Mission of Middle Georgia has operated in Macon since 1952 as a faith-based residential recovery program for adults facing addiction, homelessness, and other life-challenging circumstances. Its core offering is a 12-month, Bible-based Life-Recovery Program run separately for men and for women, combining counseling, life-skills classes, daily work-therapy assignments, and mentoring. Residents receive housing and meals for the full year while progressing through the program, which is aimed at helping participants secure employment and move toward stable, independent living.",
+    "impact": "The Mission provides year-round residential shelter, meals, and structured work-therapy assignments to men and women recovering from addiction and homelessness in the Macon area, using supervised work responsibilities as preparation for paid employment after graduation.",
     "website": "https://www.rescuemissionga.com/"
   },
   "other-faith": {
@@ -260,8 +327,8 @@
     "category": "special-population",
     "tags": ["Career Services", "Economic Development", "Trades"],
     "image": "assets/logos/Transitional center.jpeg",
-    "description": "A residential facility that allows non-violent offenders to work paid community jobs during the final months of their sentence.",
-    "impact": "Enables successful re-entry by allowing offenders to build work history and save money before release.",
+    "description": "The Macon Transitional Center is a 156-bed, minimum-security Georgia Department of Corrections facility housing adult male felons nearing the end of their sentences. Its central program is work release: about 138 beds are reserved for residents who leave daily to hold paying jobs with community employers, while other residents work on-site in food service, laundry, and building maintenance. Beyond employment itself, the center provides job-readiness training, GED preparation, career-center services, and substance-abuse and fatherhood programming. It is one of 12 Reentry and Cognitive Programming centers the Georgia Department of Corrections operates statewide.",
+    "impact": "Work-release residents at the Macon center hold real jobs with area employers and build a recent, verifiable work history before release; wages are applied to room and board and family support, with remaining funds saved until release. Georgia DOC research on this reentry model found participants up to one-third more likely to remain crime-free after release.",
     "website": "https://gdc.georgia.gov/locations/macon-transitional-center"
   },
 
@@ -270,8 +337,8 @@
     "category": "special-population",
     "tags": ["Adult Education", "Career Services"],
     "image": "assets/logos/MBC-Color-Seal-150x150.png",
-    "description": "A court-referred intensive outpatient program for justice-involved individuals focused on reducing criminal behavior through education.",
-    "impact": "Increases employability and restores justice-involved individuals to their community through job skills training.",
+    "description": "The Macon Day Reporting Center operates as part of the Georgia Department of Community Supervision's statewide DRC network — a non-residential, supervision-ordered alternative for higher-risk, higher-need probationers and parolees, serving the Macon judicial circuit (Bibb, Crawford, and Peach counties). Participants move through three phases — Detox/Behavior Stabilization, Sobriety/Employment, and Aftercare — combining intensive counseling and cognitive-behavioral programming with substance-abuse treatment, peer mentoring, and dedicated employment and educational specialist support.",
+    "impact": "The program's goal is to increase justice-involved participants' education levels and employability so they can be restored to their communities as a community-based alternative to incarceration for the Macon-Crawford-Peach circuit.",
     "website": "https://dcs.georgia.gov/reentry-services/community-resources"
   }
 

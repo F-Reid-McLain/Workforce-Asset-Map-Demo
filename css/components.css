@@ -396,3 +396,14 @@ COMPONENTS CRITERIA FOR INCLUSION:
     background: var(--color-accent);
     color: #fff;
 }
+
+/* Wraps multiple pill links (e.g. a university's individual schools)
+   under "Related Programs" — shared by the modal and the map's inline
+   info panel, since both reuse the same .modal-body a pill styling. */
+.related-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.related-links a { margin-top: 0; }
