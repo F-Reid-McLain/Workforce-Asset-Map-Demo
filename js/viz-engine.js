@@ -211,6 +211,12 @@ const structuralLinks = [
     return CATEGORY_COLORS[d.category] || "#66bb6a";
   }
 
+  // Hops from the hub — hub itself, its six categories, then leaf assets.
+  // Drives both the on-load reveal stagger and which way particles flow.
+  function depthOf(d) { return d.type === "hub" ? 0 : d.type === "major-group" ? 1 : 2; }
+
+  const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   // 3. SIMULATION SETUP
   simulation = d3.forceSimulation(workforceData.nodes)
     .force("link", d3.forceLink(workforceData.links).id(d => d.id).distance(d => {
@@ -241,6 +247,23 @@ const structuralLinks = [
     .attr("stroke-width", d => d.source.type === "hub" ? 3 : 1.5)
     .attr("stroke-opacity", d => d.source.type === "hub" || d.target.type === "hub" ? 0.55 : 0.4);
   linkSelection = link;
+
+  // Small dots that continuously travel each link toward the hub, reading as
+  // activity/energy flowing into the network — skipped under reduced-motion.
+  const PARTICLE_PERIOD = 2600; // ms for one full travel down a link
+  let particle = null;
+  if (!prefersReducedMotion) {
+    workforceData.links.forEach(d => {
+      // Always flow from the farther-from-hub end toward the nearer end.
+      d.__flowFrom = depthOf(d.source) > depthOf(d.target) ? d.source : d.target;
+      d.__flowTo   = d.__flowFrom === d.source ? d.target : d.source;
+      d.__phase    = Math.random() * PARTICLE_PERIOD; // desyncs the dots
+    });
+    particle = g.append("g").selectAll("circle").data(workforceData.links).join("circle")
+      .attr("r", 2.5)
+      .attr("fill", linkColor)
+      .attr("opacity", 0);
+  }
 
   // Define a clipPath per node so images are clipped to their circle
   const defs = svg.append("defs");
@@ -334,6 +357,14 @@ const structuralLinks = [
   function renderTick() {
     link.attr("x1", d => d.source.x).attr("y1", d => d.source.y).attr("x2", d => d.target.x).attr("y2", d => d.target.y);
     node.attr("transform", d => `translate(${d.x},${d.y})`);
+    if (particle) {
+      const now = Date.now();
+      particle
+        .attr("cx", d => { const t = ((now + d.__phase) % PARTICLE_PERIOD) / PARTICLE_PERIOD; return d.__flowFrom.x + (d.__flowTo.x - d.__flowFrom.x) * t; })
+        .attr("cy", d => { const t = ((now + d.__phase) % PARTICLE_PERIOD) / PARTICLE_PERIOD; return d.__flowFrom.y + (d.__flowTo.y - d.__flowFrom.y) * t; })
+        // sin envelope: fades in leaving the outer node, peaks mid-link, fades out arriving
+        .attr("opacity", d => Math.sin((((now + d.__phase) % PARTICLE_PERIOD) / PARTICLE_PERIOD) * Math.PI) * 0.85);
+    }
   }
 
   // Paint the warm-started layout immediately, then frame it — rather than
@@ -341,6 +372,14 @@ const structuralLinks = [
   // full graph is visible on load instead of just its middle.
   renderTick();
   fitVizView(0);
+
+  // On-load reveal: fade everything in with a stagger that radiates outward
+  // from the hub (hub, then categories, then leaf assets), instead of the
+  // whole graph just appearing at once. Skipped under reduced-motion.
+  if (!prefersReducedMotion) {
+    node.style("opacity", 0).transition().delay(d => depthOf(d) * 220 + Math.random() * 150).duration(500).style("opacity", 1);
+    link.style("opacity", 0).transition().delay(d => Math.max(depthOf(d.source), depthOf(d.target)) * 220 + Math.random() * 150 - 80).duration(400).style("opacity", 1);
+  }
 
   simulation.alphaTarget(IDLE_ALPHA_TARGET).restart();
   simulation.on("tick", renderTick);
