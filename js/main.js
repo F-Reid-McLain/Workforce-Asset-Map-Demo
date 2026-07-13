@@ -2,7 +2,7 @@
 
 let hubDistance = 28;
 const assetRatio = 3.0;
-let currentSizeScale = 1;
+let currentSizeScale = 1.5;
 
 // Sliders (below-viz controls)
 const hubDistanceSlider = document.getElementById('hub-distance-slider');
@@ -203,7 +203,7 @@ document.addEventListener('keydown', function(e) {
 // ===== SHARED RESET LOGIC =====
 function doReset() {
     applyHubDistance(28);
-    applySizeScale(1);
+    applySizeScale(1.5);
     resetVizLayout(750); // snaps every node back to its page-load position, then reframes
 }
 

@@ -108,17 +108,139 @@ body {
     padding: 2rem 0;
 }
 
+/* ===== SITE FOOTER (Chamber brand chrome, matches choosemacon.com) ===== */
 .main-footer {
-    background-color: var(--color-bg-surface);
-    border-top: 1px solid var(--color-border);
-    padding: 1.5rem 0;
+    position: relative;
+    background: var(--footer-bg);
+    color: var(--footer-text);
+    padding: 100px 0 90px;
     margin-top: 3rem;
+    overflow: hidden;
 }
 
-.main-footer p {
+/* Top gradient stripe */
+.main-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(to right,
+        var(--footer-stripe-red) 0 12.5%,
+        var(--footer-accent-gold) 12.5% 25%,
+        var(--footer-stripe-blue) 25% 37.5%,
+        var(--footer-text) 37.5% 50%,
+        var(--footer-stripe-red) 50% 62.5%,
+        var(--footer-accent-gold) 62.5% 75%,
+        var(--footer-stripe-blue) 75% 87.5%,
+        var(--footer-text) 87.5% 100%);
+}
+
+/* Darker sub-bar along the bottom edge */
+.main-footer::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+    background: var(--footer-bg-bar);
+    border-top: 1px solid var(--footer-bar-border);
+}
+
+.main-footer__wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 0 50px;
+}
+
+.main-footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    text-align: left;
+}
+
+.main-footer__eyebrow {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--footer-accent-gold);
+}
+
+.main-footer__address {
+    font-style: normal;
+    margin: 15px 0 20px;
+    line-height: 1.6;
+}
+
+.main-footer__phone a {
+    color: var(--footer-text);
+    text-decoration: none;
+}
+
+.main-footer__phone a:hover,
+.main-footer__phone a:focus {
+    text-decoration: underline;
+}
+
+.main-footer__logo {
+    width: 100%;
+    max-width: 225px;
+}
+
+.main-footer__logo img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.main-footer__links {
+    margin: 40px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.main-footer__links li:not(:last-child) {
+    margin-bottom: 10px;
+}
+
+.main-footer__link {
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--footer-accent-gold);
+}
+
+.main-footer__link:hover,
+.main-footer__link:focus {
+    text-decoration: underline;
+}
+
+.main-footer__attribution {
     text-align: center;
-    color: var(--color-text-muted);
+    margin-top: 50px;
     font-size: var(--font-size-footer);
+    color: var(--footer-text);
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .main-footer { padding: 100px 0 150px; }
+    .main-footer__wrapper { padding: 0 25px; }
+    .main-footer__inner { justify-content: center; text-align: center; }
+    .main-footer__contact { width: 100%; margin: 0 auto 60px; }
+    .main-footer__menu-wrap { width: 100%; }
+    .main-footer__logo { margin: 0 auto; }
 }
 
 /* ===== CHART SUBTITLE ===== */

@@ -38,6 +38,15 @@ entire site. Other CSS files must not hardcode these values.
     --color-node-group:      #4a9eff;   /* Major-group nodes */
     --color-node-asset:      #66bb6a;   /* Asset leaf nodes */
 
+    /* ===== FOOTER (Chamber brand chrome — matches choosemacon.com) ===== */
+    --footer-bg:             #252525;   /* Footer background */
+    --footer-bg-bar:         #201f1f;   /* Darker sub-bar along the bottom edge */
+    --footer-bar-border:     #757575;
+    --footer-text:           #e7decf;   /* Cream body/heading text on the footer */
+    --footer-accent-gold:    #afa66d;   /* Eyebrow labels, nav links */
+    --footer-stripe-red:     #de5e6d;   /* Top gradient stripe, stops 1 & 5 */
+    --footer-stripe-blue:    #4d748c;   /* Top gradient stripe, stops 3 & 7 */
+
     /* ===== HEADER FONTS ===== */
     --font-heading:          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-heading-weight:   600;

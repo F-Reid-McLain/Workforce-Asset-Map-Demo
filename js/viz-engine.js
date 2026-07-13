@@ -14,17 +14,24 @@ let workforceData; // hoisted so main.js can re-fit the view (e.g. on Reset)
 let initialLayout = null;
 let resetVizLayout = () => {};
 
-// Fixed hue per category — CVD-checked as a set (see dataviz palette) — used
-// for major-group node fill and as the glow/link tint for everything under it,
-// so the map reads as six identifiable neighborhoods instead of one blue blob.
+// Fixed hue per category — drawn from the site footer's Choose Macon brand
+// palette (the gradient stripe's red/gold/blue/cream) so the map and footer
+// read as one system, with a darker tonal variant of red and blue added to
+// cover all six categories. These are muted brand colors, not high-contrast
+// data-viz ones — every node keeps a persistent label so identity never
+// depends on hue alone.
 const CATEGORY_COLORS = {
-  "colleges":            "#3987e5",
-  "faith-based":         "#199e70",
-  "special-population":  "#c98500",
-  "job-training":        "#008300",
-  "community-dev":       "#9085e9",
-  "k12-secondary":       "#e66767"
+  "colleges":            "#4d748c", // steel blue
+  "faith-based":         "#e7decf", // cream
+  "special-population":  "#afa66d", // gold
+  "job-training":        "#de5e6d", // coral red
+  "community-dev":       "#31556b", // deep blue
+  "k12-secondary":       "#c82236"  // deep red
 };
+
+// The footer's primary gold accent — used for the hub node/links so the
+// map's focal point ties back to the footer's "Contact Us" / nav gold.
+const HUB_ACCENT = "#afa66d";
 
 // Applied as an attribute (not a CSS rule) so it composes with the hover
 // handler's inline "filter" attribute below instead of being silently
@@ -203,7 +210,7 @@ const structuralLinks = [
 
   const colorScale = d3.scaleOrdinal()
     .domain(["hub", "major-group", "asset"])
-    .range(["#ffffff", "#4a9eff", "#66bb6a"]);
+    .range(["#ffffff", HUB_ACCENT, "#afa66d"]);
 
   // The node's own circle color — logos keep a neutral backing plate (their
   // own logoBg, or white) so the artwork stays legible; everything else takes
@@ -220,9 +227,29 @@ const structuralLinks = [
   // category hue even for logo nodes, so the glow still marks which
   // neighborhood a photographic logo belongs to.
   function glowColor(d) {
-    if (d.type === "hub") return "#4a9eff";
-    if (d.type === "major-group") return CATEGORY_COLORS[d.id] || "#4a9eff";
-    return CATEGORY_COLORS[d.category] || "#66bb6a";
+    if (d.type === "hub") return HUB_ACCENT;
+    if (d.type === "major-group") return CATEGORY_COLORS[d.id] || HUB_ACCENT;
+    return CATEGORY_COLORS[d.category] || "#afa66d";
+  }
+
+  // WCAG relative luminance / contrast — used to pick a white or dark icon
+  // stroke per category fill. The brand palette mixes light (cream, gold)
+  // and dark (blues, reds) fills, so a single fixed icon color would go
+  // invisible on roughly half of them (e.g. white-on-cream is ~1.3:1).
+  function relativeLuminance(hex) {
+    const c = hex.replace("#", "");
+    const [r, g, b] = [0, 2, 4].map(i => parseInt(c.substr(i, 2), 16) / 255)
+      .map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+  function contrastRatio(hexA, hexB) {
+    const a = relativeLuminance(hexA), b = relativeLuminance(hexB);
+    const lighter = Math.max(a, b), darker = Math.min(a, b);
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+  function iconColor(d) {
+    const fill = CATEGORY_COLORS[d.id] || HUB_ACCENT;
+    return contrastRatio("#ffffff", fill) >= contrastRatio("#252525", fill) ? "#ffffff" : "#252525";
   }
 
   // Hops from the hub — hub itself, its six categories, then leaf assets.
@@ -262,9 +289,9 @@ const structuralLinks = [
   for (let i = 0; i < 300; i++) simulation.tick();
 
   // A link's color follows whichever end is the category node — asset links
-  // read as belonging to their category's color, hub links stay accent blue.
+  // read as belonging to their category's color, hub links stay gold.
   function linkColor(d) {
-    if (d.source.type === "hub" || d.target.type === "hub") return "#4a9eff";
+    if (d.source.type === "hub" || d.target.type === "hub") return HUB_ACCENT;
     const catNode = d.source.type === "major-group" ? d.source : d.target;
     return CATEGORY_COLORS[catNode.id] || "#666";
   }
@@ -309,7 +336,7 @@ const structuralLinks = [
     .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
   nodeSelection = node;
 
-  node.append("circle").attr("r", d => d.size).attr("fill", fillColor).attr("stroke", "#fff")
+  node.append("circle").attr("r", d => d.size).attr("fill", fillColor).attr("stroke", "#e7decf")
     .attr("stroke-width", 2)
     .attr("stroke-dasharray", d => d.type === "asset" && !d.image && !d.placeholder ? "5,5" : "0")
     .attr("opacity", 0.9)
@@ -326,7 +353,7 @@ const structuralLinks = [
         .attr("class", "node-icon")
         .attr("transform", `translate(${-12 * scale},${-12 * scale}) scale(${scale})`)
         .attr("fill", "none")
-        .attr("stroke", "#fff")
+        .attr("stroke", iconColor(d))
         .attr("stroke-width", 2)
         .attr("stroke-linecap", "round")
         .attr("stroke-linejoin", "round")
@@ -336,14 +363,17 @@ const structuralLinks = [
         .attr("d", p => p);
     });
 
-  // Hub node gets an "MWN" wordmark instead of a photo logo or category icon
+  // Hub node gets an "MWN" wordmark instead of a photo logo or category icon.
+  // Footer's dark background color, not the gold accent — gold-on-white
+  // circle only clears ~2.5:1 contrast, well under WCAG's 3:1 floor even
+  // for bold/large text.
   node.filter(d => d.type === "hub")
     .append("text")
     .attr("class", "node-hub-mark")
     .text("MWN")
     .attr("text-anchor", "middle")
     .attr("dy", "0.35em")
-    .attr("fill", "#4a9eff")
+    .attr("fill", "#252525")
     .attr("font-weight", "700")
     .attr("font-size", d => d.size * 0.62)
     .attr("letter-spacing", "0.02em");
@@ -440,6 +470,11 @@ const structuralLinks = [
     renderTick();
     fitVizView(duration);
   };
+
+  // Node Size defaults to 1.5, not 1.0 — reuses the same slider machinery
+  // a manual drag would, so it stays in sync with the slider's displayed
+  // value and with what Reset View restores.
+  applySizeScale(1.5);
 
   // On-load reveal: fade everything in with a stagger that radiates outward
   // from the hub (hub, then categories, then leaf assets), instead of the
