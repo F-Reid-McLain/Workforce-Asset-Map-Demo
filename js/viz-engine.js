@@ -41,7 +41,7 @@ function truncateLabel(name, maxLen) {
 // Computes the zoom transform that frames every current node within a
 // width x height viewport, so the default/reset view shows the whole graph
 // instead of whatever the force layout happened to center on.
-function computeFitTransform(width, height, padding = 60) {
+function computeFitTransform(width, height, padding = 45) {
   if (!workforceData || !workforceData.nodes.length) return d3.zoomIdentity;
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   workforceData.nodes.forEach(d => {
@@ -53,7 +53,9 @@ function computeFitTransform(width, height, padding = 60) {
   });
   const graphWidth = Math.max(maxX - minX, 1);
   const graphHeight = Math.max(maxY - minY, 1);
-  const scale = Math.min((width - padding * 2) / graphWidth, (height - padding * 2) / graphHeight, 1);
+  // Capped above 1 (not just at 1) so a layout that packs smaller than the
+  // container zooms in to fill the window, instead of floating in empty space.
+  const scale = Math.min((width - padding * 2) / graphWidth, (height - padding * 2) / graphHeight, 1.35);
   const tx = width / 2 - scale * (minX + maxX) / 2;
   const ty = height / 2 - scale * (minY + maxY) / 2;
   return d3.zoomIdentity.translate(tx, ty).scale(scale);
@@ -79,13 +81,13 @@ function setWheelZoomEnabled(enabled) {
 
 // 1. STRUCTURAL DATA — hub and category nodes stay hardcoded
 const structuralNodes = [
-  { id: "hub",                name: "Macon Workforce Navigator",          type: "hub",         size: 25, image: "" },
-  { id: "colleges",           name: "Colleges",                           type: "major-group", size: 18, image: "", icon: "graduation-cap" },
-  { id: "faith-based",        name: "Faith Based",                        type: "major-group", size: 18, image: "", icon: "heart" },
-  { id: "special-population", name: "Special Population and Re Entry",    type: "major-group", size: 18, image: "", icon: "users" },
-  { id: "job-training",       name: "Job Training and Career Services",   type: "major-group", size: 18, image: "", icon: "briefcase" },
-  { id: "community-dev",      name: "Community and Economic Development", type: "major-group", size: 18, image: "", icon: "building" },
-  { id: "k12-secondary",      name: "K-12 and Secondary",                 type: "major-group", size: 18, image: "", icon: "book-open" }
+  { id: "hub",                name: "Macon Workforce Navigator",          type: "hub",         size: 30, image: "" },
+  { id: "colleges",           name: "Colleges",                           type: "major-group", size: 23, image: "", icon: "graduation-cap" },
+  { id: "faith-based",        name: "Faith Based",                        type: "major-group", size: 23, image: "", icon: "heart" },
+  { id: "special-population", name: "Special Population and Re Entry",    type: "major-group", size: 23, image: "", icon: "users" },
+  { id: "job-training",       name: "Job Training and Career Services",   type: "major-group", size: 23, image: "", icon: "briefcase" },
+  { id: "community-dev",      name: "Community and Economic Development", type: "major-group", size: 23, image: "", icon: "building" },
+  { id: "k12-secondary",      name: "K-12 and Secondary",                 type: "major-group", size: 23, image: "", icon: "book-open" }
 ];
 
 // Simple Feather/Lucide-style line icons (24x24 viewBox, stroke-based) used
@@ -151,7 +153,7 @@ const structuralLinks = [
     name: data.name,
     type: "asset",
     category: data.category || "",
-    size: data.size || 17,
+    size: data.size || 22,
     image: data.image || "",
     logoFit: data.logoFit || "cover",
     logoBg: data.logoBg || "",
@@ -218,15 +220,23 @@ const structuralLinks = [
   const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // 3. SIMULATION SETUP
+  // Distances/charge pulled in a bit from the old defaults (35/130, -550) so
+  // the now-larger nodes pack tighter instead of spreading out proportionally
+  // — fit-to-view below scales to the container either way, so a tighter
+  // layout is what actually makes nodes render bigger on screen. Collide
+  // padding bumped up to match, or labels on the now-bigger nodes collide.
   simulation = d3.forceSimulation(workforceData.nodes)
     .force("link", d3.forceLink(workforceData.links).id(d => d.id).distance(d => {
-        return (d.source.type === "hub" || d.target.type === "hub") ? 35 : 130;
+        return (d.source.type === "hub" || d.target.type === "hub") ? 32 : 112;
     }))
-    .force("charge", d3.forceManyBody().strength(-550))
+    .force("charge", d3.forceManyBody().strength(-500))
     .force("center", d3.forceCenter(width / 2, height / 2))
     // Keeps nodes (and the labels hanging below them) from overlapping —
-    // padding is generous since it has to clear the label text, not just the circle.
-    .force("collide", d3.forceCollide(d => d.size + 34).strength(0.8));
+    // padding is generous since it has to clear the label text, not just the
+    // circle. Major-group labels are full phrases ("Community and Economic
+    // Development") and never truncated, unlike asset names, so they need
+    // much more clearance or they collide with the neighbor sitting below them.
+    .force("collide", d3.forceCollide(d => d.size + (d.type === "major-group" ? 95 : 40)).strength(0.9));
 
   // Warm-start: run the layout to near-equilibrium synchronously before the
   // first paint, so the initial fit-to-view (below) frames settled positions
@@ -259,7 +269,11 @@ const structuralLinks = [
       d.__flowTo   = d.__flowFrom === d.source ? d.target : d.source;
       d.__phase    = Math.random() * PARTICLE_PERIOD; // desyncs the dots
     });
+    // Classed so main.js's broad "g circle" node-size selector (which reads
+    // originalSizes by node id) skips these — they're bound to link data, not
+    // node data, and would otherwise resolve to NaN and break the size slider.
     particle = g.append("g").selectAll("circle").data(workforceData.links).join("circle")
+      .attr("class", "flow-particle")
       .attr("r", 2.5)
       .attr("fill", linkColor)
       .attr("opacity", 0);

@@ -1,6 +1,6 @@
 /* ===== UI CONTROLS & EVENT LISTENERS ===== */
 
-let hubDistance = 35;
+let hubDistance = 28;
 const assetRatio = 3.0;
 let currentSizeScale = 1;
 
@@ -22,7 +22,7 @@ function applySizeScale(val) {
     if (fsSizeSlider) fsSizeSlider.value = val;
     document.getElementById('size-value').textContent = val.toFixed(1);
     if (fsSizeValue) fsSizeValue.textContent = val.toFixed(1);
-    d3.selectAll('.asset-node circle, g circle')
+    d3.selectAll('.asset-node circle, g circle:not(.flow-particle)')
         .transition().duration(200)
         .attr('r', d => originalSizes[d.id] * currentSizeScale);
     d3.selectAll('g image')
@@ -103,9 +103,12 @@ function fitVizToContainer() {
     const r = vizContainer.getBoundingClientRect();
     d3.select('#network-visualization svg')
         .attr('viewBox', `0 0 ${r.width} ${r.height}`);
-    simulation
-        .force('center', d3.forceCenter(r.width / 2, r.height / 2))
-        .alpha(0.3).restart();
+    // Re-frame the camera (pan+zoom) to the new container size, rather than
+    // moving the force simulation's own center — fitVizView already frames
+    // wherever the nodes currently sit, so also re-centering the simulation
+    // here would animate the nodes toward a second, different target at the
+    // same time and the two would race, cropping the graph mid-transition.
+    fitVizView(600);
 }
 
 // ===== ZOOM BUTTONS =====
@@ -200,7 +203,7 @@ document.addEventListener('keydown', function(e) {
 // ===== SHARED RESET LOGIC =====
 function doReset() {
     fitVizView(750); // reframes to fit every node, not just a fixed 1:1 view
-    applyHubDistance(35);
+    applyHubDistance(28);
     applySizeScale(1);
 }
 
