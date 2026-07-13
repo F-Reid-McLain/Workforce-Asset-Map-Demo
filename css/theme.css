@@ -25,13 +25,17 @@ entire site. Other CSS files must not hardcode these values.
     --color-text-muted:      #888888;   /* Footer, placeholders */
 
     /* ===== ACCENT / BRAND ===== */
-    --color-accent:          #4a9eff;   /* Chamber Blue — links, highlights */
-    --color-accent-hover:    #3a8eef;   /* Darker on hover */
-    --color-accent-teal:     #2dd4bf;   /* Positive / growth indicators */
-    --color-accent-orange:   #fb923c;   /* Negative / attention indicators */
+    /* Chamber gold — matches the footer/choosemacon.com brand chrome. Kept
+       separate from the teal/orange data-indicator colors below and from
+       the map's own category palette, so "brand chrome" and "data" stay
+       visually distinct instead of everything reading as one color. */
+    --color-accent:          #afa66d;   /* Chamber Gold — links, highlights */
+    --color-accent-hover:    #9d9356;   /* Darker on hover */
+    --color-accent-teal:     #2dd4bf;   /* Positive / growth indicators (data) */
+    --color-accent-orange:   #fb923c;   /* Negative / attention indicators (data) */
 
     /* ===== DIRECTORY ===== */
-    --color-directory-group-heading: #4a9eff;  /* Group category headers */
+    --color-directory-group-heading: #afa66d;  /* Group category headers */
 
     /* ===== NODE COLORS (D3 map) ===== */
     --color-node-hub:        #ffffff;
