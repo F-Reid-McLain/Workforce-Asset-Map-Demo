@@ -50,7 +50,8 @@ const structuralLinks = [
     name: data.name,
     type: "asset",
     size: data.size || 12,
-    image: data.image || ""
+    image: data.image || "",
+    tags: data.tags || []
   }));
 
   const assetLinks = Object.entries(assetsJson)
