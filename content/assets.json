@@ -21,7 +21,7 @@
     "name": "Wesleyan College",
     "category": "colleges",
     "tags": ["Career Services", "Economic Development"],
-    "image": "assets/logos/wesleyan college.png",
+    "image": "assets/logos/Logo_Wesleyan-College.png",
     "description": "A private liberal arts college recognized as the first college in the world chartered to grant degrees to women.",
     "impact": "Provides undergraduate programs emphasizing career development and leadership, helping students find unique purpose through strong academics.",
     "website": "https://www.wesleyancollege.edu/studentlife/career/career-development.cfm"
@@ -39,6 +39,7 @@
     "name": "W.S. Hutchings College & Career Academy",
     "category": "k12-secondary",
     "tags": ["Healthcare", "Trades", "Career Services"],
+    "image": "assets/logos/SPHutchings.jpg",
     "description": "A dedicated career academy serving Bibb County high school students with vocational and technical pathways in healthcare, construction, and culinary arts.",
     "impact": "Allows students to earn industry certifications or college credits while in high school through partnerships with local employers and CGTC.",
     "website": "https://hutchings.bcsdk12.net/"
@@ -47,6 +48,7 @@
     "name": "Bibb County School District",
     "category": "k12-secondary",
     "tags": ["Technology", "Trades", "Career Services"],
+    "image": "assets/logos/bibb county school district.png",
     "description": "Offers career pathway programs across all public high schools aligned with Georgia's CTAE curriculum, including engineering and IT.",
     "impact": "Ensures graduates gain technical skills and work-based learning experiences to enhance employability immediately after graduation.",
     "website": "https://www.bcsdk12.net/"
@@ -55,6 +57,7 @@
     "name": "Macon-Bibb County Innovation & Technology Academy",
     "category": "k12-secondary",
     "tags": ["Technology", "Trades", "Career Services"],
+    "image": "assets/logos/bibb county school district.png",
     "description": "A state-of-the-art extension of Hutchings Career Academy focused on emerging technology, robotics, cybersecurity, and electric vehicle technology.",
     "impact": "Cultivates a tech-savvy workforce straight out of high school through a unique city-school partnership.",
     "website": "https://www.bcsdk12.net/departments/career-technical-and-agricultural-education"
@@ -99,6 +102,7 @@
     "name": "Greater Macon Workforce Alliance",
     "category": "community-dev",
     "tags": ["Economic Development", "Career Services", "Technology"],
+    "image": "assets/logos/greater macon chamber .png",
     "description": "A consortium of agencies focused on research, data analysis, and sustainable workforce solutions for the region.",
     "impact": "Instrumental in the research behind the Workforce Asset Map and regional collaboration.",
     "website": "https://maconchamber.com/"
@@ -206,6 +210,7 @@
     "name": "Adult Education Programs",
     "category": "job-training",
     "tags": ["Adult Education", "Career Services", "Economic Development"],
+    "image": "assets/logos/central georgia technical college.svg",
     "description": "Free adult basic education and GED prep through Central Georgia Technical College's Adult Education division.",
     "impact": "Enables adults to earn technical certifications and diplomas simultaneously to thrive in the modern workforce.",
     "website": "https://www.centralgatech.edu/adult-education"

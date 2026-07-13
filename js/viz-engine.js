@@ -6,6 +6,13 @@ let originalSizes = {};
 let simulation, svg, zoom, g;
 let nodeSelection, linkSelection;
 
+// Asset names run long ("Macon-Bibb County Office of Workforce Development") —
+// truncate the always-on label so the map stays scannable; the full name is
+// still one hover (native title tooltip) or click (info panel) away.
+function truncateLabel(name, maxLen) {
+  return name.length > maxLen ? name.slice(0, maxLen - 1).trimEnd() + '…' : name;
+}
+
 // Called by main.js when fullscreen state changes
 function setWheelZoomEnabled(enabled) {
   zoom.filter(enabled
@@ -16,14 +23,52 @@ function setWheelZoomEnabled(enabled) {
 
 // 1. STRUCTURAL DATA — hub and category nodes stay hardcoded
 const structuralNodes = [
-  { id: "hub",                name: "Workforce Asset Map",                type: "hub",         size: 25, image: "" },
-  { id: "colleges",           name: "Colleges",                           type: "major-group", size: 18, image: "" },
-  { id: "faith-based",        name: "Faith Based",                        type: "major-group", size: 18, image: "" },
-  { id: "special-population", name: "Special Population and Re Entry",    type: "major-group", size: 18, image: "" },
-  { id: "job-training",       name: "Job Training and Career Services",   type: "major-group", size: 18, image: "" },
-  { id: "community-dev",      name: "Community and Economic Development", type: "major-group", size: 18, image: "" },
-  { id: "k12-secondary",      name: "K-12 and Secondary",                 type: "major-group", size: 18, image: "" }
+  { id: "hub",                name: "Macon Workforce Navigator",          type: "hub",         size: 25, image: "" },
+  { id: "colleges",           name: "Colleges",                           type: "major-group", size: 18, image: "", icon: "graduation-cap" },
+  { id: "faith-based",        name: "Faith Based",                        type: "major-group", size: 18, image: "", icon: "heart" },
+  { id: "special-population", name: "Special Population and Re Entry",    type: "major-group", size: 18, image: "", icon: "users" },
+  { id: "job-training",       name: "Job Training and Career Services",   type: "major-group", size: 18, image: "", icon: "briefcase" },
+  { id: "community-dev",      name: "Community and Economic Development", type: "major-group", size: 18, image: "", icon: "building" },
+  { id: "k12-secondary",      name: "K-12 and Secondary",                 type: "major-group", size: 18, image: "", icon: "book-open" }
 ];
+
+// Simple Feather/Lucide-style line icons (24x24 viewBox, stroke-based) used
+// to give category ("major-group") nodes a purposeful visual instead of a
+// blank circle — distinct from the photographic org logos on asset nodes.
+const ICON_PATHS = {
+  "graduation-cap": [
+    "M2 9l10-5 10 5-10 5-10-5z",
+    "M6 11.5V16c0 1.66 2.69 3 6 3s6-1.34 6-3v-4.5",
+    "M22 9v6"
+  ],
+  "heart": [
+    "M12 20.5s-7.5-4.6-9.9-9C.4 8 3 4.5 6.6 4.5c2.1 0 3.7 1.4 5.4 3.4 1.7-2 3.3-3.4 5.4-3.4 3.6 0 6.2 3.5 4.5 7-2.4 4.4-9.9 9-9.9 9z"
+  ],
+  "users": [
+    "M9 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z",
+    "M2.5 20c.6-3.4 3.3-6 6.5-6s5.9 2.6 6.5 6",
+    "M16.5 6.2c1.4.3 2.5 1.6 2.5 3.1 0 1.5-1.1 2.8-2.5 3.1",
+    "M18.5 14.3c2.4.6 4.3 2.7 4.7 5.7"
+  ],
+  "briefcase": [
+    "M3.5 8h17v11h-17z",
+    "M8.5 8V6a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2",
+    "M3.5 13.5h17"
+  ],
+  "building": [
+    "M4 21h16",
+    "M6 21V9l5-4 5 4v12",
+    "M10 21v-5h4v5",
+    "M9 11h.01",
+    "M13 11h.01",
+    "M9 15h.01",
+    "M13 15h.01"
+  ],
+  "book-open": [
+    "M12 6.5c-1.8-1.3-4.2-1.8-6.5-1.8-.8 0-1.5.7-1.5 1.5v11c0 .8.7 1.5 1.5 1.5 2.3 0 4.7.5 6.5 1.8",
+    "M12 6.5c1.8-1.3 4.2-1.8 6.5-1.8.8 0 1.5.7 1.5 1.5v11c0 .8-.7 1.5-1.5 1.5-2.3 0-4.7.5-6.5 1.8V6.5z"
+  ]
+};
 
 const structuralLinks = [
   { source: "hub", target: "colleges" },
@@ -49,7 +94,7 @@ const structuralLinks = [
     id,
     name: data.name,
     type: "asset",
-    size: data.size || 12,
+    size: data.size || 17,
     image: data.image || "",
     tags: data.tags || []
   }));
@@ -89,9 +134,9 @@ const structuralLinks = [
   // 3. SIMULATION SETUP
   simulation = d3.forceSimulation(workforceData.nodes)
     .force("link", d3.forceLink(workforceData.links).id(d => d.id).distance(d => {
-        return (d.source.type === "hub" || d.target.type === "hub") ? 35 : 105;
+        return (d.source.type === "hub" || d.target.type === "hub") ? 35 : 130;
     }))
-    .force("charge", d3.forceManyBody().strength(-400))
+    .force("charge", d3.forceManyBody().strength(-550))
     .force("center", d3.forceCenter(width / 2, height / 2));
 
   const link = g.append("g").selectAll("line").data(workforceData.links).join("line")
@@ -112,7 +157,41 @@ const structuralLinks = [
   nodeSelection = node;
 
   node.append("circle").attr("r", d => d.size).attr("fill", d => d.image ? "#ffffff" : colorScale(d.type)).attr("stroke", "#fff")
-    .attr("stroke-width", 2).attr("stroke-dasharray", d => d.image ? "0" : "5,5").attr("opacity", 0.9);
+    .attr("stroke-width", 2)
+    .attr("stroke-dasharray", d => d.type === "asset" && !d.image ? "5,5" : "0")
+    .attr("opacity", 0.9);
+
+  // Render a themed icon inside category ("major-group") nodes so they read
+  // as purposeful, distinct from both the plain hub and the asset logos
+  node.filter(d => d.icon && ICON_PATHS[d.icon])
+    .each(function (d) {
+      const iconWidth = d.size * 1.4; // ~70% of the circle's diameter (d.size*2)
+      const scale = iconWidth / 24;   // icon paths are drawn in a 24x24 viewBox
+      d3.select(this).append("g")
+        .attr("class", "node-icon")
+        .attr("transform", `translate(${-12 * scale},${-12 * scale}) scale(${scale})`)
+        .attr("fill", "none")
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 2)
+        .attr("stroke-linecap", "round")
+        .attr("stroke-linejoin", "round")
+        .selectAll("path")
+        .data(ICON_PATHS[d.icon])
+        .join("path")
+        .attr("d", p => p);
+    });
+
+  // Hub node gets an "MWN" wordmark instead of a photo logo or category icon
+  node.filter(d => d.type === "hub")
+    .append("text")
+    .attr("class", "node-hub-mark")
+    .text("MWN")
+    .attr("text-anchor", "middle")
+    .attr("dy", "0.35em")
+    .attr("fill", "#4a9eff")
+    .attr("font-weight", "700")
+    .attr("font-size", d => d.size * 0.62)
+    .attr("letter-spacing", "0.02em");
 
   // Render logo inside circle for nodes that have an image
   node.filter(d => d.image)
@@ -125,8 +204,13 @@ const structuralLinks = [
     .attr("clip-path", d => `url(#clip-${d.id})`)
     .attr("preserveAspectRatio", "xMidYMid slice");
 
-  node.append("text").text(d => d.name).attr("dy", d => d.size + 18).attr("text-anchor", "middle").attr("fill", "#fff")
+  node.append("text").attr("class", "node-label")
+    .text(d => d.type === "asset" ? truncateLabel(d.name, 24) : d.name)
+    .attr("dy", d => d.size + 18).attr("text-anchor", "middle").attr("fill", "#fff")
     .attr("font-size", d => d.type === "hub" ? "14px" : "11px").style("text-shadow", "1px 1px 2px rgba(0,0,0,0.8)");
+
+  // Native tooltip so a truncated asset name is still readable on hover
+  node.filter(d => d.type === "asset").append("title").text(d => d.name);
 
   // 4. INTERACTION
   node.on("mouseover", function() { d3.select(this).select("circle").attr("stroke-width", 4).attr("filter", "brightness(1.3)"); })

@@ -118,36 +118,6 @@ COMPONENTS CRITERIA FOR INCLUSION:
     transition: color var(--transition-fast);
 }
 
-/* ===== TAG CHIPS (shared: directory + map) ===== */
-.tag-chip-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-    max-width: 700px;
-    margin: 1rem auto 0;
-}
-
-.tag-chip {
-    background: var(--color-bg-surface);
-    border: 1px solid var(--color-border-control);
-    border-radius: var(--radius-pill);
-    color: var(--color-text-secondary);
-    font-family: var(--font-body);
-    font-size: var(--font-size-xs);
-    padding: 0.4rem 0.9rem;
-    cursor: pointer;
-    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
-}
-
-.tag-chip:hover { border-color: var(--color-accent); color: var(--color-text-primary); }
-
-.tag-chip.active {
-    background: var(--color-accent);
-    border-color: var(--color-accent);
-    color: #fff;
-}
-
 .search-clear-btn:hover { color: var(--color-text-primary); }
 
 .control-group {

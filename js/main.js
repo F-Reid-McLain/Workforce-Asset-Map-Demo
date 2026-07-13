@@ -37,9 +37,18 @@ function applySizeScale(val) {
             const nodeId = clipId.replace('clip-', '');
             return (originalSizes[nodeId] || 12) * currentSizeScale;
         });
-    d3.selectAll('g text')
+    d3.selectAll('g.node-icon')
+        .attr('transform', function(d) {
+            const size  = originalSizes[d.id] * currentSizeScale;
+            const scale = (size * 1.4) / 24;
+            return `translate(${-12 * scale},${-12 * scale}) scale(${scale})`;
+        });
+    d3.selectAll('g text.node-label')
         .transition().duration(200)
         .attr('dy', d => (originalSizes[d.id] * currentSizeScale) + 18);
+    d3.selectAll('g text.node-hub-mark')
+        .transition().duration(200)
+        .attr('font-size', d => (originalSizes[d.id] * currentSizeScale) * 0.62);
 }
 
 // Helper: apply hub distance change and sync all hub UI
