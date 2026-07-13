@@ -7,6 +7,13 @@ let simulation, svg, zoom, g;
 let nodeSelection, linkSelection;
 let workforceData; // hoisted so main.js can re-fit the view (e.g. on Reset)
 
+// Snapshot of every node's settled x/y right after the initial warm-start,
+// and the function to restore it — both assigned once init finishes, so
+// main.js's Reset View can put the map back exactly how it looked on load
+// instead of just re-fitting whatever the layout has drifted/been dragged to.
+let initialLayout = null;
+let resetVizLayout = () => {};
+
 // Fixed hue per category — CVD-checked as a set (see dataviz palette) — used
 // for major-group node fill and as the glow/link tint for everything under it,
 // so the map reads as six identifiable neighborhoods instead of one blue blob.
@@ -230,11 +237,16 @@ const structuralLinks = [
   // — fit-to-view below scales to the container either way, so a tighter
   // layout is what actually makes nodes render bigger on screen. Collide
   // padding bumped up to match, or labels on the now-bigger nodes collide.
+  // Named (not just inlined below) so Reset View can re-apply these exact
+  // values later — the hub-distance/size sliders drive a *different*
+  // formula, and applying that on reset would pull the restored snapshot
+  // positions out of equilibrium and let them drift right back off-layout.
+  const HUB_LINK_DISTANCE = 32, ASSET_LINK_DISTANCE = 112, CHARGE_STRENGTH = -500;
   simulation = d3.forceSimulation(workforceData.nodes)
     .force("link", d3.forceLink(workforceData.links).id(d => d.id).distance(d => {
-        return (d.source.type === "hub" || d.target.type === "hub") ? 32 : 112;
+        return (d.source.type === "hub" || d.target.type === "hub") ? HUB_LINK_DISTANCE : ASSET_LINK_DISTANCE;
     }))
-    .force("charge", d3.forceManyBody().strength(-500))
+    .force("charge", d3.forceManyBody().strength(CHARGE_STRENGTH))
     .force("center", d3.forceCenter(width / 2, height / 2))
     // Keeps nodes (and the labels hanging below them) from overlapping —
     // padding is generous since it has to clear the label text, not just the
@@ -396,6 +408,38 @@ const structuralLinks = [
   // full graph is visible on load instead of just its middle.
   renderTick();
   fitVizView(0);
+
+  // Snapshot this settled layout so Reset View can put every node back
+  // exactly here later, instead of just re-fitting the camera to wherever
+  // idle drift or dragging has since carried the (still-live) simulation.
+  initialLayout = {};
+  workforceData.nodes.forEach(d => { initialLayout[d.id] = { x: d.x, y: d.y }; });
+  resetVizLayout = function (duration = 750) {
+    // Re-apply the exact forces the snapshot was settled under — the
+    // hub-distance/size sliders' own formula gives different values, and
+    // restoring positions without also restoring these would leave the
+    // snapshot out of equilibrium, so it'd immediately start drifting again.
+    simulation.force("link").distance(d => (d.source.type === "hub" || d.target.type === "hub") ? HUB_LINK_DISTANCE : ASSET_LINK_DISTANCE);
+    simulation.force("charge", d3.forceManyBody().strength(CHARGE_STRENGTH));
+    // d3-force scales every force by the current alpha each tick — the size/
+    // hub-distance sliders just called alpha(0.4) to visibly "reheat" the
+    // sim for their own change, and applying our restored forces at that
+    // same high energy would perturb the snapshot right back out of place.
+    simulation.alpha(IDLE_ALPHA_TARGET);
+    workforceData.nodes.forEach(d => {
+      const p = initialLayout[d.id];
+      if (p) { d.x = p.x; d.y = p.y; }
+      // Zero out velocity too, not just position — otherwise leftover
+      // momentum from a recent drag or a slider-triggered alpha restart
+      // carries the node away from the restored spot on the next tick.
+      d.vx = 0;
+      d.vy = 0;
+      d.fx = null;
+      d.fy = null;
+    });
+    renderTick();
+    fitVizView(duration);
+  };
 
   // On-load reveal: fade everything in with a stagger that radiates outward
   // from the hub (hub, then categories, then leaf assets), instead of the

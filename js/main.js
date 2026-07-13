@@ -202,9 +202,9 @@ document.addEventListener('keydown', function(e) {
 
 // ===== SHARED RESET LOGIC =====
 function doReset() {
-    fitVizView(750); // reframes to fit every node, not just a fixed 1:1 view
     applyHubDistance(28);
     applySizeScale(1);
+    resetVizLayout(750); // snaps every node back to its page-load position, then reframes
 }
 
 const resetBtn = document.getElementById('reset-btn');
