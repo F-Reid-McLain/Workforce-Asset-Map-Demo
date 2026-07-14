@@ -102,6 +102,10 @@ function openAssetModal(assetId) {
     if (inlinePanel) {
         document.getElementById('viz-info-title').textContent = asset ? asset.name : 'Asset Information';
         document.getElementById('viz-info-body').innerHTML = html;
+        // Without this, clicking a different node while scrolled down keeps
+        // the old scroll offset — the new content jumps in mid-scroll instead
+        // of opening at the top.
+        inlinePanel.scrollTop = 0;
         inlinePanel.classList.add('open');
         return;
     }
