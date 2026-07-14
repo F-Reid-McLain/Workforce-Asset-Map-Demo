@@ -443,6 +443,38 @@ const structuralLinks = [
     if (branchGroup) { branchGroup.remove(); branchGroup = null; branchSatSel = null; branchLineSel = null; }
   }
 
+  // Satellite links lead off-site, so confirm before leaving rather than
+  // opening a new tab the instant a small, easy-to-misclick node is tapped.
+  const linkConfirmModal    = document.getElementById('link-confirm-modal');
+  const linkConfirmLabel    = document.getElementById('link-confirm-label');
+  const linkConfirmOpenBtn  = document.getElementById('link-confirm-open');
+  const linkConfirmCancelBtn = document.getElementById('link-confirm-cancel');
+  const linkConfirmCloseBtn  = document.getElementById('link-confirm-close');
+  let pendingLinkUrl = null;
+
+  function closeLinkConfirm() {
+    if (linkConfirmModal) linkConfirmModal.style.display = "none";
+    pendingLinkUrl = null;
+  }
+
+  function showLinkConfirm(l) {
+    if (!linkConfirmModal) { window.open(l.url, "_blank"); return; } // fallback if markup is ever missing
+    pendingLinkUrl = l.url;
+    linkConfirmLabel.textContent = l.label;
+    linkConfirmModal.style.display = "block";
+  }
+
+  if (linkConfirmOpenBtn) linkConfirmOpenBtn.onclick = () => {
+    if (pendingLinkUrl) window.open(pendingLinkUrl, "_blank");
+    closeLinkConfirm();
+  };
+  if (linkConfirmCancelBtn) linkConfirmCancelBtn.onclick = closeLinkConfirm;
+  if (linkConfirmCloseBtn) linkConfirmCloseBtn.onclick = closeLinkConfirm;
+  if (linkConfirmModal) linkConfirmModal.onclick = (e) => { if (e.target === linkConfirmModal) closeLinkConfirm(); };
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && linkConfirmModal && linkConfirmModal.style.display === 'block') closeLinkConfirm();
+  });
+
   // Spotlight effect: fade every other node/link/particle so the focused
   // node (and any satellites, which live in their own branchGroup and are
   // untouched by this) reads clearly instead of competing visually with
@@ -452,13 +484,40 @@ const structuralLinks = [
     focusDimActive = active;
     node.transition().duration(400).style("opacity", d => active ? (d === focusedNode ? 1 : 0.15) : 1);
     link.transition().duration(400).style("opacity", active ? 0.08 : 1);
+    // Every node's own text label — including the focused node's — hides
+    // while focused. The panel already shows the focused node's full name,
+    // and a node label sitting right where satellites fan out was the
+    // single biggest source of unreadable overlapping text.
+    node.select(".node-label").transition().duration(250).style("opacity", active ? 0 : 1);
+  }
+
+  // The info panel covers part of #network-visualization (left strip in
+  // landscape, bottom strip in portrait) without shrinking that element, so
+  // centering against its full rect puts focused clusters partly behind the
+  // panel. This returns the actual unobstructed area to center within.
+  function getSafeViewportRect() {
+    const containerRect = document.getElementById('network-visualization').getBoundingClientRect();
+    const panelEl = document.getElementById('viz-info-panel');
+    let left = 0, top = 0, width = containerRect.width, height = containerRect.height;
+    if (panelEl && panelEl.classList.contains('open')) {
+      const panelRect = panelEl.getBoundingClientRect();
+      if (window.matchMedia("(orientation: landscape)").matches) {
+        left = panelRect.width;
+        width = containerRect.width - panelRect.width;
+      } else {
+        height = containerRect.height - panelRect.height;
+      }
+    }
+    return { left, top, width, height };
   }
 
   function focusOnCluster(cx, cy, extent, duration) {
-    const r = document.getElementById('network-visualization').getBoundingClientRect();
+    const safe = getSafeViewportRect();
     const pad = 70;
-    const scale = Math.max(0.5, Math.min((r.width - pad * 2) / (extent * 2), (r.height - pad * 2) / (extent * 2), 2.5));
-    const transform = d3.zoomIdentity.translate(r.width / 2 - scale * cx, r.height / 2 - scale * cy).scale(scale);
+    const scale = Math.max(0.5, Math.min((safe.width - pad * 2) / (extent * 2), (safe.height - pad * 2) / (extent * 2), 2.5));
+    const targetX = safe.left + safe.width / 2;
+    const targetY = safe.top + safe.height / 2;
+    const transform = d3.zoomIdentity.translate(targetX - scale * cx, targetY - scale * cy).scale(scale);
     if (duration > 0) svg.transition().duration(duration).call(zoom.transform, transform);
     else svg.call(zoom.transform, transform);
   }
@@ -492,8 +551,12 @@ const structuralLinks = [
     branchSatSel = branchGroup.append("g").selectAll("g").data(links).join("g")
       .attr("class", "branch-satellite")
       .style("cursor", "pointer")
-      .on("click", (_e, l) => window.open(l.url, "_blank"));
+      .on("click", (_e, l) => showLinkConfirm(l));
+    // Classed so main.js's broad "g circle" node-size selector (which reads
+    // originalSizes by node id) skips these — they're bound to link data,
+    // not node data, and would otherwise resolve to NaN.
     branchSatSel.append("circle")
+      .attr("class", "branch-node-circle")
       .attr("r", BRANCH_NODE_R).attr("fill", color).attr("fill-opacity", 0.3)
       .attr("stroke", color).attr("stroke-width", 1.5);
     branchSatSel.append("text")

@@ -107,6 +107,23 @@
         </div>
     </div>
 
+    <!-- Confirm before leaving the site via a related-program link -->
+    <div id="link-confirm-modal" class="modal">
+        <div class="modal-content link-confirm-content">
+            <div class="modal-header">
+                <h2>Open External Link?</h2>
+                <span class="close" id="link-confirm-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Open <strong id="link-confirm-label"></strong> in a new tab?</p>
+                <div class="link-confirm-actions">
+                    <button class="control-btn" id="link-confirm-cancel">Cancel</button>
+                    <button class="control-btn control-btn--accent" id="link-confirm-open">Open in New Tab</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="main-footer">
         <div class="main-footer__wrapper">
             <div class="main-footer__inner">

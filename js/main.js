@@ -22,7 +22,7 @@ function applySizeScale(val) {
     if (fsSizeSlider) fsSizeSlider.value = val;
     document.getElementById('size-value').textContent = val.toFixed(1);
     if (fsSizeValue) fsSizeValue.textContent = val.toFixed(1);
-    d3.selectAll('.asset-node circle, g circle:not(.flow-particle)')
+    d3.selectAll('.asset-node circle, g circle:not(.flow-particle):not(.branch-node-circle)')
         .transition().duration(200)
         .attr('r', d => originalSizes[d.id] * currentSizeScale);
     d3.selectAll('g image')
@@ -202,6 +202,9 @@ document.addEventListener('keydown', function(e) {
 
 // ===== SHARED RESET LOGIC =====
 function doReset() {
+    collapseBranch(0); // clear any focused node/satellites first, or they'd be left stranded mid-reset
+    const panel = document.getElementById('viz-info-panel');
+    if (panel) panel.classList.remove('open');
     applyHubDistance(28);
     applySizeScale(1.5);
     resetVizLayout(750); // snaps every node back to its page-load position, then reframes

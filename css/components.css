@@ -88,6 +88,34 @@ COMPONENTS CRITERIA FOR INCLUSION:
 
 .control-btn:hover, .directory-link:hover { background-color: #444; }
 
+.control-btn--accent {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+.control-btn--accent:hover { background-color: var(--color-accent); opacity: 0.85; }
+
+/* ===== LINK CONFIRMATION MODAL (map satellite nodes) ===== */
+.link-confirm-content { max-width: 420px; }
+
+.link-confirm-content .modal-body p {
+    margin: 0 0 1.25rem;
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-body);
+}
+
+.link-confirm-content .modal-body strong { color: var(--color-accent); }
+
+.link-confirm-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.link-confirm-actions .control-btn { padding: 0.6rem 1.25rem; }
+
 /* ===== ICON BUTTON (circular, low-emphasis — e.g. report download) ===== */
 .icon-btn {
     display: inline-flex;
