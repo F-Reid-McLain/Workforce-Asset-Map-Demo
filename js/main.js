@@ -46,9 +46,12 @@ function applySizeScale(val) {
     d3.selectAll('g text.node-label')
         .transition().duration(200)
         .attr('dy', d => (originalSizes[d.id] * currentSizeScale) + 18);
-    d3.selectAll('g text.node-hub-mark')
+    d3.selectAll('g.node-hub-mark')
         .transition().duration(200)
-        .attr('font-size', d => (originalSizes[d.id] * currentSizeScale) * 0.62);
+        .attr('transform', d => {
+            const size = originalSizes[d.id] * currentSizeScale;
+            return `scale(${(size * 0.9) / 183.5}) translate(-200,-200)`;
+        });
 }
 
 // Helper: apply hub distance change and sync all hub UI

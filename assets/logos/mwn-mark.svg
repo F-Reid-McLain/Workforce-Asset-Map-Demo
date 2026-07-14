@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <circle cx="200" cy="200" r="182" fill="none" stroke="#cccccc" stroke-width="14"/>
+  <path d="M20,184.085L164.724,52.47L164.724,52.47L182.458,89.371L221.394,115.101L272.289,108.439L354.688,144.271L354.688,144.271L380,164.265L312.483,266.527L289.693,265.786L290.657,322.595L306.905,347.53L306.905,347.53L244.857,344.452L210.451,329.338L210.451,329.338L178.32,331.647L109.56,301.349L23.999,215.301Z"
+        transform="translate(200,200) scale(0.72) translate(-200,-200)"
+        fill="none" stroke="#cccccc" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+  <text x="200" y="222" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        font-weight="800" font-size="92" letter-spacing="1" fill="#cccccc" transform="translate(200,200) scale(0.72) translate(-200,-200)">MWN</text>
+</svg>

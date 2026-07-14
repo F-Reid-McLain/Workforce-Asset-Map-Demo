@@ -231,7 +231,7 @@ const structuralLinks = [
   function fillColor(d) {
     if (d.logoBg) return d.logoBg;
     if (d.image) return "#ffffff";
-    if (d.type === "hub") return "#ffffff";
+    if (d.type === "hub") return "#3a3a3a"; // monochrome grey badge, matches the favicon
     if (d.type === "major-group") return CATEGORY_COLORS[d.id] || colorScale(d.type);
     return CATEGORY_COLORS[d.category] || colorScale(d.type);
   }
@@ -349,7 +349,8 @@ const structuralLinks = [
     .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
   nodeSelection = node;
 
-  node.append("circle").attr("r", d => d.size).attr("fill", fillColor).attr("stroke", "#e7decf")
+  node.append("circle").attr("r", d => d.size).attr("fill", fillColor)
+    .attr("stroke", d => d.type === "hub" ? "#888888" : "#e7decf")
     .attr("stroke-width", 2)
     .attr("stroke-dasharray", d => d.type === "asset" && !d.image && !d.placeholder ? "5,5" : "0")
     .attr("opacity", 0.9)
@@ -376,20 +377,33 @@ const structuralLinks = [
         .attr("d", p => p);
     });
 
-  // Hub node gets an "MWN" wordmark instead of a photo logo or category icon.
-  // Footer's dark background color, not the gold accent — gold-on-white
-  // circle only clears ~2.5:1 contrast, well under WCAG's 3:1 floor even
-  // for bold/large text.
-  node.filter(d => d.type === "hub")
-    .append("text")
+  // Hub node gets the site's own mark — Bibb County's outline with "MWN"
+  // set inside it — instead of a photo logo or category icon. Drawn at its
+  // native 400x400 coordinates and scaled/recentered into the hub circle's
+  // local origin; the shape's own farthest vertex is 183.5 units from its
+  // center, so scale 0.147 brings that in to ~27, just inside the hub's
+  // r=30 circle. Light grey on the hub's dark grey fill — same monochrome
+  // badge as the site favicon, no gold or white.
+  const HUB_MARK_PATH = "M20,184.085L164.724,52.47L164.724,52.47L182.458,89.371L221.394,115.101L272.289,108.439L354.688,144.271L354.688,144.271L380,164.265L312.483,266.527L289.693,265.786L290.657,322.595L306.905,347.53L306.905,347.53L244.857,344.452L210.451,329.338L210.451,329.338L178.32,331.647L109.56,301.349L23.999,215.301Z";
+  const hubMark = node.filter(d => d.type === "hub")
+    .append("g")
     .attr("class", "node-hub-mark")
+    .attr("transform", d => `scale(${(d.size * 0.9) / 183.5}) translate(-200,-200)`);
+  hubMark.append("path")
+    .attr("d", HUB_MARK_PATH)
+    .attr("fill", "none")
+    .attr("stroke", "#cccccc")
+    .attr("stroke-width", 7)
+    .attr("stroke-linejoin", "round")
+    .attr("stroke-linecap", "round");
+  hubMark.append("text")
     .text("MWN")
     .attr("text-anchor", "middle")
-    .attr("dy", "0.35em")
-    .attr("fill", "#252525")
+    .attr("x", 196).attr("y", 222)
+    .attr("fill", "#cccccc")
     .attr("font-weight", "700")
-    .attr("font-size", d => d.size * 0.62)
-    .attr("letter-spacing", "0.02em");
+    .attr("font-size", 88)
+    .attr("letter-spacing", 2);
 
   // "Other" catch-all nodes get an ellipsis instead of a photo logo or category icon
   node.filter(d => d.placeholder === "dots")
