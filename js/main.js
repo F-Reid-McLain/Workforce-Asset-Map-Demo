@@ -2,7 +2,7 @@
 
 let hubDistance = 28;
 const assetRatio = 3.0;
-let currentSizeScale = 1.5;
+let currentSizeScale = 1; // 1 = the map's normal/default node size (see originalSizes in viz-engine.js)
 
 // Sliders (below-viz controls)
 const hubDistanceSlider = document.getElementById('hub-distance-slider');
@@ -206,7 +206,7 @@ function doReset() {
     const panel = document.getElementById('viz-info-panel');
     if (panel) panel.classList.remove('open');
     applyHubDistance(28);
-    applySizeScale(1.5);
+    applySizeScale(1);
     resetVizLayout(750); // snaps every node back to its page-load position, then reframes
 }
 

@@ -188,7 +188,11 @@ const structuralLinks = [
     links: [...structuralLinks, ...assetLinks]
   };
 
-  workforceData.nodes.forEach(node => { originalSizes[node.id] = node.size; });
+  // The *1.5 bakes in what used to be the slider's default multiplier, so
+  // that main.js's new default of currentSizeScale = 1 renders every node
+  // at exactly the same size as before — only the slider's own numbering
+  // changed (old 1.5 default -> new 1 default), not any actual node size.
+  workforceData.nodes.forEach(node => { originalSizes[node.id] = node.size * 1.5; });
 
   const container = d3.select("#network-visualization");
   const containerRect = container.node().getBoundingClientRect();
@@ -658,10 +662,10 @@ const structuralLinks = [
     fitVizView(duration);
   };
 
-  // Node Size defaults to 1.5, not 1.0 — reuses the same slider machinery
-  // a manual drag would, so it stays in sync with the slider's displayed
-  // value and with what Reset View restores.
-  applySizeScale(1.5);
+  // Reuses the same slider machinery a manual drag would, so it stays in
+  // sync with the slider's displayed value and with what Reset View
+  // restores. 1 = the map's normal default size (see originalSizes above).
+  applySizeScale(1);
 
   // On-load reveal: fade everything in with a stagger that radiates outward
   // from the hub (hub, then categories, then leaf assets), instead of the
