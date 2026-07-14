@@ -379,12 +379,36 @@ body {
 .page-jumpnav a:hover { color: var(--color-text-primary); background: var(--color-bg-surface-deep); }
 .page-jumpnav a.active { color: #1a1a1a; background: var(--color-accent); font-weight: 600; }
 
-@media (max-width: 1400px) {
-    .page-jumpnav { display: none; }
-}
-
-/* Scroll targets land clear of the fixed header */
+/* Scroll targets land clear of the fixed header — the media query below
+   raises this further once the jump nav goes back into document flow. */
 .stats-section, .section { scroll-margin-top: 80px; }
+
+/* Below 1400px there's no longer room for a left rail without it sitting on
+   top of the content column — fall back to the horizontal pill bar this
+   started as, sticky under the header instead of fixed to an edge. Keeps
+   the nav available on tablets and phones instead of just disappearing. */
+@media (max-width: 1400px) {
+    .page-jumpnav {
+        position: sticky;
+        top: 62px; /* matches .main-header's rendered height */
+        left: auto;
+        z-index: 200;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: auto;
+        gap: 8px;
+        border-radius: var(--radius-pill);
+        margin-bottom: 2.5rem;
+    }
+    .page-jumpnav a {
+        padding: 0.35rem 0.85rem;
+        border-radius: var(--radius-pill);
+        overflow: visible;
+        text-overflow: initial;
+    }
+    .stats-section, .section { scroll-margin-top: 130px; }
+}
 
 /* ===== RESPONSIVE BASE ===== */
 @media (max-width: 768px) {
