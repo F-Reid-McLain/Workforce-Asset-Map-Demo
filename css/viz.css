@@ -690,19 +690,14 @@
     gap: 16px;
 }
 
-.occ-demand-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 16px;
-    margin-top: 16px;
-}
-
 .occ-chart-card {
     background: var(--color-bg-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     padding: 18px 20px;
 }
+
+.occ-chart-card--wide { margin-top: 16px; }
 
 .occ-chart-title {
     font-size: 0.78rem;
@@ -725,11 +720,38 @@
     flex-shrink: 0;
 }
 
+/* Tab row replacing the old 3-up Job Exits / Transfers / Net Growth grid —
+   same info, one chart at a time, a fraction of the vertical space. */
+.occ-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.occ-tab {
+    background: none;
+    border: 1px solid var(--color-border-control);
+    border-radius: var(--radius-pill);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    padding: 0.35rem 1rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.occ-tab:hover { color: var(--color-text-primary); border-color: var(--color-text-secondary); }
+.occ-tab.active { background: var(--color-accent); border-color: var(--color-accent); color: #1a1a1a; font-weight: 600; }
+
+/* Mid-width label column for the 2-up Growing/Paying charts — narrower than
+   the full-width wide-label charts but still wider than the tight 3-up
+   demographics grid, since these SOC group names run long. */
+.demo-bar-label.mid-label { width: 190px; }
+
 /* ===== RESPONSIVE (workforce data sections) ===== */
 @media (max-width: 900px) {
     .demo-grid { grid-template-columns: 1fr; }
     .occ-charts-grid { grid-template-columns: 1fr; }
-    .occ-demand-grid { grid-template-columns: 1fr; }
     .demo-stat-grid { grid-template-columns: repeat(2, 1fr); }
     #region-map { height: 480px; }
 }
@@ -739,6 +761,7 @@
        screens — shrink it so the track stays visible (still truncates
        via ellipsis, same as the default 120px label). */
     .demo-bar-label.wide-label { width: 130px; }
+    .demo-bar-label.mid-label { width: 110px; }
 }
 
 /* ===== MOBILE VIZ ===== */

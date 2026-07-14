@@ -2,8 +2,9 @@
     'use strict';
 
     // ===== THEME =====
+    // accent matches --color-accent (Chamber Gold) in theme.css.
     const C = {
-        accent: '#4a9eff',
+        accent: '#afa66d',
         teal:   '#2dd4bf',
     };
 
@@ -11,13 +12,13 @@
     function parseNum(str) {
         return parseInt(String(str).replace(/,/g, ''), 10);
     }
-    function truncate(str, n) {
-        return str.length > n ? str.slice(0, n - 1) + '…' : str;
-    }
 
     // Same horizontal bar-row markup used by the Demographics/Occupation
     // Intelligence panels, so these two charts read as part of the same
-    // component family instead of a separate SVG-chart style.
+    // component family instead of a separate SVG-chart style. Labels are
+    // left full-length — CSS's own white-space/ellipsis truncation (see
+    // .demo-bar-label) clips them based on actual rendered width instead
+    // of a fixed character count.
     function renderBarRows(containerId, rows, color) {
         const el = document.getElementById(containerId);
         if (!el) return;
@@ -26,7 +27,7 @@
         const max = Math.max(...rows.map(r => r.value));
         el.innerHTML = rows.map(r => `
             <div class="demo-bar-row">
-                <div class="demo-bar-label wide-label" title="${r.label}">${truncate(r.label, 34)}</div>
+                <div class="demo-bar-label wide-label" title="${r.label}">${r.label}</div>
                 <div class="demo-bar-track">
                     <div class="demo-bar-fill" style="width:${max ? (r.value / max * 100).toFixed(1) : 0}%;background:${color};"></div>
                 </div>

@@ -42,8 +42,19 @@
                 </div>
             </section>
 
+            <!-- In-page section nav -->
+            <nav class="page-jumpnav" aria-label="Page sections">
+                <a href="#section-kpis">Key Indicators</a>
+                <a href="#section-region">Regional Context</a>
+                <a href="#section-adjusted">Adjusted Picture</a>
+                <a href="#section-industries">Industries</a>
+                <a href="#section-demographics">Demographics</a>
+                <a href="#section-occupations">Occupations</a>
+                <a href="#section-hiring">Hiring Demand</a>
+            </nav>
+
             <!-- Hero KPIs -->
-            <section class="stats-section">
+            <section class="stats-section" id="section-kpis">
                 <h3>Key Economic Indicators
                     <span class="info-btn-wrap">
                         <button type="button" class="info-btn" aria-label="About this data">i</button>
@@ -83,7 +94,7 @@
         </div>
 
         <!-- Regional Map -->
-        <div class="section">
+        <div class="section" id="section-region">
             <div class="section-label teal">Regional Context</div>
             <div class="section-title">Regional Commuting Patterns
                 <span class="info-btn-wrap">
@@ -101,7 +112,7 @@
         <hr class="section-divider">
 
         <!-- Adjusted Metrics -->
-        <div class="section">
+        <div class="section" id="section-adjusted">
             <div class="section-label teal">Beyond the Headline Numbers</div>
             <div class="section-title">Macon-Bibb's Adjusted Economic Picture</div>
             <p class="section-desc">About 40% of workers employed in Macon-Bibb live outside it. Standard Census metrics follow the worker home — understating the county's income and overstating its neighbors'. The figures below are adjusted for where the work actually happens.</p>
@@ -155,30 +166,36 @@
                 </div>
             </div>
 
-            <div class="adj-callouts">
-                <div class="adj-callout">
-                    <div class="adj-callout-val teal">60–70%</div>
-                    <div class="adj-callout-desc">of retail spending in Macon-Bibb originates from <strong>non-residents</strong> — commuters and regional visitors — a direct economic multiplier not captured in local income surveys.</div>
-                </div>
-                <div class="adj-callout">
-                    <div class="adj-callout-val teal">~$50K</div>
-                    <div class="adj-callout-desc">Houston County's workplace-adjusted household income <strong>drops below $50,000</strong> once commuter wage flows are removed — reversing its perceived advantage over Macon-Bibb.</div>
-                </div>
-                <div class="adj-callout">
-                    <div class="adj-callout-val teal">Near Full</div>
-                    <div class="adj-callout-desc">Occupancy of Bibb County Industrial Authority parcels as of 2024 — indicating tight supply and strong demand for industrial space in the region.</div>
-                </div>
+            <div class="chart-expand-row">
+                <button class="chart-expand-btn" id="adj-context-toggle">▼ Show Supporting Context</button>
             </div>
 
-            <div class="adj-source">
-                Source: George, A. (2025). <em>Reclassifying Municipal Realities: How Regional Data Distortions Undermine Investment in Middle Georgia.</em> Data derived from U.S. Census Quick Facts, BLS, LEHD/LODES Origin-Destination Employment Statistics, and BEA GDP data.
+            <div class="adj-context" id="adj-context">
+                <div class="adj-callouts">
+                    <div class="adj-callout">
+                        <div class="adj-callout-val teal">60–70%</div>
+                        <div class="adj-callout-desc">of retail spending in Macon-Bibb originates from <strong>non-residents</strong> — commuters and regional visitors — a direct economic multiplier not captured in local income surveys.</div>
+                    </div>
+                    <div class="adj-callout">
+                        <div class="adj-callout-val teal">~$50K</div>
+                        <div class="adj-callout-desc">Houston County's workplace-adjusted household income <strong>drops below $50,000</strong> once commuter wage flows are removed — reversing its perceived advantage over Macon-Bibb.</div>
+                    </div>
+                    <div class="adj-callout">
+                        <div class="adj-callout-val teal">Near Full</div>
+                        <div class="adj-callout-desc">Occupancy of Bibb County Industrial Authority parcels as of 2024 — indicating tight supply and strong demand for industrial space in the region.</div>
+                    </div>
+                </div>
+
+                <div class="adj-source">
+                    Source: George, A. (2025). <em>Reclassifying Municipal Realities: How Regional Data Distortions Undermine Investment in Middle Georgia.</em> Data derived from U.S. Census Quick Facts, BLS, LEHD/LODES Origin-Destination Employment Statistics, and BEA GDP data.
+                </div>
             </div>
         </div>
 
         <hr class="section-divider">
 
         <!-- Industry Treemap -->
-        <div class="section">
+        <div class="section" id="section-industries">
             <div class="section-label">Industry Landscape</div>
             <div class="section-title">Where Macon Works
                 <span class="info-btn-wrap">
@@ -202,7 +219,7 @@
         <hr class="section-divider">
 
         <!-- Demographics -->
-        <div class="section">
+        <div class="section" id="section-demographics">
             <div class="section-label orange">Workforce Demographics</div>
             <div class="section-title">Who Lives Here
                 <span class="info-btn-wrap">
@@ -253,7 +270,7 @@
         <hr class="section-divider">
 
         <!-- Occupations -->
-        <div class="section">
+        <div class="section" id="section-occupations">
             <div class="section-label teal">Top Occupations</div>
             <div class="section-title">In-Demand Roles
                 <span class="info-btn-wrap">
@@ -308,29 +325,21 @@
                 </div>
             </div>
 
-            <div class="occ-demand-grid">
-                <div class="occ-chart-card">
-                    <div class="occ-chart-title">Job Exits</div>
-                    <div class="occ-chart-sub">Workers permanently leaving the occupation annually</div>
-                    <div id="occ-exits"></div>
+            <div class="occ-chart-card occ-chart-card--wide">
+                <div class="occ-tabs" role="tablist" aria-label="Occupation demand metric">
+                    <button class="occ-tab active" data-metric="exits" role="tab" aria-selected="true">Job Exits</button>
+                    <button class="occ-tab" data-metric="transfers" role="tab" aria-selected="false">Occupational Transfers</button>
+                    <button class="occ-tab" data-metric="netgrowth" role="tab" aria-selected="false">Net New Positions</button>
                 </div>
-                <div class="occ-chart-card">
-                    <div class="occ-chart-title">Occupational Transfers</div>
-                    <div class="occ-chart-sub">Workers moving into a different occupation annually</div>
-                    <div id="occ-transfers"></div>
-                </div>
-                <div class="occ-chart-card">
-                    <div class="occ-chart-title">Net New Positions</div>
-                    <div class="occ-chart-sub">Projected net employment growth (absolute jobs added)</div>
-                    <div id="occ-net-growth"></div>
-                </div>
+                <div class="occ-chart-sub" id="occ-demand-sub">Workers permanently leaving the occupation annually</div>
+                <div id="occ-demand-chart"></div>
             </div>
         </div>
 
         <hr class="section-divider">
 
         <!-- Hiring Demand -->
-        <div class="section">
+        <div class="section" id="section-hiring">
             <div class="section-label orange">Hiring Demand</div>
             <div class="section-title">Where Employers Are Hiring Now
                 <span class="info-btn-wrap">

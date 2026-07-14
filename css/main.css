@@ -5,6 +5,10 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: var(--font-body);
     background-color: var(--color-bg-page);
@@ -339,6 +343,49 @@ body {
     margin-top: 1.25rem;
 }
 
+/* ===== IN-PAGE JUMP NAV (workforce data page) ===== */
+/* Fixed to the left edge, out of document flow, so it's visible the
+   instant the page loads and stays put through the entire scroll instead
+   of only sticking once you've scrolled down to where it originally sat.
+   Only enough room on wide viewports (see media query below) — on
+   anything narrower it'd sit on top of the 1200px content column. */
+.page-jumpnav {
+    position: fixed;
+    top: 100px;
+    left: 24px;
+    z-index: 250; /* below .main-header (300), above page content */
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 190px;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 10px;
+}
+
+.page-jumpnav a {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    padding: 0.45rem 0.7rem;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all var(--transition-fast);
+}
+
+.page-jumpnav a:hover { color: var(--color-text-primary); background: var(--color-bg-surface-deep); }
+.page-jumpnav a.active { color: #1a1a1a; background: var(--color-accent); font-weight: 600; }
+
+@media (max-width: 1400px) {
+    .page-jumpnav { display: none; }
+}
+
+/* Scroll targets land clear of the fixed header */
+.stats-section, .section { scroll-margin-top: 80px; }
+
 /* ===== RESPONSIVE BASE ===== */
 @media (max-width: 768px) {
     .viz-header h2, .page-header h2 { font-size: 2rem; }
@@ -593,6 +640,15 @@ body {
 .adj-row-val.highlight { color: var(--color-accent-teal); }
 .adj-row-val.muted { color: var(--color-text-muted); font-weight: 500; font-size: 0.9rem; }
 .adj-divider { border: none; border-top: 1px solid var(--color-border); margin: 4px 0; }
+
+/* Supplementary factoids + citation — collapsed by default so the section
+   leads with the three core comparisons, not a wall of supporting text. */
+.adj-context {
+    display: none;
+    margin-top: 16px;
+}
+
+.adj-context.open { display: block; }
 
 .adj-callouts {
     display: grid;

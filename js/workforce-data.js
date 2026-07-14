@@ -2,12 +2,14 @@
     'use strict';
 
     // ===== THEME =====
+    // accent matches --color-accent (Chamber Gold) in theme.css — kept in
+    // sync manually since these charts are hand-rolled SVG/HTML, not CSS.
     const C = {
-        accent:        '#4a9eff',
-        accentHover:   '#3a8eef',
+        accent:        '#afa66d',
+        accentHover:   '#9d9356',
+        accentLight:   '#d7d2b5', // lightened accent — map stroke/highlight text
         teal:          '#2dd4bf',
         orange:        '#fb923c',
-        green:         '#66bb6a',
         bgSurface:     '#2d2d2d',
         bgSurfaceDeep: '#252525',
         textPrimary:   '#ffffff',
@@ -35,27 +37,37 @@
     }
 
     // ===== INDUSTRY CONFIG (2-digit NAICS prefix -> sector) =====
+    // Colors: the three largest/most-referenced sectors are pinned to the
+    // site's actual accent trio (teal/orange/gold) so the treemap ties back
+    // to the same brand vocabulary as the rest of the site; the remaining
+    // sectors use a golden-angle hue rotation (a fixed ~137.5° step) so that
+    // sectors adjacent in the treemap's size-sorted layout stay visually
+    // distinct, at a saturation/lightness band that matches the pinned three
+    // instead of the old grab-bag of bright Tailwind pastels. Every cell is
+    // always directly labeled with its name, so hue is a wayfinding aid here,
+    // not the sole identifier — full CVD-safe separation across all 20 isn't
+    // the goal the way it would be for a legend-dependent chart.
     const INDUSTRIES = {
-        '11': { name: 'Agriculture, Forestry & Fishing',   prefixes: ['11'],           color: '#86efac' },
-        '21': { name: 'Mining & Oil and Gas',               prefixes: ['21'],           color: '#fcd34d' },
-        '22': { name: 'Utilities',                          prefixes: ['22'],           color: '#67e8f9' },
-        '23': { name: 'Construction',                       prefixes: ['23'],           color: '#fdba74' },
-        '31': { name: 'Manufacturing',                      prefixes: ['31', '32', '33'], color: '#93c5fd' },
-        '42': { name: 'Wholesale Trade',                    prefixes: ['42'],           color: '#5eead4' },
-        '44': { name: 'Retail Trade',                       prefixes: ['44', '45'],     color: '#f9a8d4' },
-        '48': { name: 'Transportation & Warehousing',       prefixes: ['48', '49'],     color: '#fca5a5' },
-        '51': { name: 'Information',                        prefixes: ['51'],           color: '#c4b5fd' },
-        '52': { name: 'Finance & Insurance',                prefixes: ['52'],           color: '#7dd3fc' },
-        '53': { name: 'Real Estate',                        prefixes: ['53'],           color: '#6ee7b7' },
-        '54': { name: 'Professional & Technical Services',  prefixes: ['54'],           color: '#a5b4fc' },
-        '55': { name: 'Management of Companies',            prefixes: ['55'],           color: '#94a3b8' },
-        '56': { name: 'Administrative & Support',           prefixes: ['56'],           color: '#fde68a' },
-        '61': { name: 'Educational Services',                prefixes: ['61'],           color: '#bef264' },
-        '62': { name: 'Health Care & Social Assistance',    prefixes: ['62'],           color: '#34d399' },
-        '71': { name: 'Arts & Entertainment',                prefixes: ['71'],           color: '#f9a8d4' },
+        '11': { name: 'Agriculture, Forestry & Fishing',   prefixes: ['11'],           color: '#5857c1' },
+        '21': { name: 'Mining & Oil and Gas',               prefixes: ['21'],           color: '#bc5ec9' },
+        '22': { name: 'Utilities',                          prefixes: ['22'],           color: '#b9c775' },
+        '23': { name: 'Construction',                       prefixes: ['23'],           color: '#a8c775' },
+        '31': { name: 'Manufacturing',                      prefixes: ['31', '32', '33'], color: '#7cc775' },
+        '42': { name: 'Wholesale Trade',                    prefixes: ['42'],           color: '#c95e63' },
+        '44': { name: 'Retail Trade',                       prefixes: ['44', '45'],     color: '#afa66d' },
+        '48': { name: 'Transportation & Warehousing',       prefixes: ['48', '49'],     color: '#6e57c1' },
+        '51': { name: 'Information',                        prefixes: ['51'],           color: '#c95e9d' },
+        '52': { name: 'Finance & Insurance',                prefixes: ['52'],           color: '#5ec98f' },
+        '53': { name: 'Real Estate',                        prefixes: ['53'],           color: '#9157c1' },
+        '54': { name: 'Professional & Technical Services',  prefixes: ['54'],           color: '#577ac1' },
+        '55': { name: 'Management of Companies',            prefixes: ['55'],           color: '#75c78a' },
+        '56': { name: 'Administrative & Support',           prefixes: ['56'],           color: '#b275c7' },
+        '61': { name: 'Educational Services',                prefixes: ['61'],           color: '#c95e86' },
+        '62': { name: 'Health Care & Social Assistance',    prefixes: ['62'],           color: '#2dd4bf' },
+        '71': { name: 'Arts & Entertainment',                prefixes: ['71'],           color: '#8dc775' },
         '72': { name: 'Accommodation & Food Services',      prefixes: ['72'],           color: '#fb923c' },
-        '81': { name: 'Other Services',                      prefixes: ['81'],           color: '#a1a1aa' },
-        '92': { name: 'Public Administration',                prefixes: ['92'],           color: '#818cf8' },
+        '81': { name: 'Other Services',                      prefixes: ['81'],           color: '#579ec1' },
+        '92': { name: 'Public Administration',                prefixes: ['92'],           color: '#c95ec0' },
     };
 
     function sectorFor(naics) {
@@ -185,14 +197,18 @@
     }
 
     // ===== SHARED HORIZONTAL BAR ROWS (demographics + occupation intelligence) =====
-    function renderBars(containerId, items, color, formatVal) {
+    // Labels are handed to the DOM in full and left to CSS's own
+    // white-space/ellipsis truncation (see .demo-bar-label) rather than
+    // pre-cut to a fixed character count — a fixed cutoff clips long names
+    // even in the wider label columns that have room to show them in full.
+    function renderBars(containerId, items, color, formatVal, labelClass) {
         const el = document.getElementById(containerId);
         if (!el || !items.length) { if (el) el.innerHTML = ''; return; }
-        const max   = Math.max(...items.map(i => i.v));
-        const trunc = s => s.length > 30 ? s.slice(0, 29) + '…' : s;
+        const max = Math.max(...items.map(i => i.v));
+        const cls = 'demo-bar-label' + (labelClass ? ' ' + labelClass : '');
         el.innerHTML = items.map(({ label, v }) => `
             <div class="demo-bar-row">
-                <div class="demo-bar-label" title="${label}">${trunc(String(label))}</div>
+                <div class="${cls}" title="${label}">${label}</div>
                 <div class="demo-bar-track">
                     <div class="demo-bar-fill" style="width:${max ? (v / max * 100).toFixed(1) : 0}%;background:${color};"></div>
                 </div>
@@ -351,31 +367,56 @@
 
         renderBars('occ-proj-growth',
             projGroups.filter(g => g.v > 0).sort((a, b) => b.v - a.v).slice(0, 8),
-            C.teal, fmtPct);
+            C.teal, fmtPct, 'mid-label');
 
         renderBars('occ-wage-mean',
             base.filter(r => toNum(r['Mean Ann Wages2']) > 0)
                 .sort((a, b) => toNum(b['Mean Ann Wages2']) - toNum(a['Mean Ann Wages2'])).slice(0, 8)
                 .map(r => ({ label: r['Occupation'], v: toNum(r['Mean Ann Wages2']) })),
-            C.orange, fmtWage);
+            C.orange, fmtWage, 'mid-label');
 
-        renderBars('occ-exits',
-            base.filter(noTotal).filter(r => toNum(r['Exits']) > 0)
-                .sort((a, b) => toNum(b['Exits']) - toNum(a['Exits'])).slice(0, 5)
-                .map(r => ({ label: r['Occupation'], v: toNum(r['Exits']) })),
-            C.orange, fmtNum);
+        // Job Exits / Occupational Transfers / Net New Positions share one
+        // full-width chart behind a tab switcher instead of three stacked
+        // cards — same information, a fraction of the vertical space, and
+        // the full-width column gives labels room to not truncate as hard.
+        const DEMAND_METRICS = {
+            exits: {
+                sub: 'Workers permanently leaving the occupation annually', color: C.orange,
+                data: base.filter(noTotal).filter(r => toNum(r['Exits']) > 0)
+                    .sort((a, b) => toNum(b['Exits']) - toNum(a['Exits'])).slice(0, 5)
+                    .map(r => ({ label: r['Occupation'], v: toNum(r['Exits']) })),
+            },
+            transfers: {
+                sub: 'Workers moving into a different occupation annually', color: C.accent,
+                data: base.filter(noTotal).filter(r => toNum(r['Transfers']) > 0)
+                    .sort((a, b) => toNum(b['Transfers']) - toNum(a['Transfers'])).slice(0, 5)
+                    .map(r => ({ label: r['Occupation'], v: toNum(r['Transfers']) })),
+            },
+            netgrowth: {
+                sub: 'Projected net employment growth (absolute jobs added)', color: C.teal,
+                data: base.filter(noTotal).filter(r => toNum(r['Empl Growth']) > 0)
+                    .sort((a, b) => toNum(b['Empl Growth']) - toNum(a['Empl Growth'])).slice(0, 5)
+                    .map(r => ({ label: r['Occupation'], v: toNum(r['Empl Growth']) })),
+            },
+        };
 
-        renderBars('occ-transfers',
-            base.filter(noTotal).filter(r => toNum(r['Transfers']) > 0)
-                .sort((a, b) => toNum(b['Transfers']) - toNum(a['Transfers'])).slice(0, 5)
-                .map(r => ({ label: r['Occupation'], v: toNum(r['Transfers']) })),
-            C.accent, fmtNum);
+        const tabs  = document.querySelectorAll('.occ-tab');
+        const subEl = document.getElementById('occ-demand-sub');
 
-        renderBars('occ-net-growth',
-            base.filter(noTotal).filter(r => toNum(r['Empl Growth']) > 0)
-                .sort((a, b) => toNum(b['Empl Growth']) - toNum(a['Empl Growth'])).slice(0, 5)
-                .map(r => ({ label: r['Occupation'], v: toNum(r['Empl Growth']) })),
-            C.green, fmtNum);
+        function renderDemand(metric) {
+            const m = DEMAND_METRICS[metric];
+            if (!m) return;
+            if (subEl) subEl.textContent = m.sub;
+            renderBars('occ-demand-chart', m.data, m.color, fmtNum, 'wide-label');
+            tabs.forEach(t => {
+                const active = t.dataset.metric === metric;
+                t.classList.toggle('active', active);
+                t.setAttribute('aria-selected', String(active));
+            });
+        }
+
+        tabs.forEach(t => t.addEventListener('click', () => renderDemand(t.dataset.metric)));
+        renderDemand('exits');
     }
 
     // ===== REGIONAL MAP =====
@@ -436,7 +477,7 @@
                 .datum(bibbFeature)
                 .attr('d', pathGen)
                 .attr('fill', 'none')
-                .attr('stroke', '#7ec1ff')
+                .attr('stroke', C.accentLight)
                 .attr('stroke-width', 2);
         }
 
@@ -465,7 +506,7 @@
                     .attr('font-size', 13).attr('font-weight', 700).attr('fill', '#ffffff');
                 g.append('text').text(popStr)
                     .attr('text-anchor', 'middle').attr('dy', '5')
-                    .attr('font-size', 11).attr('fill', '#e8f3ff');
+                    .attr('font-size', 11).attr('fill', C.accentLight);
                 g.append('text').text(commStr)
                     .attr('text-anchor', 'middle').attr('dy', '19')
                     .attr('font-size', 9.5).attr('fill', '#bbf7d0');
@@ -540,7 +581,7 @@
 
         // Legend box (SVG, included in PNG export)
         const LEG_ITEMS = [
-            { color: C.accent, stroke: '#7ec1ff', label: 'Macon-Bibb County' },
+            { color: C.accent, stroke: C.accentLight, label: 'Macon-Bibb County' },
             { color: C.orange, label: 'Negative net commuting' },
             { color: C.teal,   label: 'Positive net commuting' },
         ];
@@ -658,4 +699,41 @@
 
     document.addEventListener('click', closeAll);
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAll(); });
+})();
+
+/* ===== ADJUSTED PICTURE — supporting context toggle ===== */
+(function () {
+    const btn = document.getElementById('adj-context-toggle');
+    const box = document.getElementById('adj-context');
+    if (!btn || !box) return;
+    btn.addEventListener('click', () => {
+        const open = box.classList.toggle('open');
+        btn.textContent = open ? '▲ Hide Supporting Context' : '▼ Show Supporting Context';
+    });
+})();
+
+/* ===== IN-PAGE JUMP NAV — active section highlight ===== */
+(function () {
+    const links = Array.from(document.querySelectorAll('.page-jumpnav a'));
+    if (!links.length) return;
+
+    const sections = links
+        .map(a => document.getElementById(a.getAttribute('href').slice(1)))
+        .filter(Boolean);
+
+    const setActive = (id) => {
+        links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        // Pick the entry closest to the top of the viewport among those
+        // currently intersecting, so the highlight tracks scroll position
+        // even when several tall sections are on screen at once.
+        const visible = entries.filter(e => e.isIntersecting);
+        if (!visible.length) return;
+        visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        setActive(visible[0].target.id);
+    }, { rootMargin: '-140px 0px -70% 0px', threshold: 0 });
+
+    sections.forEach(s => observer.observe(s));
 })();
