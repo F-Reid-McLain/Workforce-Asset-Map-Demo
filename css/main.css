@@ -289,25 +289,6 @@ body {
     color: var(--color-accent);
 }
 
-.chart-download-btn {
-    position: absolute;
-    right: 0;
-    background: none;
-    border: 1px solid var(--color-border-control);
-    border-radius: var(--radius-pill);
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
-    padding: 0.35rem 0.8rem;
-    text-decoration: none;
-    cursor: pointer;
-    transition: border-color var(--transition-fast), color var(--transition-fast);
-}
-
-.chart-download-btn:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-}
-
 /* ===== PAGE HEADERS ===== */
 .visualization-section {
     text-align: center;
@@ -337,10 +318,6 @@ body {
     color: var(--color-text-secondary);
     max-width: 800px;
     margin: 0 auto;
-}
-
-.page-header-actions {
-    margin-top: 1.25rem;
 }
 
 /* ===== IN-PAGE JUMP NAV (workforce data page) ===== */
@@ -384,30 +361,10 @@ body {
 .stats-section, .section { scroll-margin-top: 80px; }
 
 /* Below 1400px there's no longer room for a left rail without it sitting on
-   top of the content column — fall back to the horizontal pill bar this
-   started as, sticky under the header instead of fixed to an edge. Keeps
-   the nav available on tablets and phones instead of just disappearing. */
+   top of the content column, and no horizontal fallback either — just
+   hide it and let mobile/tablet scroll normally. */
 @media (max-width: 1400px) {
-    .page-jumpnav {
-        position: sticky;
-        top: 62px; /* matches .main-header's rendered height */
-        left: auto;
-        z-index: 200;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        width: auto;
-        gap: 8px;
-        border-radius: var(--radius-pill);
-        margin-bottom: 2.5rem;
-    }
-    .page-jumpnav a {
-        padding: 0.35rem 0.85rem;
-        border-radius: var(--radius-pill);
-        overflow: visible;
-        text-overflow: initial;
-    }
-    .stats-section, .section { scroll-margin-top: 130px; }
+    .page-jumpnav { display: none; }
 }
 
 /* ===== RESPONSIVE BASE ===== */

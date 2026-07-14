@@ -116,51 +116,23 @@ COMPONENTS CRITERIA FOR INCLUSION:
 
 .link-confirm-actions .control-btn { padding: 0.6rem 1.25rem; }
 
-/* ===== ICON BUTTON (circular, low-emphasis — e.g. report download) ===== */
-.icon-btn {
+/* ===== SUBTLE LINK (report download, footer of workforce data page) ===== */
+.page-footer-actions {
+    text-align: center;
+    margin: 3rem 0 1rem;
+}
+
+.subtle-link {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid var(--color-border);
-    background: transparent;
+    gap: 0.4rem;
+    font-size: var(--font-size-xs);
     color: var(--color-text-muted);
-    font-size: 1rem;
     text-decoration: none;
-    cursor: pointer;
-    transition: border-color var(--transition-fast), color var(--transition-fast);
-}
-
-.icon-btn:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-}
-
-/* Icon + always-visible caption, e.g. the report download button */
-.icon-btn-group {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.65rem;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.icon-btn-caption {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
     transition: color var(--transition-fast);
 }
 
-.icon-btn-group:hover .icon-btn {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-}
-
-.icon-btn-group:hover .icon-btn-caption {
-    color: var(--color-accent);
-}
+.subtle-link:hover { color: var(--color-text-secondary); }
 
 /* ===== INFO BUTTON + POPOVER (chart data/source explanations) ===== */
 .info-btn-wrap {

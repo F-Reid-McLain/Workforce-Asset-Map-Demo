@@ -6,10 +6,11 @@
     // sync manually since these charts are hand-rolled SVG/HTML, not CSS.
     const C = {
         accent:        '#afa66d',
-        accentHover:   '#9d9356',
-        accentLight:   '#d7d2b5', // lightened accent — map stroke/highlight text
         teal:          '#2dd4bf',
         orange:        '#fb923c',
+        maconGreen:      '#16a34a', // Regional map — Macon-Bibb County highlight
+        maconGreenLight: '#5cdc8b', // lightened — map stroke/highlight text
+        lightestGreen:   '#bbf7d0', // Regional map — Wilkinson County (barely-positive net commuting)
         bgSurface:     '#2d2d2d',
         bgSurfaceDeep: '#252525',
         textPrimary:   '#ffffff',
@@ -18,7 +19,8 @@
         border:        '#444444',
     };
 
-    const BIBB = '13021';
+    const BIBB      = '13021';
+    const WILKINSON = '13319'; // only county with positive net commuting right now — called out as the palest green on the regional map
 
     // ===== HELPERS =====
     function toNum(v) {
@@ -443,7 +445,8 @@
         const maxNeg  = Math.max(0, ...nonBibb.filter(([, v]) => v <= 0).map(([, v]) => -v));
 
         const countyFill = fips => {
-            if (fips === BIBB) return C.accent;
+            if (fips === BIBB) return C.maconGreen;
+            if (fips === WILKINSON) return C.lightestGreen;
             const comm = commLookup[fips] || 0;
             if (comm > 0) {
                 const t = comm / (maxPos || 1);
@@ -477,7 +480,7 @@
                 .datum(bibbFeature)
                 .attr('d', pathGen)
                 .attr('fill', 'none')
-                .attr('stroke', C.accentLight)
+                .attr('stroke', C.maconGreenLight)
                 .attr('stroke-width', 2);
         }
 
@@ -496,9 +499,13 @@
                 ? `+${Math.round(comm).toLocaleString()} net`
                 : `net: ${Math.round(comm).toLocaleString()}`;
 
+            // Wilkinson's fill is near-white, so the usual white text +
+            // dark shadow (built for the mid/dark fills every other county
+            // uses) would be unreadable — flip to dark text with no shadow.
+            const isWilkinson = fips === WILKINSON;
             const g = labelG.append('g')
                 .attr('transform', `translate(${cx},${cy})`)
-                .style('text-shadow', '1px 1px 2px rgba(0,0,0,0.85)');
+                .style('text-shadow', isWilkinson ? 'none' : '1px 1px 2px rgba(0,0,0,0.85)');
 
             if (isBibb) {
                 g.append('text').text('Macon-Bibb')
@@ -506,7 +513,7 @@
                     .attr('font-size', 13).attr('font-weight', 700).attr('fill', '#ffffff');
                 g.append('text').text(popStr)
                     .attr('text-anchor', 'middle').attr('dy', '5')
-                    .attr('font-size', 11).attr('fill', C.accentLight);
+                    .attr('font-size', 11).attr('fill', C.maconGreenLight);
                 g.append('text').text(commStr)
                     .attr('text-anchor', 'middle').attr('dy', '19')
                     .attr('font-size', 9.5).attr('fill', '#bbf7d0');
@@ -518,12 +525,12 @@
                 const fs = Math.max(7, Math.min(10, minDim / 6));
                 g.append('text').text(name)
                     .attr('text-anchor', 'middle').attr('dy', minDim < 42 ? '-2' : '-5')
-                    .attr('font-size', fs).attr('font-weight', 600).attr('fill', '#ffffff');
+                    .attr('font-size', fs).attr('font-weight', 600).attr('fill', isWilkinson ? '#1a3a26' : '#ffffff');
                 g.append('text').text(popStr)
                     .attr('text-anchor', 'middle').attr('dy', '8')
-                    .attr('font-size', fs - 1).attr('fill', '#d8d8d8');
+                    .attr('font-size', fs - 1).attr('fill', isWilkinson ? '#3d5b4a' : '#d8d8d8');
                 if (minDim >= 42) {
-                    const commColor = comm > 0 ? '#bbf7d0' : '#fed7aa';
+                    const commColor = isWilkinson ? C.maconGreen : (comm > 0 ? '#bbf7d0' : '#fed7aa');
                     g.append('text').text(commStr)
                         .attr('text-anchor', 'middle').attr('dy', '20')
                         .attr('font-size', fs - 1).attr('fill', commColor);
@@ -543,7 +550,7 @@
                 const name   = nameLookup[fips] || 'Unknown';
                 const pop    = (popLookup[fips] || 0).toLocaleString();
                 const comm   = commLookup[fips] || 0;
-                const commColor = isBibb ? C.accent : (comm > 0 ? C.teal : C.orange);
+                const commColor = isBibb ? C.maconGreen : (fips === WILKINSON ? C.maconGreenLight : (comm > 0 ? C.teal : C.orange));
                 const commLine  = `Net commuting balance: <strong style="color:${commColor}">${comm > 0 ? '+' : ''}${Math.round(comm).toLocaleString()}</strong>`;
                 tip.innerHTML = `<strong style="display:block;margin-bottom:3px">${name} County</strong>Population: <strong>${pop}</strong><br>${commLine}`;
                 const rect = container.getBoundingClientRect();
@@ -574,16 +581,16 @@
             .attr('stroke', C.border).attr('stroke-width', 1);
         statsG.append('text').text(fmt(bibbPop))
             .attr('x', 12).attr('y', 63)
-            .attr('font-size', 19).attr('font-weight', 700).attr('fill', C.accent).attr('letter-spacing', '-0.03em');
+            .attr('font-size', 19).attr('font-weight', 700).attr('fill', C.maconGreen).attr('letter-spacing', '-0.03em');
         statsG.append('text').text('MACON-BIBB POPULATION')
             .attr('x', 12).attr('y', 75)
             .attr('font-size', 7).attr('font-weight', 600).attr('fill', C.textMuted).attr('letter-spacing', '0.05em');
 
         // Legend box (SVG, included in PNG export)
         const LEG_ITEMS = [
-            { color: C.accent, stroke: C.accentLight, label: 'Macon-Bibb County' },
+            { color: C.maconGreen, stroke: C.maconGreenLight, label: 'Macon-Bibb County' },
             { color: C.orange, label: 'Negative net commuting' },
-            { color: C.teal,   label: 'Positive net commuting' },
+            { color: C.lightestGreen, stroke: C.maconGreen, label: 'Positive net commuting' },
         ];
         const legW = 158, legH = 14 + LEG_ITEMS.length * 18 + 8;
         const legX = W - legW - 12, legY = H - legH - 12;

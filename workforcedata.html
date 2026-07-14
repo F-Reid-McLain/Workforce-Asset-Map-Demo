@@ -34,12 +34,6 @@
             <section class="page-header">
                 <h2>Macon-Bibb County Workforce Data</h2>
                 <p>Economic indicators and workforce trends for the Greater Macon region</p>
-                <div class="page-header-actions">
-                    <a href="reports/macon-overview.pdf" download class="icon-btn-group" title="Download Regional Overview Report (PDF)">
-                        <span class="icon-btn" aria-hidden="true">&#11015;</span>
-                        <span class="icon-btn-caption">Download PDF</span>
-                    </a>
-                </div>
             </section>
 
             <!-- In-page section nav -->
@@ -358,7 +352,6 @@
                 <div id="hiring-chart" class="chart"></div>
                 <div class="chart-expand-row">
                     <button class="chart-expand-btn" id="hiring-toggle">▼ Show All Industries</button>
-                    <a href="data/Top Hiring Industries.csv" download class="chart-download-btn">&#11015; Download CSV</a>
                 </div>
             </div>
 
@@ -368,9 +361,15 @@
                 <div id="employers-chart" class="chart"></div>
                 <div class="chart-expand-row">
                     <button class="chart-expand-btn" id="employers-toggle">▼ Show All Employers</button>
-                    <a href="data/Bibb Top Employers.csv" download class="chart-download-btn">&#11015; Download CSV</a>
                 </div>
             </div>
+        </div>
+
+        <div class="page-footer-actions">
+            <a href="reports/macon-overview.pdf" download class="subtle-link">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Regional Overview (PDF)
+            </a>
         </div>
     </main>
 
