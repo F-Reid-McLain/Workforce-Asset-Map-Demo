@@ -214,6 +214,23 @@
     top: 3.5rem;
 }
 
+/* Phones: the Size + Hub Distance + Reset row doesn't fit alongside
+   anything else at this width. Move it to the bottom (stacked, so it
+   fits regardless of exact screen width) and let search reclaim the
+   top-center spot instead of sharing it. */
+@media (max-width: 600px) {
+    .viz-fs-controls {
+        top: auto;
+        bottom: 0.75rem;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .viz-container.fullscreen .viz-search {
+        top: 0.75rem;
+    }
+}
+
 .viz-search-input-row {
     display: flex;
     align-items: center;

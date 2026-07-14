@@ -15,7 +15,14 @@
 
     window.addEventListener('scroll', function () {
         const currentY = window.scrollY;
-        if (currentY > lastY + THRESHOLD) {
+        // Mobile rubber-band overscroll at the top fires scroll events with
+        // a real delta even though the user hasn't actually scrolled down —
+        // that was tripping the hide logic and hiding the nav (hamburger
+        // included) right at the top of the page until the next upward
+        // scroll cleared it. Never hide while at/near the top.
+        if (currentY <= 0) {
+            header.classList.remove('header-hidden');
+        } else if (currentY > lastY + THRESHOLD) {
             header.classList.add('header-hidden');
         } else if (currentY < lastY - THRESHOLD) {
             header.classList.remove('header-hidden');
