@@ -187,8 +187,13 @@ const structuralLinks = [
   workforceData.nodes.forEach(node => { originalSizes[node.id] = node.size; });
 
   const container = d3.select("#network-visualization");
-  const width = container.node().getBoundingClientRect().width;
-  const height = 612; // Fixed height for consistency
+  const containerRect = container.node().getBoundingClientRect();
+  const width = containerRect.width;
+  // Read the actual rendered height instead of hardcoding it — the mobile
+  // media query shrinks the container to 391px, and a mismatched viewBox
+  // (sized for the desktop 612px) makes the SVG's default "meet" scaling
+  // letterbox everything toward the top instead of filling the box.
+  const height = containerRect.height;
 
   svg = container.append("svg")
     .attr("width", "100%")
