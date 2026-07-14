@@ -48,6 +48,7 @@ function setupModalListeners() {
     if (vizInfoClose) {
         vizInfoClose.onclick = () => {
             document.getElementById('viz-info-panel').classList.remove('open');
+            collapseBranch(); // tear down any branched-out related-program nodes too
         };
     }
 

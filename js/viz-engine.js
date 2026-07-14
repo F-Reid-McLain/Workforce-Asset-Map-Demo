@@ -14,6 +14,11 @@ let workforceData; // hoisted so main.js can re-fit the view (e.g. on Reset)
 let initialLayout = null;
 let resetVizLayout = () => {};
 
+// Branch-out state — set when a node with "Related Programs" links is
+// clicked; main.js's panel-close handler calls collapseBranch() to tear it
+// down. Assigned once init finishes, same pattern as resetVizLayout above.
+let collapseBranch = () => {};
+
 // Fixed hue per category — drawn from the site footer's Choose Macon brand
 // palette (the gradient stripe's red/gold/blue/cream) so the map and footer
 // read as one system, with a darker tonal variant of red and blue added to
@@ -40,10 +45,8 @@ const HUB_ACCENT = "#afa66d";
 // over both and break the hover brighten.
 const GLOW_FILTER = "drop-shadow(0 0 1px currentColor) drop-shadow(0 0 4px currentColor)";
 
-// Simulation never fully cools to this floor instead of 0, so the graph
-// keeps a faint perpetual drift at rest instead of freezing solid.
-// main.js's drag handler restores this same value on drag-end.
-const IDLE_ALPHA_TARGET = 0.008;
+// Simulation settles to a complete stop once alpha decays to 0 (the
+// default) — no perpetual idle drift.
 
 // Asset names run long ("Macon-Bibb County Office of Workforce Development") —
 // truncate the always-on label so the map stays scannable; the full name is
@@ -172,7 +175,8 @@ const structuralLinks = [
     logoFit: data.logoFit || "cover",
     logoBg: data.logoBg || "",
     placeholder: data.placeholder || "",
-    tags: data.tags || []
+    tags: data.tags || [],
+    links: data.links || []
   }));
 
   const assetLinks = Object.entries(assetsJson)
@@ -415,27 +419,142 @@ const structuralLinks = [
   node.filter(d => d.type === "asset").append("title").text(d => d.name);
 
   // 4. INTERACTION
+
+  // "Branch-out": clicking a node with Related Programs links spawns a
+  // small satellite node per link, radiating out from the parent, and
+  // zooms the camera in to frame the cluster. Each satellite shows its
+  // program's description on hover and opens its link on click. Clicking
+  // ANY asset node zooms in on it, whether or not it has links.
+  let branchGroup = null, branchSatSel = null, branchLineSel = null;
+  let focusedNode = null; // whichever asset node the camera is currently zoomed in on
+  const BRANCH_RADIUS = 85, BRANCH_NODE_R = 11;
+
+  function updateBranchPositions() {
+    if (!branchGroup || !focusedNode) return;
+    const px = focusedNode.x, py = focusedNode.y;
+    branchSatSel.attr("transform", l => `translate(${px + BRANCH_RADIUS * Math.cos(l.__angle)},${py + BRANCH_RADIUS * Math.sin(l.__angle)})`);
+    branchLineSel
+      .attr("x1", px).attr("y1", py)
+      .attr("x2", l => px + BRANCH_RADIUS * Math.cos(l.__angle))
+      .attr("y2", l => py + BRANCH_RADIUS * Math.sin(l.__angle));
+  }
+
+  function removeBranchGroup() {
+    if (branchGroup) { branchGroup.remove(); branchGroup = null; branchSatSel = null; branchLineSel = null; }
+  }
+
+  // Spotlight effect: fade every other node/link/particle so the focused
+  // node (and any satellites, which live in their own branchGroup and are
+  // untouched by this) reads clearly instead of competing visually with
+  // whatever it happens to sit near or overlap on screen.
+  let focusDimActive = false;
+  function setFocusDim(active) {
+    focusDimActive = active;
+    node.transition().duration(400).style("opacity", d => active ? (d === focusedNode ? 1 : 0.15) : 1);
+    link.transition().duration(400).style("opacity", active ? 0.08 : 1);
+  }
+
+  function focusOnCluster(cx, cy, extent, duration) {
+    const r = document.getElementById('network-visualization').getBoundingClientRect();
+    const pad = 70;
+    const scale = Math.max(0.5, Math.min((r.width - pad * 2) / (extent * 2), (r.height - pad * 2) / (extent * 2), 2.5));
+    const transform = d3.zoomIdentity.translate(r.width / 2 - scale * cx, r.height / 2 - scale * cy).scale(scale);
+    if (duration > 0) svg.transition().duration(duration).call(zoom.transform, transform);
+    else svg.call(zoom.transform, transform);
+  }
+
+  function branchOutNode(d) {
+    removeBranchGroup();
+    const links = d.links;
+    const color = glowColor(d);
+
+    // Fan the satellites out AWAY from the hub, through the parent, instead
+    // of surrounding it on all sides — they read as "extending outward"
+    // rather than crowding whatever's already next to the parent toward
+    // the hub's side.
+    const hub = workforceData.nodes.find(n => n.id === "hub");
+    const baseAngle = hub ? Math.atan2(d.y - hub.y, d.x - hub.x) : -Math.PI / 2;
+    const spreadDeg = links.length <= 1 ? 0 : Math.min(150, 40 + (links.length - 1) * 25);
+    const spreadRad = spreadDeg * Math.PI / 180;
+    links.forEach((l, i) => {
+      const t = links.length === 1 ? 0 : (i / (links.length - 1)) - 0.5;
+      l.__angle = baseAngle + t * spreadRad;
+    });
+
+    branchGroup = g.append("g").attr("class", "node-branch");
+    // pointer-events:none — these converge exactly on the parent node's
+    // center and render on top of it (appended after), so without this
+    // they'd steal the click meant for re-clicking the node to collapse.
+    branchLineSel = branchGroup.append("g").selectAll("line").data(links).join("line")
+      .attr("stroke", color).attr("stroke-width", 1.5).attr("stroke-opacity", 0.55)
+      .style("pointer-events", "none");
+
+    branchSatSel = branchGroup.append("g").selectAll("g").data(links).join("g")
+      .attr("class", "branch-satellite")
+      .style("cursor", "pointer")
+      .on("click", (_e, l) => window.open(l.url, "_blank"));
+    branchSatSel.append("circle")
+      .attr("r", BRANCH_NODE_R).attr("fill", color).attr("fill-opacity", 0.3)
+      .attr("stroke", color).attr("stroke-width", 1.5);
+    branchSatSel.append("text")
+      .text(l => truncateLabel(l.label, 20))
+      .attr("text-anchor", "middle").attr("dy", BRANCH_NODE_R + 13)
+      .attr("fill", "#fff").attr("font-size", "9px")
+      .style("text-shadow", "1px 1px 2px rgba(0,0,0,0.8)");
+    branchSatSel.append("title").text(l => l.description || l.label);
+
+    updateBranchPositions();
+    focusOnCluster(d.x, d.y, BRANCH_RADIUS + BRANCH_NODE_R + 40, 700);
+  }
+
+  collapseBranch = function (duration = 600) {
+    if (!focusedNode) return;
+    removeBranchGroup();
+    focusedNode = null;
+    setFocusDim(false);
+    fitVizView(duration);
+  };
+
   node.on("mouseover", function() { d3.select(this).select("circle").attr("stroke-width", 4).attr("filter", GLOW_FILTER + " brightness(1.3)"); })
       .on("mouseout", function() { d3.select(this).select("circle").attr("stroke-width", 2).attr("filter", GLOW_FILTER); })
-      .on("click", (_e, d) => { if (d.type === "asset") openAssetModal(d.id); })
+      .on("click", (_e, d) => {
+        if (d.type !== "asset") return;
+        openAssetModal(d.id);
+        if (focusedNode === d) { collapseBranch(); return; }
+        removeBranchGroup();
+        focusedNode = d;
+        setFocusDim(true);
+        if (d.links && d.links.length) branchOutNode(d);
+        else focusOnCluster(d.x, d.y, d.size + 80, 700);
+      })
       .style("cursor", d => d.type === "asset" ? "pointer" : "default");
 
+  // Structural positions only — driven by the simulation's own "tick" event,
+  // which (with no idle drift) only fires during an active drag/slider
+  // change/reset, not perpetually.
   function renderTick() {
     link.attr("x1", d => d.source.x).attr("y1", d => d.source.y).attr("x2", d => d.target.x).attr("y2", d => d.target.y);
     node.attr("transform", d => `translate(${d.x},${d.y})`);
-    if (particle) {
-      const now = Date.now();
-      // Counter-scaled against the current zoom so the dot stays a constant
-      // on-screen size — at a heavily zoomed-out fit (e.g. a narrow mobile
-      // container) a fixed SVG-unit radius shrinks to sub-pixel and vanishes.
-      const particleR = Math.max(1.5, Math.min(6, 2.5 / currentZoomScale));
-      particle
-        .attr("r", particleR)
-        .attr("cx", d => { const t = ((now + d.__phase) % PARTICLE_PERIOD) / PARTICLE_PERIOD; return d.__flowFrom.x + (d.__flowTo.x - d.__flowFrom.x) * t; })
-        .attr("cy", d => { const t = ((now + d.__phase) % PARTICLE_PERIOD) / PARTICLE_PERIOD; return d.__flowFrom.y + (d.__flowTo.y - d.__flowFrom.y) * t; })
-        // sin envelope: fades in leaving the outer node, peaks mid-link, fades out arriving
-        .attr("opacity", d => Math.sin((((now + d.__phase) % PARTICLE_PERIOD) / PARTICLE_PERIOD) * Math.PI) * 0.85);
-    }
+    if (branchGroup) updateBranchPositions();
+  }
+
+  // The flowing particles are a time-based animation, not a position-based
+  // one — they need to keep animating even while the simulation itself has
+  // settled and stopped ticking, so they run on their own perpetual d3.timer
+  // instead of piggybacking on renderTick.
+  function updateParticles() {
+    if (!particle) return;
+    const now = Date.now();
+    // Counter-scaled against the current zoom so the dot stays a constant
+    // on-screen size — at a heavily zoomed-out fit (e.g. a narrow mobile
+    // container) a fixed SVG-unit radius shrinks to sub-pixel and vanishes.
+    const particleR = Math.max(1.5, Math.min(6, 2.5 / currentZoomScale));
+    particle
+      .attr("r", particleR)
+      .attr("cx", d => { const t = ((now + d.__phase) % PARTICLE_PERIOD) / PARTICLE_PERIOD; return d.__flowFrom.x + (d.__flowTo.x - d.__flowFrom.x) * t; })
+      .attr("cy", d => { const t = ((now + d.__phase) % PARTICLE_PERIOD) / PARTICLE_PERIOD; return d.__flowFrom.y + (d.__flowTo.y - d.__flowFrom.y) * t; })
+      // sin envelope: fades in leaving the outer node, peaks mid-link, fades out arriving
+      .attr("opacity", d => Math.sin((((now + d.__phase) % PARTICLE_PERIOD) / PARTICLE_PERIOD) * Math.PI) * 0.85 * (focusDimActive ? 0.1 : 1));
   }
 
   // Paint the warm-started layout immediately, then frame it — rather than
@@ -460,7 +579,7 @@ const structuralLinks = [
     // hub-distance sliders just called alpha(0.4) to visibly "reheat" the
     // sim for their own change, and applying our restored forces at that
     // same high energy would perturb the snapshot right back out of place.
-    simulation.alpha(IDLE_ALPHA_TARGET);
+    simulation.alpha(0);
     workforceData.nodes.forEach(d => {
       const p = initialLayout[d.id];
       if (p) { d.x = p.x; d.y = p.y; }
@@ -489,10 +608,13 @@ const structuralLinks = [
     link.style("opacity", 0).transition().delay(d => Math.max(depthOf(d.source), depthOf(d.target)) * 220 + Math.random() * 150 - 80).duration(400).style("opacity", 1);
   }
 
-  simulation.alphaTarget(IDLE_ALPHA_TARGET).restart();
+  // No idle-drift restart here — the simulation stays settled at rest until
+  // a drag/slider/reset explicitly reheats it. The tick handler stays
+  // registered so it fires correctly whenever that next happens.
   simulation.on("tick", renderTick);
+  if (particle) d3.timer(updateParticles);
 
   function dragstarted(event, d) { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; }
   function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
-  function dragended(event, d) { if (!event.active) simulation.alphaTarget(IDLE_ALPHA_TARGET); d.fx = null; d.fy = null; }
+  function dragended(event, d) { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }
 })();
