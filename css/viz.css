@@ -782,12 +782,24 @@
 }
 
 /* ===== MOBILE VIZ ===== */
+/* Desktop never shows the categories-only mode or its toggle — the map
+   always shows everything above this breakpoint (matches the JS check in
+   viz-engine.js: window.innerWidth <= 768). Targeted by ID, not class —
+   .controls-row--actions .control-btn in components.css has equal
+   specificity to a two-class selector here and loads after this file, so
+   it would win the display property regardless of what this file says.
+   IDs outrank that unambiguously. */
+#mobile-map-toggle, #fs-mobile-map-toggle { display: none; }
+
 @media (max-width: 768px) {
     .viz-container, #network-visualization, #network-visualization svg {
         height: 391px;
         min-height: 391px;
     }
     .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+    #mobile-map-toggle { display: inline-block; }
+    #fs-mobile-map-toggle { display: flex; }
 
     /* show/hide toggled by JS in enterInteractiveMode / exitInteractiveMode */
 }

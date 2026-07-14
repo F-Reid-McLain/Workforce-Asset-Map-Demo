@@ -19,6 +19,24 @@ let resetVizLayout = () => {};
 // down. Assigned once init finishes, same pattern as resetVizLayout above.
 let collapseBranch = () => {};
 
+// Mobile category-collapse state — on narrow screens the map starts showing
+// only the hub + 6 category nodes, with every org pinned invisibly on top of
+// its own category, so the initial layout is compact instead of spreading
+// out for orgs nobody can see yet. Tapping a category releases (and a
+// second tap re-pins) just that category's orgs. Read by computeFitTransform
+// below (module scope, like workforceData) so the camera only frames what's
+// actually visible; the toggle function is reassigned once init finishes,
+// same pattern as resetVizLayout/collapseBranch above.
+let collapseCategoriesOnMobile = false;
+let expandedCategoryId = null;
+let setCategoriesCollapsed = () => {};
+
+function isNodeVisible(d) {
+  if (d.type !== "asset") return true;
+  if (!collapseCategoriesOnMobile) return true;
+  return d.category === expandedCategoryId;
+}
+
 // Fixed hue per category — drawn from the site footer's Choose Macon brand
 // palette (the gradient stripe's red/gold/blue/cream) so the map and footer
 // read as one system, with a darker tonal variant of red and blue added to
@@ -61,7 +79,7 @@ function truncateLabel(name, maxLen) {
 function computeFitTransform(width, height, padding = 45) {
   if (!workforceData || !workforceData.nodes.length) return d3.zoomIdentity;
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  workforceData.nodes.forEach(d => {
+  workforceData.nodes.filter(isNodeVisible).forEach(d => {
     const r = d.size + 20; // clear the label hanging below each node
     minX = Math.min(minX, d.x - r);
     maxX = Math.max(maxX, d.x + r);
@@ -194,6 +212,11 @@ const structuralLinks = [
   // changed (old 1.5 default -> new 1 default), not any actual node size.
   workforceData.nodes.forEach(node => { originalSizes[node.id] = node.size * 1.5; });
 
+  // Narrow screens start with categories collapsed — see the module-level
+  // comment above collapseCategoriesOnMobile for why.
+  const MOBILE_BREAKPOINT = 768;
+  collapseCategoriesOnMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+
   const container = d3.select("#network-visualization");
   const containerRect = container.node().getBoundingClientRect();
   const width = containerRect.width;
@@ -300,6 +323,32 @@ const structuralLinks = [
   // instead of the starting jumble.
   simulation.stop();
   for (let i = 0; i < 300; i++) simulation.tick();
+
+  // Pins every org exactly on top of its category — invisible (opacity is
+  // applied further down) and out of the way, so the collapsed mobile view
+  // settles as a compact hub+categories layout instead of one that's still
+  // spread out to make room for orgs nobody can see yet. Re-settle briefly
+  // afterward so the categories re-balance now that their pinned children
+  // aren't pulling/pushing them outward like a full graph would.
+  function pinAllAssetsToCategories() {
+    workforceData.nodes.forEach(n => {
+      if (n.type !== "asset") return;
+      const cat = workforceData.nodes.find(c => c.id === n.category);
+      if (!cat) return;
+      // Tiny per-node offset so pinned siblings aren't perfectly coincident —
+      // a zero-distance start makes the charge force's direction undefined
+      // for an instant when they're later released together.
+      const jitter = (n.id.charCodeAt(0) % 7) - 3;
+      n.x = cat.x + jitter; n.y = cat.y + jitter;
+      n.fx = n.x; n.fy = n.y;
+      n.vx = 0; n.vy = 0;
+    });
+  }
+
+  if (collapseCategoriesOnMobile) {
+    pinAllAssetsToCategories();
+    for (let i = 0; i < 120; i++) simulation.tick();
+  }
 
   // A link's color follows whichever end is the category node — asset links
   // read as belonging to their category's color, hub links stay gold.
@@ -461,6 +510,88 @@ const structuralLinks = [
     if (branchGroup) { branchGroup.remove(); branchGroup = null; branchSatSel = null; branchLineSel = null; }
   }
 
+  // Mobile category-collapse — applies the current isNodeVisible() state to
+  // the already-created node/link/particle selections (nothing is ever
+  // added or removed from the DOM; hidden orgs just sit pinned and invisible
+  // on their category, per pinAllAssetsToCategories above).
+  function updateMobileVisibility(withTransition) {
+    (withTransition ? node.transition().duration(500) : node)
+      .style("opacity", d => isNodeVisible(d) ? 1 : 0);
+    node.style("pointer-events", d => isNodeVisible(d) ? null : "none");
+    (withTransition ? link.transition().duration(500) : link)
+      .style("opacity", d => (isNodeVisible(d.source) && isNodeVisible(d.target)) ? 1 : 0);
+    if (particle) particle.style("display", d => (isNodeVisible(d.source) && isNodeVisible(d.target)) ? null : "none");
+    node.filter(d => d.type === "major-group")
+      .style("cursor", collapseCategoriesOnMobile ? "pointer" : "default");
+  }
+
+  // Snaps a category's orgs back onto it (using its CURRENT position, which
+  // may have moved since they were last pinned — e.g. a hub-distance/size
+  // slider change) and re-fixes them there.
+  function collapseCategory(catId) {
+    const cat = workforceData.nodes.find(n => n.id === catId);
+    if (!cat) return;
+    workforceData.nodes.forEach(n => {
+      if (n.type === "asset" && n.category === catId) { n.fx = cat.x; n.fy = cat.y; }
+    });
+  }
+
+  // Releases a category's orgs from its current position and lets the
+  // existing link/charge/collide forces carry them out to a natural resting
+  // spot — no manual animation needed, the live simulation ticking each
+  // frame (renderTick, already wired below) already smoothly interpolates
+  // position, exactly like a slider change or drag does today.
+  function expandCategory(catNode) {
+    workforceData.nodes.forEach(n => {
+      if (n.type !== "asset" || n.category !== catNode.id) return;
+      // Re-anchor before releasing, in case catNode has since moved — plus a
+      // tiny per-node offset, since releasing several perfectly-coincident
+      // points into the charge force at once leaves their push-apart
+      // direction undefined for the first tick or two.
+      const jitter = (n.id.charCodeAt(0) % 7) - 3;
+      n.x = catNode.x + jitter; n.y = catNode.y + jitter;
+      n.fx = null; n.fy = null;
+    });
+    simulation.alpha(0.6).restart();
+  }
+
+  function toggleCategoryExpansion(catNode) {
+    if (expandedCategoryId === catNode.id) {
+      collapseCategory(catNode.id);
+      expandedCategoryId = null;
+    } else {
+      if (expandedCategoryId) collapseCategory(expandedCategoryId);
+      expandCategory(catNode);
+      expandedCategoryId = catNode.id;
+    }
+    updateMobileVisibility(true);
+    fitVizView(700);
+  }
+
+  // Exposed at module scope so the "Show Full Map" toggle button (wired in
+  // main.js-adjacent markup, queried below) can flip modes; also called by
+  // resetVizLayout indirectly through collapseCategoriesOnMobile's read.
+  setCategoriesCollapsed = function (collapsed) {
+    collapseCategoriesOnMobile = collapsed;
+    expandedCategoryId = null;
+    if (collapsed) {
+      pinAllAssetsToCategories();
+    } else {
+      workforceData.nodes.forEach(n => { if (n.type === "asset") { n.fx = null; n.fy = null; } });
+    }
+    simulation.alpha(0.5).restart();
+    updateMobileVisibility(true);
+    fitVizView(700);
+    const toggleBtns = document.querySelectorAll(".mobile-map-toggle");
+    toggleBtns.forEach(btn => { btn.textContent = collapsed ? "Show Full Map" : "Show Categories Only"; });
+  };
+
+  const mobileToggleBtns = document.querySelectorAll(".mobile-map-toggle");
+  mobileToggleBtns.forEach(btn => {
+    btn.textContent = collapseCategoriesOnMobile ? "Show Full Map" : "Show Categories Only";
+    btn.addEventListener("click", () => setCategoriesCollapsed(!collapseCategoriesOnMobile));
+  });
+
   // Satellite links lead off-site, so confirm before leaving rather than
   // opening a new tab the instant a small, easy-to-misclick node is tapped.
   const linkConfirmModal    = document.getElementById('link-confirm-modal');
@@ -500,8 +631,11 @@ const structuralLinks = [
   let focusDimActive = false;
   function setFocusDim(active) {
     focusDimActive = active;
-    node.transition().duration(400).style("opacity", d => active ? (d === focusedNode ? 1 : 0.15) : 1);
-    link.transition().duration(400).style("opacity", active ? 0.08 : 1);
+    // Un-focusing restores each node/link to whatever the mobile category-
+    // collapse state says it should be, not unconditionally back to 1 —
+    // otherwise this would flash orgs a collapsed category had hidden.
+    node.transition().duration(400).style("opacity", d => active ? (d === focusedNode ? 1 : 0.15) : (isNodeVisible(d) ? 1 : 0));
+    link.transition().duration(400).style("opacity", d => active ? 0.08 : ((isNodeVisible(d.source) && isNodeVisible(d.target)) ? 1 : 0));
     // Every node's own text label — including the focused node's — hides
     // while focused. The panel already shows the focused node's full name,
     // and a node label sitting right where satellites fan out was the
@@ -599,6 +733,10 @@ const structuralLinks = [
   node.on("mouseover", function() { d3.select(this).select("circle").attr("stroke-width", 4).attr("filter", GLOW_FILTER + " brightness(1.3)"); })
       .on("mouseout", function() { d3.select(this).select("circle").attr("stroke-width", 2).attr("filter", GLOW_FILTER); })
       .on("click", (_e, d) => {
+        if (d.type === "major-group") {
+          if (collapseCategoriesOnMobile) toggleCategoryExpansion(d);
+          return;
+        }
         if (d.type !== "asset") return;
         openAssetModal(d.id);
         if (focusedNode === d) { collapseBranch(); return; }
@@ -608,7 +746,7 @@ const structuralLinks = [
         if (d.links && d.links.length) branchOutNode(d);
         else focusOnCluster(d.x, d.y, d.size + 80, 700);
       })
-      .style("cursor", d => d.type === "asset" ? "pointer" : "default");
+      .style("cursor", d => d.type === "asset" ? "pointer" : (d.type === "major-group" && collapseCategoriesOnMobile ? "pointer" : "default"));
 
   // Structural positions only — driven by the simulation's own "tick" event,
   // which (with no idle drift) only fires during an active drag/slider
@@ -672,6 +810,13 @@ const structuralLinks = [
       d.fx = null;
       d.fy = null;
     });
+    // Reset always returns to the fully-collapsed default on mobile, not
+    // whatever category happened to be expanded — re-pinning is still
+    // needed even though positions already match it (initialLayout was
+    // snapshotted post-pin), since the fx/fy clear just above releases them.
+    expandedCategoryId = null;
+    if (collapseCategoriesOnMobile) pinAllAssetsToCategories();
+    updateMobileVisibility(false);
     renderTick();
     fitVizView(duration);
   };
@@ -683,11 +828,19 @@ const structuralLinks = [
 
   // On-load reveal: fade everything in with a stagger that radiates outward
   // from the hub (hub, then categories, then leaf assets), instead of the
-  // whole graph just appearing at once. Skipped under reduced-motion.
+  // whole graph just appearing at once — except orgs hidden by the mobile
+  // category-collapse, which fade to 0 (i.e. stay invisible) instead of 1,
+  // so they don't flash into view before immediately being hidden again.
+  // Skipped under reduced-motion, but still needs the same final opacity.
   if (!prefersReducedMotion) {
-    node.style("opacity", 0).transition().delay(d => depthOf(d) * 220 + Math.random() * 150).duration(500).style("opacity", 1);
-    link.style("opacity", 0).transition().delay(d => Math.max(depthOf(d.source), depthOf(d.target)) * 220 + Math.random() * 150 - 80).duration(400).style("opacity", 1);
+    node.style("opacity", 0).transition().delay(d => depthOf(d) * 220 + Math.random() * 150).duration(500).style("opacity", d => isNodeVisible(d) ? 1 : 0);
+    link.style("opacity", 0).transition().delay(d => Math.max(depthOf(d.source), depthOf(d.target)) * 220 + Math.random() * 150 - 80).duration(400).style("opacity", d => (isNodeVisible(d.source) && isNodeVisible(d.target)) ? 1 : 0);
+  } else {
+    node.style("opacity", d => isNodeVisible(d) ? 1 : 0);
+    link.style("opacity", d => (isNodeVisible(d.source) && isNodeVisible(d.target)) ? 1 : 0);
   }
+  node.style("pointer-events", d => isNodeVisible(d) ? null : "none");
+  if (particle) particle.style("display", d => (isNodeVisible(d.source) && isNodeVisible(d.target)) ? null : "none");
 
   // No idle-drift restart here — the simulation stays settled at rest until
   // a drag/slider/reset explicitly reheats it. The tick handler stays
