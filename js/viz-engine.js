@@ -881,9 +881,61 @@ const structuralLinks = [
     fitVizView(duration);
   };
 
+  function closeInfoPanel() {
+    const panel = document.getElementById('viz-info-panel');
+    if (panel) panel.classList.remove('open');
+  }
+
+  // Tapping empty map background, on mobile, is a soft "dismiss" — closes
+  // whatever's currently open on top of the base view (the info panel, a
+  // branched-out asset, an expanded category) and recenters, without
+  // changing collapsed/full-map mode. Mirrors tap-outside-to-close, a
+  // pattern users already expect from the panel/modal itself.
+  function dismissMobileFocus() {
+    closeInfoPanel();
+    // Both can be true at once — a focused asset sitting inside its still-
+    // expanded category — so clear both instead of stopping at whichever
+    // is innermost, or the category would linger open underneath.
+    if (focusedNode) collapseBranch();
+    if (expandedCategoryId) {
+      collapseCategory(expandedCategoryId);
+      expandedCategoryId = null;
+      updateMobileVisibility(true);
+    }
+    fitVizView(700);
+  }
+
+  // Tapping the hub, on mobile, is the definitive "take me home" — same
+  // dismissal as above, but always ends back on the trimmed categories-only
+  // ring, switching out of "Show Full Map" if that was active, instead of
+  // just recentering whatever's currently shown.
+  function goHomeMobile() {
+    closeInfoPanel();
+    if (focusedNode) collapseBranch();
+    if (!collapseCategoriesOnMobile) { setCategoriesCollapsed(true); return; } // re-fits internally
+    if (expandedCategoryId) {
+      collapseCategory(expandedCategoryId);
+      expandedCategoryId = null;
+      updateMobileVisibility(true);
+    }
+    fitVizView(700);
+  }
+
+  // Background click — only when the tap lands on genuinely empty canvas
+  // (event.target is the svg element itself), never when it bubbles up
+  // from a node, so this never fights the node click handler below.
+  svg.on("click", (event) => {
+    if (event.target !== svg.node()) return;
+    if (window.innerWidth <= MOBILE_BREAKPOINT) dismissMobileFocus();
+  });
+
   node.on("mouseover", function() { d3.select(this).select("circle").attr("stroke-width", 4).attr("filter", GLOW_FILTER + " brightness(1.3)"); })
       .on("mouseout", function() { d3.select(this).select("circle").attr("stroke-width", 2).attr("filter", GLOW_FILTER); })
       .on("click", (_e, d) => {
+        if (d.type === "hub") {
+          if (window.innerWidth <= MOBILE_BREAKPOINT) goHomeMobile();
+          return;
+        }
         if (d.type === "major-group") {
           if (collapseCategoriesOnMobile) toggleCategoryExpansion(d);
           return;
@@ -897,7 +949,12 @@ const structuralLinks = [
         if (d.links && d.links.length) branchOutNode(d);
         else focusOnCluster(d.x, d.y, d.size + 80, 700);
       })
-      .style("cursor", d => d.type === "asset" ? "pointer" : (d.type === "major-group" && collapseCategoriesOnMobile ? "pointer" : "default"));
+      .style("cursor", d => {
+        if (d.type === "asset") return "pointer";
+        if (d.type === "major-group" && collapseCategoriesOnMobile) return "pointer";
+        if (d.type === "hub" && window.innerWidth <= MOBILE_BREAKPOINT) return "pointer";
+        return "default";
+      });
 
   // Structural positions only — driven by the simulation's own "tick" event,
   // which (with no idle drift) only fires during an active drag/slider
