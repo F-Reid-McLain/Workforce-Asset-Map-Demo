@@ -31,6 +31,13 @@ let collapseCategoriesOnMobile = false;
 let expandedCategoryId = null;
 let setCategoriesCollapsed = () => {};
 
+// Exposed so search.js's jumpToNode can reveal an org before the camera
+// jumps to it — otherwise, while mobile categories are collapsed, searching
+// for an org and jumping to it would zoom in on its still-collapsed,
+// invisible parent category (the org itself has no on-screen position of
+// its own until its category is expanded) instead of the org.
+let revealAssetInMobileView = () => {};
+
 function isNodeVisible(d) {
   if (d.type !== "asset") return true;
   if (!collapseCategoriesOnMobile) return true;
@@ -106,12 +113,35 @@ function fitVizView(duration = 0) {
   else svg.call(zoom.transform, transform);
 }
 
+// Combines two independent reasons the zoom behavior might reject an
+// event: wheel scrolling is only meant to zoom the map in fullscreen (else
+// it'd hijack normal page scroll), and — separately — all pan/zoom/pinch
+// is suspended entirely while the mobile info panel is open (see
+// setMapInteractionFrozen below). Recomputed whenever either changes.
+let wheelZoomEnabled = false;
+let mapInteractionFrozen = false;
+function applyZoomFilter() {
+  if (!zoom) return;
+  zoom.filter(event => {
+    if (mapInteractionFrozen) return false;
+    if (event.type === 'wheel' && !wheelZoomEnabled) return false;
+    return !event.ctrlKey && !event.button;
+  });
+}
+
 // Called by main.js when fullscreen state changes
 function setWheelZoomEnabled(enabled) {
-  zoom.filter(enabled
-    ? event => !event.ctrlKey && !event.button
-    : event => event.type !== 'wheel' && !event.ctrlKey && !event.button
-  );
+  wheelZoomEnabled = enabled;
+  applyZoomFilter();
+}
+
+// Wired below (once the info panel element exists) to a MutationObserver on
+// its "open" class, so every way the panel can open or close — clicking a
+// node, the search results list, the X button, Reset View — freezes/thaws
+// the map the same way without needing its own call site.
+function setMapInteractionFrozen(frozen) {
+  mapInteractionFrozen = frozen;
+  applyZoomFilter();
 }
 
 // 1. STRUCTURAL DATA — hub and category nodes stay hardcoded
@@ -656,10 +686,35 @@ const structuralLinks = [
       workforceData.nodes.forEach(n => { n.fx = null; n.fy = null; }); // releases the hub too, pinned by layoutCategoriesRadially
     }
     simulation.alpha(0.5).restart();
+    if (!collapsed) {
+      // Releasing every node into live physics here (unlike a normal drag,
+      // which only disturbs nodes near the one being dragged) can carry
+      // real organic drift for several seconds — long enough that a node
+      // ends up outside the frame this fit captures by the time it
+      // actually settles, stranding it off-screen. Re-fit once more when
+      // the simulation comes to rest, as a one-off listener scoped to just
+      // this transition so a user's own later drags aren't auto-recentered
+      // out from under them.
+      simulation.on("end.showFullMapSettle", () => {
+        simulation.on("end.showFullMapSettle", null);
+        fitVizView(500);
+      });
+    }
     updateMobileVisibility(true);
     fitVizView(700);
     const toggleBtns = document.querySelectorAll(".mobile-map-toggle");
     toggleBtns.forEach(btn => { btn.textContent = collapsed ? "Show Full Map" : "Show Categories Only"; });
+  };
+
+  revealAssetInMobileView = function (assetId) {
+    if (!collapseCategoriesOnMobile) return;
+    const asset = workforceData.nodes.find(n => n.id === assetId);
+    const cat = asset && workforceData.nodes.find(n => n.id === asset.category);
+    if (!cat || expandedCategoryId === cat.id) return;
+    if (expandedCategoryId) collapseCategory(expandedCategoryId);
+    expandCategory(cat);
+    expandedCategoryId = cat.id;
+    updateMobileVisibility(true);
   };
 
   const mobileToggleBtns = document.querySelectorAll(".mobile-map-toggle");
@@ -667,6 +722,26 @@ const structuralLinks = [
     btn.textContent = collapseCategoriesOnMobile ? "Show Full Map" : "Show Categories Only";
     btn.addEventListener("click", () => setCategoriesCollapsed(!collapseCategoriesOnMobile));
   });
+
+  // The info panel only covers part of the container (bottom 45% in
+  // portrait, a left strip in landscape) — the rest of the map stays
+  // visible and, without this, still fully pannable/zoomable underneath
+  // it. On mobile that's exactly where a thumb rests while scrolling the
+  // panel's text, so a stray touch could shift the camera out from under
+  // the node the panel is describing. Freeze the map's pan/zoom/drag for
+  // as long as the panel is open, on mobile only — driven by the panel's
+  // own "open" class so every way it can open or close (a node tap, a
+  // search result, the X button, Reset View) is covered without a
+  // separate call site at each one.
+  const infoPanelEl = document.getElementById('viz-info-panel');
+  if (infoPanelEl) {
+    const syncMapFreeze = () => {
+      const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+      setMapInteractionFrozen(isMobile && infoPanelEl.classList.contains('open'));
+    };
+    new MutationObserver(syncMapFreeze).observe(infoPanelEl, { attributes: true, attributeFilter: ['class'] });
+    syncMapFreeze();
+  }
 
   // Satellite links lead off-site, so confirm before leaving rather than
   // opening a new tab the instant a small, easy-to-misclick node is tapped.
@@ -938,7 +1013,7 @@ const structuralLinks = [
   // flung outward by the charge force on the next restart since everything
   // around it stays pinned with nothing to balance against.
   function isDragLocked(d) {
-    return collapseCategoriesOnMobile;
+    return collapseCategoriesOnMobile || mapInteractionFrozen;
   }
   function dragstarted(event, d) { if (isDragLocked(d)) return; if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; }
   function dragged(event, d) { if (isDragLocked(d)) return; d.fx = event.x; d.fy = event.y; }

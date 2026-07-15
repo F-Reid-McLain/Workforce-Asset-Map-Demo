@@ -109,6 +109,15 @@
 
     function jumpToNode(d) {
         if (!d || !svg || !zoom) return;
+        // While mobile categories are collapsed, an org has no on-screen
+        // position of its own until its category is expanded — without
+        // this, jumping to a searched-for org would zoom in on its still-
+        // collapsed, invisible parent category instead of the org itself.
+        // Expanding first updates d.x/d.y synchronously, so the transform
+        // below still targets the org's real (now fanned-out) position.
+        if (d.type === 'asset' && typeof revealAssetInMobileView === 'function') {
+            revealAssetInMobileView(d.id);
+        }
         const viewBox = (svg.attr('viewBox') || '').split(/\s+/).map(Number);
         const width  = viewBox[2] || (container && container.clientWidth)  || 900;
         const height = viewBox[3] || (container && container.clientHeight) || 612;
