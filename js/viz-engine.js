@@ -318,18 +318,48 @@ const structuralLinks = [
     // much more clearance or they collide with the neighbor sitting below them.
     .force("collide", d3.forceCollide(d => d.size + (d.type === "major-group" ? 95 : 40)).strength(0.9));
 
+  // Mobile: pin the 6 categories into a clean, deterministic ring around the
+  // hub instead of wherever the full 30-asset organic graph happens to
+  // settle them — the desktop layout has no reason to look clean once
+  // everything but the hub+categories is hidden (categories can end up
+  // bunched to one side, overlapping, off-center). Pinned (fx/fy), not just
+  // seeded, so it can't drift asymmetric and stays put through category
+  // expand/collapse — only "Show Full Map" releases them back to the
+  // normal organic layout.
+  function layoutCategoriesRadially() {
+    const hub = workforceData.nodes.find(n => n.id === "hub");
+    // Pin the hub itself too — otherwise it drifts toward forceCenter's
+    // target over the warm-start's hundreds of ticks while the categories,
+    // anchored to wherever the hub started (before any ticking), stay put:
+    // the two end up thousands of units apart instead of together.
+    hub.x = width / 2; hub.y = height / 2;
+    hub.fx = hub.x; hub.fy = hub.y;
+    hub.vx = 0; hub.vy = 0;
+    const categories = workforceData.nodes.filter(n => n.type === "major-group");
+    const radius = 150;
+    categories.forEach((cat, i) => {
+      const angle = (i / categories.length) * 2 * Math.PI - Math.PI / 2; // first one straight up
+      cat.x = hub.x + radius * Math.cos(angle);
+      cat.y = hub.y + radius * Math.sin(angle);
+      cat.fx = cat.x; cat.fy = cat.y;
+      cat.vx = 0; cat.vy = 0;
+    });
+  }
+
+  if (collapseCategoriesOnMobile) layoutCategoriesRadially();
+
   // Warm-start: run the layout to near-equilibrium synchronously before the
   // first paint, so the initial fit-to-view (below) frames settled positions
-  // instead of the starting jumble.
+  // instead of the starting jumble. On mobile the categories are pinned per
+  // above, so this settles each category's (still-unpinned, still-hidden at
+  // this point) orgs naturally around that clean ring.
   simulation.stop();
   for (let i = 0; i < 300; i++) simulation.tick();
 
   // Pins every org exactly on top of its category — invisible (opacity is
   // applied further down) and out of the way, so the collapsed mobile view
-  // settles as a compact hub+categories layout instead of one that's still
-  // spread out to make room for orgs nobody can see yet. Re-settle briefly
-  // afterward so the categories re-balance now that their pinned children
-  // aren't pulling/pushing them outward like a full graph would.
+  // stays a compact hub+categories layout instead of one that's still
+  // spread out to make room for orgs nobody can see yet.
   function pinAllAssetsToCategories() {
     workforceData.nodes.forEach(n => {
       if (n.type !== "asset") return;
@@ -513,16 +543,27 @@ const structuralLinks = [
   // Mobile category-collapse — applies the current isNodeVisible() state to
   // the already-created node/link/particle selections (nothing is ever
   // added or removed from the DOM; hidden orgs just sit pinned and invisible
-  // on their category, per pinAllAssetsToCategories above).
+  // on their category, per pinAllAssetsToCategories above). While a category
+  // is expanded, the other 5 fade back (spotlight, same idea as the asset
+  // branch-out's focus-dim) since the camera is about to zoom in tight on
+  // just the expanded one, and the expanded one's own children's labels
+  // hide — with several fanned out at once there's no room for full org
+  // names; the logo + a tap into the info panel does the job instead.
   function updateMobileVisibility(withTransition) {
+    const nodeOpacity = d => {
+      if (d.type === "major-group" && expandedCategoryId) return d.id === expandedCategoryId ? 1 : 0.2;
+      return isNodeVisible(d) ? 1 : 0;
+    };
     (withTransition ? node.transition().duration(500) : node)
-      .style("opacity", d => isNodeVisible(d) ? 1 : 0);
+      .style("opacity", nodeOpacity);
     node.style("pointer-events", d => isNodeVisible(d) ? null : "none");
     (withTransition ? link.transition().duration(500) : link)
       .style("opacity", d => (isNodeVisible(d.source) && isNodeVisible(d.target)) ? 1 : 0);
     if (particle) particle.style("display", d => (isNodeVisible(d.source) && isNodeVisible(d.target)) ? null : "none");
     node.filter(d => d.type === "major-group")
       .style("cursor", collapseCategoriesOnMobile ? "pointer" : "default");
+    node.select(".node-label")
+      .style("opacity", d => (d.type === "asset" && d.category === expandedCategoryId) ? 0 : null);
   }
 
   // Snaps a category's orgs back onto it (using its CURRENT position, which
@@ -536,36 +577,70 @@ const structuralLinks = [
     });
   }
 
-  // Releases a category's orgs from its current position and lets the
-  // existing link/charge/collide forces carry them out to a natural resting
-  // spot — no manual animation needed, the live simulation ticking each
-  // frame (renderTick, already wired below) already smoothly interpolates
-  // position, exactly like a slider change or drag does today.
+  // Explicitly fans children out around the category and PINS them there —
+  // same convention as branchOutNode's satellites (fixed radius/angle, away
+  // from the hub through the category), and pinned for the same reason
+  // satellites aren't part of the live simulation at all. Releasing them
+  // into the force simulation (even from a good seeded position) was tried
+  // first and didn't hold up: with the whole rest of the graph pinned
+  // (categories in the ring, every other category's hidden children), the
+  // charge force has nothing to balance against near this one release point
+  // and keeps pushing outward for as long as alpha takes to decay — nodes
+  // ended up 200-500+ units from their category instead of the ~100 seeded.
+  // A full pin is the only way this stays exactly where it's put. Returns
+  // the fan radius used, so the caller can zoom in to fit it exactly.
   function expandCategory(catNode) {
-    workforceData.nodes.forEach(n => {
-      if (n.type !== "asset" || n.category !== catNode.id) return;
-      // Re-anchor before releasing, in case catNode has since moved — plus a
-      // tiny per-node offset, since releasing several perfectly-coincident
-      // points into the charge force at once leaves their push-apart
-      // direction undefined for the first tick or two.
-      const jitter = (n.id.charCodeAt(0) % 7) - 3;
-      n.x = catNode.x + jitter; n.y = catNode.y + jitter;
-      n.fx = null; n.fy = null;
+    const children = workforceData.nodes.filter(n => n.type === "asset" && n.category === catNode.id);
+    if (!children.length) return 60;
+    const hub = workforceData.nodes.find(n => n.id === "hub");
+    const baseAngle = hub ? Math.atan2(catNode.y - hub.y, catNode.x - hub.x) : -Math.PI / 2;
+    const spreadDeg = children.length <= 1 ? 0 : Math.min(170, 40 + (children.length - 1) * 22);
+    const spreadRad = spreadDeg * Math.PI / 180;
+    // Radius has to grow with node size, not just child count: at a fixed
+    // angular spread, more children means a tighter angular step between
+    // neighbors, so the chord distance between their centers shrinks. Once
+    // that chord drops below the sum of their radii, circles overlap (seen
+    // with Job Training's 11 children — several logos were fully hidden
+    // behind neighbors at the old flat 60+n*6 radius). Solve for the radius
+    // that keeps every adjacent pair's chord >= their combined size + a gap.
+    const scale = typeof currentSizeScale === "number" ? currentSizeScale : 1;
+    const childRadius = Math.max(...children.map(n => (originalSizes[n.id] || 33) * scale));
+    let radius = 60 + Math.min(children.length, 12) * 6;
+    if (children.length > 1) {
+      const step = spreadRad / (children.length - 1);
+      const minChord = 2 * childRadius + childRadius * 0.35;
+      radius = Math.max(radius, minChord / (2 * Math.sin(step / 2)));
+    }
+    children.forEach((n, i) => {
+      const t = children.length === 1 ? 0 : (i / (children.length - 1)) - 0.5;
+      const angle = baseAngle + t * spreadRad;
+      n.x = catNode.x + radius * Math.cos(angle);
+      n.y = catNode.y + radius * Math.sin(angle);
+      n.fx = n.x; n.fy = n.y;
+      n.vx = 0; n.vy = 0;
     });
-    simulation.alpha(0.6).restart();
+    renderTick();
+    return radius;
   }
 
+  // Expanding zooms in tight on just the category + its fanned-out children
+  // (like focusOnCluster already does for an asset's Related Programs
+  // satellites) instead of trying to keep the whole ring in frame — a
+  // category with a dozen orgs needs real room, not a shrunk-to-fit view.
+  // Collapsing back returns to framing the full ring.
   function toggleCategoryExpansion(catNode) {
     if (expandedCategoryId === catNode.id) {
       collapseCategory(catNode.id);
       expandedCategoryId = null;
+      updateMobileVisibility(true);
+      fitVizView(700);
     } else {
       if (expandedCategoryId) collapseCategory(expandedCategoryId);
-      expandCategory(catNode);
+      const radius = expandCategory(catNode);
       expandedCategoryId = catNode.id;
+      updateMobileVisibility(true);
+      focusOnCluster(catNode.x, catNode.y, radius + 50, 700);
     }
-    updateMobileVisibility(true);
-    fitVizView(700);
   }
 
   // Exposed at module scope so the "Show Full Map" toggle button (wired in
@@ -575,9 +650,10 @@ const structuralLinks = [
     collapseCategoriesOnMobile = collapsed;
     expandedCategoryId = null;
     if (collapsed) {
+      layoutCategoriesRadially();
       pinAllAssetsToCategories();
     } else {
-      workforceData.nodes.forEach(n => { if (n.type === "asset") { n.fx = null; n.fy = null; } });
+      workforceData.nodes.forEach(n => { n.fx = null; n.fy = null; }); // releases the hub too, pinned by layoutCategoriesRadially
     }
     simulation.alpha(0.5).restart();
     updateMobileVisibility(true);
@@ -811,11 +887,15 @@ const structuralLinks = [
       d.fy = null;
     });
     // Reset always returns to the fully-collapsed default on mobile, not
-    // whatever category happened to be expanded — re-pinning is still
-    // needed even though positions already match it (initialLayout was
-    // snapshotted post-pin), since the fx/fy clear just above releases them.
+    // whatever category happened to be expanded — re-pinning (including the
+    // category ring) is needed even though positions already match it
+    // (initialLayout was snapshotted post-pin), since the fx/fy clear just
+    // above releases everything.
     expandedCategoryId = null;
-    if (collapseCategoriesOnMobile) pinAllAssetsToCategories();
+    if (collapseCategoriesOnMobile) {
+      layoutCategoriesRadially();
+      pinAllAssetsToCategories();
+    }
     updateMobileVisibility(false);
     renderTick();
     fitVizView(duration);
@@ -848,7 +928,16 @@ const structuralLinks = [
   simulation.on("tick", renderTick);
   if (particle) d3.timer(updateParticles);
 
-  function dragstarted(event, d) { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; }
-  function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
-  function dragended(event, d) { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }
+  // Categories (while the mobile ring is active) and hidden/pinned orgs
+  // must never be draggable — a touch "tap" fires a zero-distance drag
+  // lifecycle same as a real drag would, and dragended below unconditionally
+  // clears fx/fy on release. Without this guard, simply tapping a ring
+  // category to expand it would also silently un-pin it from the ring,
+  // leaving it free to drift off on the next force restart.
+  function isDragLocked(d) {
+    return collapseCategoriesOnMobile && (d.type === "major-group" || !isNodeVisible(d));
+  }
+  function dragstarted(event, d) { if (isDragLocked(d)) return; if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; }
+  function dragged(event, d) { if (isDragLocked(d)) return; d.fx = event.x; d.fy = event.y; }
+  function dragended(event, d) { if (isDragLocked(d)) return; if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }
 })();
