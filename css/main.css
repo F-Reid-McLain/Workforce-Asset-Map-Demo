@@ -387,7 +387,13 @@ body {
         overflow-x: auto;
         scrollbar-width: none;
         gap: 6px;
-        margin: 0 0 1.5rem;
+        /* .main-content's own 2rem top padding pushes this (its first
+           child) down from the header, leaving a visible gap for as long
+           as the page is scrolled at/near the top — before there's been
+           enough scroll for the sticky offset to actually engage. Pulling
+           it up by that same 2rem puts it flush against the header from
+           the very first frame, not just once scrolled into "stuck" mode. */
+        margin: -2rem 0 1.5rem;
         padding: 10px 20px;
         border-radius: 0;
         border-left: none;
