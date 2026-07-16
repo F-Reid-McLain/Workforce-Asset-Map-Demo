@@ -574,21 +574,37 @@ const structuralLinks = [
   // the already-created node/link/particle selections (nothing is ever
   // added or removed from the DOM; hidden orgs just sit pinned and invisible
   // on their category, per pinAllAssetsToCategories above). While a category
-  // is expanded, the other 5 fade back (spotlight, same idea as the asset
-  // branch-out's focus-dim) since the camera is about to zoom in tight on
-  // just the expanded one, and the expanded one's own children's labels
-  // hide — with several fanned out at once there's no room for full org
-  // names; the logo + a tap into the info panel does the job instead.
+  // is expanded, the rest of the map (every other category, the hub, and
+  // any link not touching the expanded category) fades down to near-
+  // invisible instead of just dimming — the camera is zooming in tight on
+  // just the expanded one, so the background should read as gone, not as a
+  // competing element. Left faintly visible rather than opacity 0 so a
+  // category can still be tapped directly to switch to it without needing
+  // to back out first. The expanded one's own children's labels hide too —
+  // with several fanned out at once there's no room for full org names; the
+  // logo + a tap into the info panel does the job instead.
+  const MOBILE_FADE_OPACITY = 0.08;
   function updateMobileVisibility(withTransition) {
     const nodeOpacity = d => {
-      if (d.type === "major-group" && expandedCategoryId) return d.id === expandedCategoryId ? 1 : 0.2;
+      if (expandedCategoryId) {
+        if (d.type === "major-group") return d.id === expandedCategoryId ? 1 : MOBILE_FADE_OPACITY;
+        if (d.type === "hub") return MOBILE_FADE_OPACITY;
+      }
       return isNodeVisible(d) ? 1 : 0;
+    };
+    const linkOpacity = d => {
+      if (!(isNodeVisible(d.source) && isNodeVisible(d.target))) return 0;
+      if (expandedCategoryId) {
+        const touchesExpanded = d.source.id === expandedCategoryId || d.target.id === expandedCategoryId;
+        return touchesExpanded ? 1 : MOBILE_FADE_OPACITY;
+      }
+      return 1;
     };
     (withTransition ? node.transition().duration(500) : node)
       .style("opacity", nodeOpacity);
     node.style("pointer-events", d => isNodeVisible(d) ? null : "none");
     (withTransition ? link.transition().duration(500) : link)
-      .style("opacity", d => (isNodeVisible(d.source) && isNodeVisible(d.target)) ? 1 : 0);
+      .style("opacity", linkOpacity);
     if (particle) particle.style("display", d => (isNodeVisible(d.source) && isNodeVisible(d.target)) ? null : "none");
     node.filter(d => d.type === "major-group")
       .style("cursor", collapseCategoriesOnMobile ? "pointer" : "default");
@@ -607,43 +623,48 @@ const structuralLinks = [
     });
   }
 
-  // Explicitly fans children out around the category and PINS them there —
-  // same convention as branchOutNode's satellites (fixed radius/angle, away
-  // from the hub through the category), and pinned for the same reason
-  // satellites aren't part of the live simulation at all. Releasing them
-  // into the force simulation (even from a good seeded position) was tried
-  // first and didn't hold up: with the whole rest of the graph pinned
-  // (categories in the ring, every other category's hidden children), the
-  // charge force has nothing to balance against near this one release point
-  // and keeps pushing outward for as long as alpha takes to decay — nodes
-  // ended up 200-500+ units from their category instead of the ~100 seeded.
-  // A full pin is the only way this stays exactly where it's put. Returns
-  // the fan radius used, so the caller can zoom in to fit it exactly.
+  // Explicitly rings children out around the category and PINS them there —
+  // same "pinned, not live-simulated" convention as branchOutNode's
+  // satellites, for the same reason: releasing them into the force
+  // simulation (even from a good seeded position) was tried first and
+  // didn't hold up. With the whole rest of the graph pinned (categories in
+  // the ring, every other category's hidden children), the charge force has
+  // nothing to balance against near this one release point and keeps
+  // pushing outward for as long as alpha takes to decay — nodes ended up
+  // 200-500+ units from their category instead of the ~100 seeded. A full
+  // pin is the only way this stays exactly where it's put.
+  //
+  // A full 360° ring, not a fan opening away from the hub — with the rest
+  // of the map fading out on expand (see updateMobileVisibility), there's
+  // no longer a reason to leave a gap on the hub-facing side, and a full
+  // ring gives many-child categories (Job Training's 11) far more breathing
+  // room per child than a ~170° arc ever could. Returns the ring radius, so
+  // the caller can zoom in to fit it exactly.
   function expandCategory(catNode) {
     const children = workforceData.nodes.filter(n => n.type === "asset" && n.category === catNode.id);
     if (!children.length) return 60;
     const hub = workforceData.nodes.find(n => n.id === "hub");
+    // Child 0 still starts pointing away from the hub, purely so the ring
+    // has a consistent, predictable starting orientation — the ring itself
+    // goes all the way around from there.
     const baseAngle = hub ? Math.atan2(catNode.y - hub.y, catNode.x - hub.x) : -Math.PI / 2;
-    const spreadDeg = children.length <= 1 ? 0 : Math.min(170, 40 + (children.length - 1) * 22);
-    const spreadRad = spreadDeg * Math.PI / 180;
     // Radius has to grow with node size, not just child count: at a fixed
-    // angular spread, more children means a tighter angular step between
-    // neighbors, so the chord distance between their centers shrinks. Once
-    // that chord drops below the sum of their radii, circles overlap (seen
-    // with Job Training's 11 children — several logos were fully hidden
-    // behind neighbors at the old flat 60+n*6 radius). Solve for the radius
-    // that keeps every adjacent pair's chord >= their combined size + a gap.
+    // angular step, more children means a tighter step between neighbors,
+    // so the chord distance between their centers shrinks. Once that chord
+    // drops below the sum of their radii, circles overlap (seen with Job
+    // Training's 11 children on the old fan — several logos were fully
+    // hidden behind neighbors). Solve for the radius that keeps every
+    // adjacent pair's chord >= their combined size + a gap.
     const scale = typeof currentSizeScale === "number" ? currentSizeScale : 1;
     const childRadius = Math.max(...children.map(n => (originalSizes[n.id] || 33) * scale));
     let radius = 60 + Math.min(children.length, 12) * 6;
     if (children.length > 1) {
-      const step = spreadRad / (children.length - 1);
+      const step = (2 * Math.PI) / children.length;
       const minChord = 2 * childRadius + childRadius * 0.35;
       radius = Math.max(radius, minChord / (2 * Math.sin(step / 2)));
     }
     children.forEach((n, i) => {
-      const t = children.length === 1 ? 0 : (i / (children.length - 1)) - 0.5;
-      const angle = baseAngle + t * spreadRad;
+      const angle = baseAngle + (i / children.length) * 2 * Math.PI;
       n.x = catNode.x + radius * Math.cos(angle);
       n.y = catNode.y + radius * Math.sin(angle);
       n.fx = n.x; n.fy = n.y;
@@ -785,7 +806,7 @@ const structuralLinks = [
     // Un-focusing restores each node/link to whatever the mobile category-
     // collapse state says it should be, not unconditionally back to 1 —
     // otherwise this would flash orgs a collapsed category had hidden.
-    node.transition().duration(400).style("opacity", d => active ? (d === focusedNode ? 1 : 0.15) : (isNodeVisible(d) ? 1 : 0));
+    node.transition().duration(400).style("opacity", d => active ? (d === focusedNode ? 1 : (collapseCategoriesOnMobile ? MOBILE_FADE_OPACITY : 0.15)) : (isNodeVisible(d) ? 1 : 0));
     link.transition().duration(400).style("opacity", d => active ? 0.08 : ((isNodeVisible(d.source) && isNodeVisible(d.target)) ? 1 : 0));
     // Every node's own text label — including the focused node's — hides
     // while focused. The panel already shows the focused node's full name,
@@ -817,7 +838,13 @@ const structuralLinks = [
   function focusOnCluster(cx, cy, extent, duration) {
     const safe = getSafeViewportRect();
     const pad = 70;
-    const scale = Math.max(0.5, Math.min((safe.width - pad * 2) / (extent * 2), (safe.height - pad * 2) / (extent * 2), 2.5));
+    // A tapped node should genuinely fill the screen on mobile, not just
+    // center — the same 2.5x cap that's right for a spacious desktop
+    // canvas leaves a lot of empty space around a single small node on a
+    // phone. Only raised while the mobile category view is active; "Show
+    // Full Map" mode and desktop keep the original cap.
+    const maxScale = collapseCategoriesOnMobile ? 4.5 : 2.5;
+    const scale = Math.max(0.5, Math.min((safe.width - pad * 2) / (extent * 2), (safe.height - pad * 2) / (extent * 2), maxScale));
     const targetX = safe.left + safe.width / 2;
     const targetY = safe.top + safe.height / 2;
     const transform = d3.zoomIdentity.translate(targetX - scale * cx, targetY - scale * cy).scale(scale);
