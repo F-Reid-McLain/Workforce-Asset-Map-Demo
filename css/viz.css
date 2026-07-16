@@ -867,17 +867,70 @@
 }
 
 .carousel-dot {
-    width: 6px;
-    height: 6px;
-    padding: 0;
+    /* The visible dot stays 6px, but the clickable box is padded out to
+       22px total — a bare 6px target was easy to miss with a real mouse
+       pointer even though it worked fine in automated testing (which
+       clicks dead center every time). background-clip keeps the color
+       confined to the original 6px circle so the enlarged hit area stays
+       invisible. Site-wide box-sizing is border-box, so width/height here
+       are the TOTAL box (22px), not the content box — padding eats into
+       that from each side, leaving exactly 22 - 8 - 8 = 6px of visible
+       content, not 6px content plus 8px padding added on top of it. */
+    width: 22px;
+    height: 22px;
+    padding: 8px;
+    background-clip: content-box;
     border: none;
     border-radius: 50%;
-    background: var(--color-border-control);
+    background-color: var(--color-border-control);
     cursor: pointer;
-    transition: background var(--transition-fast), transform var(--transition-fast);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .carousel-dot.active {
-    background: var(--color-accent);
+    /* background-color, not the background shorthand — the shorthand
+       resets background-clip to its initial value (border-box), which
+       would make the active dot's whole padded hit area go solid gold
+       instead of staying a small 6px accented dot. */
+    background-color: var(--color-accent);
     transform: scale(1.4);
+}
+
+/* ===== CAROUSEL ARROWS (mobile) =====
+   Dots alone assume the user knows to swipe — these give mouse users (a
+   desktop browser resized to a mobile width, no touch/swipe available) an
+   explicit, precise way to page through. Small and semi-transparent by
+   design: a supplementary control, not a dominant one, since swipe is
+   still the primary interaction on an actual touch device. */
+.carousel-wrap {
+    position: relative;
+}
+
+.carousel-arrow {
+    display: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 26px;
+    height: 26px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid var(--color-border-control);
+    border-radius: 50%;
+    background: rgba(20, 20, 20, 0.72);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: opacity var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.carousel-arrow svg { display: block; }
+.carousel-arrow:hover { background-color: rgba(20, 20, 20, 0.9); color: var(--color-text-primary); }
+.carousel-arrow--prev { left: 2px; }
+.carousel-arrow--next { right: 2px; }
+.carousel-arrow.is-hidden { opacity: 0; pointer-events: none; }
+
+@media (max-width: 768px) {
+    .carousel-arrow { display: flex; }
 }

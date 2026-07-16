@@ -874,6 +874,48 @@
         items.forEach(item => io.observe(item));
     }
 
+    const ARROW_LEFT  = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>';
+    const ARROW_RIGHT = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+
+    // A precise, clickable alternative to swiping — mainly for a desktop
+    // browser resized down to a mobile width, where there's a mouse but no
+    // touch/swipe gesture available at all.
+    function buildArrows(wrap, container) {
+        const prev = document.createElement('button');
+        prev.type = 'button';
+        prev.className = 'carousel-arrow carousel-arrow--prev';
+        prev.setAttribute('aria-label', 'Scroll to previous card');
+        prev.innerHTML = ARROW_LEFT;
+
+        const next = document.createElement('button');
+        next.type = 'button';
+        next.className = 'carousel-arrow carousel-arrow--next';
+        next.setAttribute('aria-label', 'Scroll to next card');
+        next.innerHTML = ARROW_RIGHT;
+
+        wrap.appendChild(prev);
+        wrap.appendChild(next);
+
+        prev.addEventListener('click', () => container.scrollBy({ left: -container.clientWidth * 0.9, behavior: 'smooth' }));
+        next.addEventListener('click', () => container.scrollBy({ left: container.clientWidth * 0.9, behavior: 'smooth' }));
+
+        // The container's own left padding (see the ≤768px carousel CSS)
+        // means a fresh, unscrolled carousel already sits at scrollLeft ≈
+        // that padding value, not 0 — scroll-snap-align: start snaps the
+        // first card's edge to the padding box, not the true edge of the
+        // scroll range. A slack of ~24px (comfortably past that natural
+        // resting point, well short of a real card-width scroll) is what
+        // "at the start" actually means here, not a strict ≤4.
+        const EDGE_SLACK = 24;
+        function updateArrows() {
+            const maxScroll = container.scrollWidth - container.clientWidth;
+            prev.classList.toggle('is-hidden', container.scrollLeft <= EDGE_SLACK);
+            next.classList.toggle('is-hidden', container.scrollLeft >= maxScroll - EDGE_SLACK);
+        }
+        container.addEventListener('scroll', updateArrows, { passive: true });
+        updateArrows();
+    }
+
     function init() {
         if (!isMobile()) return;
         CAROUSELS.forEach(({ selector, itemSelector }) => {
@@ -882,7 +924,14 @@
             const items = Array.from(container.querySelectorAll(itemSelector));
             if (items.length < 2) return;
             container.dataset.carouselInit = '1';
+
+            const wrap = document.createElement('div');
+            wrap.className = 'carousel-wrap';
+            container.parentNode.insertBefore(wrap, container);
+            wrap.appendChild(container);
+
             buildDots(container, items);
+            buildArrows(wrap, container);
         });
     }
 
