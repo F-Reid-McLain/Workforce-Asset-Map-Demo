@@ -857,9 +857,8 @@ const structuralLinks = [
     return { left, top, width, height };
   }
 
-  function focusOnCluster(cx, cy, extent, duration, strictFit, bounds) {
+  function focusOnCluster(cx, cy, extent, duration, strictFit, bounds, pad = 70) {
     const safe = getSafeViewportRect();
-    const pad = 70;
     // A tapped node should genuinely fill the screen on mobile, not just
     // center — the same 2.5x cap that's right for a spacious desktop
     // canvas leaves a lot of empty space around a single small node on a
@@ -1015,7 +1014,10 @@ const structuralLinks = [
     // climb-only zoom floor — that floor was forcing the scale back up past
     // whatever fitScale this measured footprint actually needs, whenever a
     // category was already zoomed in tight before the satellites appeared.
-    focusOnCluster(d.x, d.y, BRANCH_RADIUS + BRANCH_NODE_R + 65, 700, true, { left, right, top, bottom });
+    // A tighter pad than the 70px default — the fan's own bounding box
+    // already includes each label's full reach, so there's no need for as
+    // much extra breathing room around it as a single node or ring wants.
+    focusOnCluster(d.x, d.y, BRANCH_RADIUS + BRANCH_NODE_R + 65, 700, true, { left, right, top, bottom }, 25);
   }
 
   collapseBranch = function (duration = 600) {
