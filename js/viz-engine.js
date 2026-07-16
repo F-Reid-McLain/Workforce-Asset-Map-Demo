@@ -38,6 +38,11 @@ let setCategoriesCollapsed = () => {};
 // its own until its category is expanded) instead of the org.
 let revealAssetInMobileView = () => {};
 
+// Exposed so directory.js's info-panel close button can fully reset the
+// mobile map (not just tear down a branched-out asset) when the user
+// leaves the panel — see the assignment further down for what this does.
+let dismissMobileFocus = () => {};
+
 function isNodeVisible(d) {
   if (d.type !== "asset") return true;
   if (!collapseCategoriesOnMobile) return true;
@@ -928,8 +933,11 @@ const structuralLinks = [
   // whatever's currently open on top of the base view (the info panel, a
   // branched-out asset, an expanded category) and recenters, without
   // changing collapsed/full-map mode. Mirrors tap-outside-to-close, a
-  // pattern users already expect from the panel/modal itself.
-  function dismissMobileFocus() {
+  // pattern users already expect from the panel/modal itself. Assigned
+  // (not declared with `function` alone) so this reassigns the module-
+  // level variable of the same name above, rather than shadowing it with
+  // a binding local to this closure that directory.js could never reach.
+  dismissMobileFocus = function () {
     closeInfoPanel();
     // Both can be true at once — a focused asset sitting inside its still-
     // expanded category — so clear both instead of stopping at whichever

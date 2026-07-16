@@ -48,7 +48,16 @@ function setupModalListeners() {
     if (vizInfoClose) {
         vizInfoClose.onclick = () => {
             document.getElementById('viz-info-panel').classList.remove('open');
-            collapseBranch(); // tear down any branched-out related-program nodes too
+            // On mobile, leaving the panel resets the whole map back to the
+            // core ring — not just the branched-out asset that opened it —
+            // since an expanded category can still be sitting open
+            // underneath (tap a category, tap one of its children, then
+            // close the panel: collapseBranch alone tore down the child's
+            // satellites but left the category itself expanded). Desktop
+            // has no category-collapse concept to reset, so it keeps the
+            // narrower, branch-only teardown.
+            if (window.innerWidth <= 768 && typeof dismissMobileFocus === 'function') dismissMobileFocus();
+            else collapseBranch(); // tear down any branched-out related-program nodes too
         };
     }
 
