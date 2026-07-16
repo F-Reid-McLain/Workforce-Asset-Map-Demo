@@ -260,19 +260,6 @@
     ],
     "website": "https://bibblib.org/"
   },
-  "workforce-alliance": {
-    "name": "Greater Macon Workforce Alliance",
-    "category": "community-dev",
-    "tags": [
-      "Economic Development",
-      "Career Services",
-      "Technology"
-    ],
-    "image": "assets/logos/greater macon chamber .png",
-    "description": "Workforce development in Macon-Bibb is coordinated across several partner organizations rather than through one standalone office — the Chamber's Greater Career Works platform, MBCIA's industry recruitment, Central Georgia Technical College's training programs, and the Middle Georgia Regional Commission's WIOA-funded workforce board all link to and reinforce one another as parts of a shared regional workforce pipeline.",
-    "impact": "This collaborative model lets Macon-Bibb job seekers and employers move between career exploration, training, and job placement without gaps between individual programs.",
-    "website": "https://maconchamber.com/"
-  },
   "newtown": {
     "name": "NewTown Macon",
     "category": "community-dev",
