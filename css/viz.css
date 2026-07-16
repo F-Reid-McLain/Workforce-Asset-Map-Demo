@@ -88,7 +88,12 @@
 }
 
 .chart {
-    min-height: 300px;
+    /* No min-height — every other bar chart on this page (demographics,
+       occupation intelligence) already sizes naturally to its row count
+       with no floor. This one had a 300px floor left over from when it
+       always defaulted to 10 rows (content comfortably exceeded 300px on
+       its own); now that mobile defaults to 5, that floor just reserved a
+       block of dead space below the last bar and before the expand button. */
     width: 100%;
     border-radius: var(--radius-sm);
 }
