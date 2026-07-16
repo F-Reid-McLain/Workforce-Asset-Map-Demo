@@ -796,10 +796,67 @@
         height: 391px;
         min-height: 391px;
     }
-    .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 
     #mobile-map-toggle { display: inline-block; }
     #fs-mobile-map-toggle { display: flex; }
 
     /* show/hide toggled by JS in enterInteractiveMode / exitInteractiveMode */
+}
+
+/* ===== MOBILE CAROUSELS (Fast Facts, Adjusted Picture, Demographics) =====
+   Same repeated-card grids that read fine on desktop turn into a wall of
+   stacked cards on a phone — swipeable, one-at-a-time viewing cuts that
+   scroll length down and reads as a deliberate mobile pattern instead of
+   "the grid just broke." Dot indicators/scroll-snap logic are added by
+   workforce-data.js; this only needs to lay the cards out horizontally and
+   style the dots it injects. Desktop is untouched — these selectors only
+   apply below the breakpoint, so above it the original grid rules stand. */
+@media (max-width: 768px) {
+    .stats-grid, .adj-metrics-grid, .demo-grid {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        margin: 0 -20px;
+        padding: 0 20px 4px;
+    }
+    .stats-grid::-webkit-scrollbar,
+    .adj-metrics-grid::-webkit-scrollbar,
+    .demo-grid::-webkit-scrollbar { display: none; }
+
+    .stats-grid > .kpi-block,
+    .adj-metrics-grid > .adj-card,
+    .demo-grid > .demo-card {
+        flex: 0 0 82%;
+        scroll-snap-align: center;
+    }
+}
+
+.carousel-dots {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    margin: 14px 0 6px;
+}
+
+@media (max-width: 768px) {
+    .carousel-dots { display: flex; }
+}
+
+.carousel-dot {
+    width: 6px;
+    height: 6px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--color-border-control);
+    cursor: pointer;
+    transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.carousel-dot.active {
+    background: var(--color-accent);
+    transform: scale(1.4);
 }

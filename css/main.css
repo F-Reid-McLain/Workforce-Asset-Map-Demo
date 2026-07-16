@@ -361,10 +361,45 @@ body {
 .stats-section, .section { scroll-margin-top: 80px; }
 
 /* Below 1400px there's no longer room for a left rail without it sitting on
-   top of the content column, and no horizontal fallback either — just
-   hide it and let mobile/tablet scroll normally. */
+   top of the content column — hide it through the tablet range, where
+   there's no great horizontal fallback either (too wide for a pill bar,
+   too narrow for the rail). The mobile breakpoint below brings it back as
+   a horizontal one, back in document flow, so a long page with 7 sections
+   still has a quick way to jump around. */
 @media (max-width: 1400px) {
     .page-jumpnav { display: none; }
+}
+
+/* Sticky horizontal pill bar, back in document flow (not fixed — the rail's
+   fixed positioning only worked because it lived in dead space beside the
+   narrow content column; there's no equivalent dead space here). Active-pill
+   highlighting already exists (same .active class the rail used, same
+   IntersectionObserver in workforce-data.js) — this only needs new layout. */
+@media (max-width: 768px) {
+    .page-jumpnav {
+        display: flex;
+        position: sticky;
+        top: 65px; /* matches .main-header's rendered height so the nav tucks snugly beneath it, not under or with a gap */
+        left: auto;
+        z-index: 150; /* below .main-header (300), above page content */
+        width: auto;
+        flex-direction: row;
+        overflow-x: auto;
+        scrollbar-width: none;
+        gap: 6px;
+        margin: 0 -20px 1.5rem;
+        padding: 10px 20px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+    .page-jumpnav::-webkit-scrollbar { display: none; }
+    .page-jumpnav a {
+        flex-shrink: 0;
+        white-space: nowrap;
+        border-radius: var(--radius-pill);
+    }
+    .stats-section, .section { scroll-margin-top: 118px; }
 }
 
 /* ===== RESPONSIVE BASE ===== */
@@ -537,6 +572,37 @@ body {
     max-width: 640px;
     line-height: var(--line-height-relaxed);
     margin-bottom: 2rem;
+}
+
+/* ===== COLLAPSIBLE SECTIONS (mobile only) =====
+   .section-body is created at runtime by workforce-data.js, wrapping
+   everything after .section-desc. Hidden entirely off mobile — desktop
+   never wires the click handler that would add .collapsed in the first
+   place, this is just the visual half. */
+.section-collapse-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-left: auto;
+    flex-shrink: 0;
+    background: none;
+    border: 1px solid var(--color-border-control);
+    border-radius: 50%;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.section-collapse-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.section-collapse-btn svg { display: block; transition: transform var(--transition-fast); }
+.section-collapse-btn.is-collapsed svg { transform: rotate(180deg); }
+
+.section-body.collapsed { display: none; }
+
+@media (max-width: 768px) {
+    .section-collapse-btn { display: flex; }
 }
 
 .section-divider {

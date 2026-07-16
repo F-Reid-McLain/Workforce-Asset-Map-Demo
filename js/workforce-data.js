@@ -270,15 +270,17 @@
     }
 
     // ===== OCCUPATIONS TABLE =====
-    function renderOccupations(occRows) {
-        const validOcc = occRows
-            .filter(r => toNum(r['Empl']) > 0 && r['Occupation'] && r['SOC'] !== '00-0000')
-            .sort((a, b) => toNum(b['Empl']) - toNum(a['Empl']))
-            .slice(0, 15);
+    // Same top-N + "Show All" pattern already used for the Hiring Demand
+    // charts below (renderHiringChart/renderEmployersChart in charts.js) —
+    // 15 rows is a lot of table for a first view, especially on mobile.
+    let occAllRows = [];
+    let occExpanded = false;
 
+    function renderOccTable() {
+        const rows = occExpanded ? occAllRows : occAllRows.slice(0, 5);
         const tbody = document.getElementById('occ-tbody');
         if (!tbody) return;
-        tbody.innerHTML = validOcc.map((r, i) => {
+        tbody.innerHTML = rows.map((r, i) => {
             const wage = toNum(r['Mean Ann Wages2']);
             const wageStr = wage > 0 ? '$' + Math.round(wage).toLocaleString() : '—';
             return `<tr>
@@ -288,6 +290,25 @@
                 <td>${wageStr}</td>
             </tr>`;
         }).join('');
+
+        const btn = document.getElementById('occ-toggle');
+        if (btn) btn.textContent = occExpanded ? '▲ Show Less' : '▼ Show All Occupations';
+    }
+
+    function renderOccupations(occRows) {
+        occAllRows = occRows
+            .filter(r => toNum(r['Empl']) > 0 && r['Occupation'] && r['SOC'] !== '00-0000')
+            .sort((a, b) => toNum(b['Empl']) - toNum(a['Empl']))
+            .slice(0, 15);
+        renderOccTable();
+
+        const btn = document.getElementById('occ-toggle');
+        if (btn) {
+            btn.addEventListener('click', () => {
+                occExpanded = !occExpanded;
+                renderOccTable();
+            });
+        }
     }
 
     // ===== OCCUPATION INTELLIGENCE GRID =====
@@ -728,8 +749,30 @@
         .map(a => document.getElementById(a.getAttribute('href').slice(1)))
         .filter(Boolean);
 
+    const nav = document.querySelector('.page-jumpnav');
+
     const setActive = (id) => {
-        links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+        let activeLink = null;
+        links.forEach(a => {
+            const isActive = a.getAttribute('href') === '#' + id;
+            a.classList.toggle('active', isActive);
+            if (isActive) activeLink = a;
+        });
+        // On mobile the nav itself scrolls horizontally (see the ≤768px CSS) —
+        // keep the active pill in view as the highlight moves, same idea as
+        // the carousel dots tracking their own scroll position. Scrolled via
+        // the nav's own scrollLeft (not activeLink.scrollIntoView) because
+        // the nav is position:sticky — scrollIntoView's "nearest" ancestor
+        // resolution isn't reliable there and was fighting the page's own
+        // anchor-jump scroll (jumping to a section could visibly bounce to
+        // the wrong scroll position). Setting scrollLeft directly can only
+        // ever move the nav's own horizontal scrollbar, never the page.
+        if (activeLink && nav && window.innerWidth <= 768) {
+            const navRect  = nav.getBoundingClientRect();
+            const linkRect = activeLink.getBoundingClientRect();
+            const delta = (linkRect.left + linkRect.width / 2) - (navRect.left + navRect.width / 2);
+            nav.scrollTo({ left: nav.scrollLeft + delta, behavior: 'smooth' });
+        }
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -743,4 +786,128 @@
     }, { rootMargin: '-140px 0px -70% 0px', threshold: 0 });
 
     sections.forEach(s => observer.observe(s));
+})();
+
+/* ===== MOBILE CAROUSELS (Fast Facts, Adjusted Picture, Demographics) =====
+   The card grids stack full-width on mobile (see viz.css), which is a lot
+   of vertical clutter for repeated-shape cards — swiped one at a time
+   instead, with dot indicators showing position/count. Card markup itself
+   is untouched; this only adds the dots and keeps them synced to scroll
+   position, and only runs below the same breakpoint the CSS switches on. */
+(function () {
+    const MOBILE_BREAKPOINT = 768;
+    const CAROUSELS = [
+        { selector: '.stats-grid', itemSelector: '.kpi-block' },
+        { selector: '.adj-metrics-grid', itemSelector: '.adj-card' },
+        { selector: '.demo-grid', itemSelector: '.demo-card' },
+    ];
+
+    function isMobile() { return window.innerWidth <= MOBILE_BREAKPOINT; }
+
+    let resizeTimer;
+    function debounced(fn, ms) { clearTimeout(resizeTimer); resizeTimer = setTimeout(fn, ms); }
+
+    function buildDots(container, items) {
+        const dots = document.createElement('div');
+        dots.className = 'carousel-dots';
+        const dotEls = items.map((item, i) => {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+            dot.setAttribute('aria-label', `Go to card ${i + 1} of ${items.length}`);
+            dot.addEventListener('click', () => {
+                item.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            });
+            dots.appendChild(dot);
+            return dot;
+        });
+        container.insertAdjacentElement('afterend', dots);
+
+        // Whichever card is most visible in the scroll container gets the
+        // active dot — tracks both swipes and dot-click scrolls, since both
+        // just move the container's scroll position.
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                const idx = items.indexOf(entry.target);
+                if (idx === -1) return;
+                dotEls.forEach((d, i) => d.classList.toggle('active', i === idx));
+            });
+        }, { root: container, threshold: 0.6 });
+        items.forEach(item => io.observe(item));
+    }
+
+    function init() {
+        if (!isMobile()) return;
+        CAROUSELS.forEach(({ selector, itemSelector }) => {
+            const container = document.querySelector(selector);
+            if (!container || container.dataset.carouselInit) return;
+            const items = Array.from(container.querySelectorAll(itemSelector));
+            if (items.length < 2) return;
+            container.dataset.carouselInit = '1';
+            buildDots(container, items);
+        });
+    }
+
+    init();
+    window.addEventListener('resize', () => debounced(init, 250));
+})();
+
+/* ===== COLLAPSIBLE SECTIONS (mobile only) =====
+   Every .section on this page follows the same label -> title -> desc ->
+   content shape, so the content can be wrapped generically at runtime
+   instead of hand-editing seven different HTML blocks. Default stays
+   expanded (nothing hides on load, so chart width measurements taken at
+   render time are unaffected) — this just gives mobile users an easy way
+   to collapse a section closed after reading it. */
+(function () {
+    const MOBILE_BREAKPOINT = 768;
+    function isMobile() { return window.innerWidth <= MOBILE_BREAKPOINT; }
+
+    const CHEVRON_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+
+    function wireSection(section) {
+        if (section.dataset.collapseInit) return;
+        const desc  = section.querySelector(':scope > .section-desc');
+        const title = section.querySelector(':scope > .section-title');
+        if (!desc || !title) return;
+        section.dataset.collapseInit = '1';
+
+        const body = document.createElement('div');
+        body.className = 'section-body';
+        let sib = desc.nextElementSibling;
+        while (sib) {
+            const next = sib.nextElementSibling;
+            body.appendChild(sib);
+            sib = next;
+        }
+        desc.insertAdjacentElement('afterend', body);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'section-collapse-btn';
+        btn.setAttribute('aria-expanded', 'true');
+        btn.setAttribute('aria-label', 'Collapse section');
+        btn.innerHTML = CHEVRON_SVG;
+        title.appendChild(btn);
+
+        btn.addEventListener('click', () => {
+            const collapsed = body.classList.toggle('collapsed');
+            btn.classList.toggle('is-collapsed', collapsed);
+            btn.setAttribute('aria-expanded', String(!collapsed));
+            btn.setAttribute('aria-label', collapsed ? 'Expand section' : 'Collapse section');
+        });
+    }
+
+    function init() {
+        if (!isMobile()) return;
+        document.querySelectorAll('main .section').forEach(wireSection);
+    }
+
+    let resizeTimer;
+    init();
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(init, 250);
+    });
 })();
