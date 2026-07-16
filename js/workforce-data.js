@@ -803,6 +803,13 @@
         const bibbPop  = popLookup[BIBB] || 0;
         const fmt = n => n >= 1_000_000 ? (n / 1_000_000).toFixed(2) + 'M' : (n / 1_000).toFixed(0) + 'K';
 
+        // Below this width, sitting side by side (bottom-left stats box,
+        // bottom-right legend) leaves almost no map visible between them —
+        // together they span nearly the full width and blanket whichever
+        // southern counties happen to fall behind them. Stacking both in
+        // the bottom-left instead (see legX/legY below) frees the entire
+        // right side of the map.
+        const isNarrowMap = W < 420;
         const statsW = 148, statsH = 80, statsX = 12, statsY = H - statsH - 12;
         const statsG = svg.append('g').attr('transform', `translate(${statsX},${statsY})`);
         statsG.append('rect')
@@ -831,7 +838,10 @@
             { color: C.lightestGreen, stroke: C.maconGreen, label: 'Positive net commuting' },
         ];
         const legW = 158, legH = 14 + LEG_ITEMS.length * 18 + 8;
-        const legX = W - legW - 12, legY = H - legH - 12;
+        // Narrow map: stack directly above the stats box instead of
+        // sitting bottom-right — same X so the two read as one column.
+        const legX = isNarrowMap ? statsX : W - legW - 12;
+        const legY = isNarrowMap ? statsY - legH - 8 : H - legH - 12;
         const legG = svg.append('g').attr('transform', `translate(${legX},${legY})`);
         legG.append('rect')
             .attr('width', legW).attr('height', legH).attr('rx', 6)

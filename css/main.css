@@ -696,13 +696,23 @@ body {
 .adj-row-label {
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
-    flex-shrink: 0;
+    /* flex-shrink: 0 here (its old value) kept the label at its full
+       single-line width no matter how narrow the card got — on phones
+       around 360-375px wide, that pushed the value in .adj-row-val
+       (theoretically shrinkable, but a flex item's default min-width:auto
+       stops it from actually going below its own content width) out past
+       the card's right edge. The label is the one with room to give: let
+       it shrink and wrap onto a second line instead, and keep the short
+       numeric value fully visible at its natural width. */
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .adj-row-val {
     font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: -0.02em;
+    flex-shrink: 0;
 }
 
 .adj-row-val.highlight { color: var(--color-accent-teal); }
@@ -802,8 +812,31 @@ body {
     width: 28px;
 }
 
+.occ-table .th-short { display: none; }
+
 @media (max-width: 768px) {
     .adj-metrics-grid, .adj-callouts { grid-template-columns: 1fr; }
+
+    /* The 480px min-width (needed on desktop so narrow columns don't
+       squeeze the occupation name column below readable) is exactly what
+       forces this table into horizontal scroll on any phone — none of them
+       are 480px wide. table-layout: fixed + explicit percentage widths let
+       the browser wrap the occupation name across lines (already happening
+       for the longest ones) instead of stretching the table past the
+       screen to fit it on one line. */
+    .occ-table-wrap { overflow-x: visible; }
+    .occ-table { min-width: 0; table-layout: fixed; }
+    .occ-table th, .occ-table td { padding: 8px 6px; font-size: 0.72rem; }
+    .occ-rank { width: 8%; }
+    .occ-table th:nth-child(2), .occ-table td:nth-child(2) { width: 44%; }
+    .occ-table th:nth-child(3), .occ-table td:nth-child(3) { width: 24%; }
+    .occ-table th:nth-child(4), .occ-table td:nth-child(4) { width: 24%; }
+    /* "Employment" is one long word with no space to wrap on — at this
+       column width it was overflowing straight into the wage header
+       instead of breaking. A shorter label reads cleanly on one line
+       instead of needing a mid-word break to fit. */
+    .occ-table .th-full { display: none; }
+    .occ-table .th-short { display: inline; }
 }
 
 /* ===== ABOUT PAGE STYLES ===== */

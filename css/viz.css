@@ -832,6 +832,16 @@
        via ellipsis, same as the default 120px label). */
     .demo-bar-label.wide-label { width: 130px; }
     .demo-bar-label.mid-label { width: 110px; }
+
+    /* The plain (un-modified) label is used inside the Demographics carousel
+       cards, which are themselves only ~82% of an already-narrow phone
+       screen (see the carousel rules below) — the fixed 120px label plus
+       the 40px value column left as little as ~63px for the actual bar
+       track, so every bar read as roughly the same short length regardless
+       of its real value. Shrinking both columns hands most of that room
+       back to the track. */
+    .demo-bar-label { width: 88px; }
+    .demo-bar-pct { width: 34px; }
 }
 
 /* ===== MOBILE VIZ ===== */
