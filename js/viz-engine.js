@@ -585,9 +585,11 @@ const structuralLinks = [
   // just the expanded one, so the background should read as gone, not as a
   // competing element. Left faintly visible rather than opacity 0 so a
   // category can still be tapped directly to switch to it without needing
-  // to back out first. The expanded one's own children's labels hide too —
-  // with several fanned out at once there's no room for full org names; the
-  // logo + a tap into the info panel does the job instead.
+  // to back out first. The expanded one's own children get their names
+  // shown too, shortened and alternating near/far (see expandCategory's
+  // __labelStagger) so adjacent labels in a tight ring don't run into each
+  // other the way two full-length names sitting at the same distance
+  // would.
   const MOBILE_FADE_OPACITY = 0.08;
   function updateMobileVisibility(withTransition) {
     const nodeOpacity = d => {
@@ -613,8 +615,11 @@ const structuralLinks = [
     if (particle) particle.style("display", d => (isNodeVisible(d.source) && isNodeVisible(d.target)) ? null : "none");
     node.filter(d => d.type === "major-group")
       .style("cursor", collapseCategoriesOnMobile ? "pointer" : "default");
+    const isExpandedChild = d => d.type === "asset" && d.category === expandedCategoryId;
     node.select(".node-label")
-      .style("opacity", d => (d.type === "asset" && d.category === expandedCategoryId) ? 0 : null);
+      .style("opacity", null)
+      .text(d => isExpandedChild(d) ? truncateLabel(d.name, 16) : (d.type === "asset" ? truncateLabel(d.name, 24) : d.name))
+      .attr("dy", d => isExpandedChild(d) ? d.size + 18 + (d.__labelStagger ? 15 : 0) : d.size + 18);
   }
 
   // Snaps a category's orgs back onto it (using its CURRENT position, which
@@ -674,6 +679,11 @@ const structuralLinks = [
       n.y = catNode.y + radius * Math.sin(angle);
       n.fx = n.x; n.fy = n.y;
       n.vx = 0; n.vy = 0;
+      // Alternating near/far label distance (see updateMobileVisibility) —
+      // adjacent labels in a tight ring would otherwise collide even though
+      // the nodes themselves don't, since text is much wider than the node
+      // it sits under.
+      n.__labelStagger = i % 2;
     });
     renderTick();
     return radius;
