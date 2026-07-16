@@ -472,7 +472,13 @@
     }
 
     // ===== REGIONAL MAP =====
-    function buildMap(commRows, popRows, geo) {
+    // Persists across buildMap re-renders (called again on every resize,
+    // which fully rebuilds the SVG from scratch) so toggling this and then
+    // rotating a device or resizing the window doesn't silently reset back
+    // to the county-labels view.
+    let showHighways = false;
+
+    function buildMap(commRows, popRows, geo, highwaysGeo) {
         const container = document.getElementById('region-map');
         if (!container) return;
         container.innerHTML = '';
@@ -534,6 +540,65 @@
                 .attr('stroke-width', 2);
         }
 
+        // Major highways — hidden by default, revealed by clicking the map
+        // (see the click handler below). Drawn with the same pathGen/
+        // projection as the counties, so a real GeoJSON of I-75/I-16/I-475/
+        // US-19 lines up correctly against the county boundaries with no
+        // separate alignment work needed.
+        const highwaysG = svg.append('g')
+            .attr('class', 'map-highways')
+            .style('opacity', 0)
+            .style('pointer-events', 'none');
+        if (highwaysGeo && highwaysGeo.features.length) {
+            highwaysG.selectAll('path')
+                .data(highwaysGeo.features)
+                .join('path')
+                .attr('d', pathGen)
+                .attr('fill', 'none')
+                .attr('stroke', '#ffffff')
+                .attr('stroke-width', 2.25)
+                .attr('stroke-opacity', 0.9)
+                .attr('stroke-linecap', 'round')
+                .attr('stroke-linejoin', 'round');
+
+            // I-475 loops around the west/south side of the city, so its
+            // length-weighted centroid lands right in the middle of it —
+            // directly on top of the Macon-Bibb county label. Nudge any
+            // route label that lands too close to that label clear of it,
+            // rather than hardcoding a fix for I-475 specifically (robust
+            // if the source data's exact points ever change).
+            const bibbCentroid = bibbFeature ? pathGen.centroid(bibbFeature) : null;
+            const routeG = highwaysG.selectAll('g.route-label')
+                .data(highwaysGeo.features.filter(f => f.properties.route))
+                .join('g')
+                .attr('class', 'route-label')
+                .attr('transform', d => {
+                    let [x, y] = pathGen.centroid(d);
+                    if (bibbCentroid) {
+                        const dx = x - bibbCentroid[0], dy = y - bibbCentroid[1];
+                        const dist = Math.hypot(dx, dy);
+                        // Push straight out along the same direction the
+                        // point already sits from Bibb's centroid, out to a
+                        // fixed clear distance — a flat (dx,dy) offset could
+                        // land almost parallel to that direction instead of
+                        // away from it, barely changing the distance at all.
+                        if (dist < 40) {
+                            const angle = dist > 0 ? Math.atan2(dy, dx) : 0;
+                            x = bibbCentroid[0] + Math.cos(angle) * 55;
+                            y = bibbCentroid[1] + Math.sin(angle) * 55;
+                        }
+                    }
+                    return `translate(${x},${y})`;
+                });
+            routeG.append('rect')
+                .attr('x', -18).attr('y', -9).attr('width', 36).attr('height', 15).attr('rx', 3)
+                .attr('fill', '#1a1a1a').attr('stroke', '#ffffff').attr('stroke-width', 1);
+            routeG.append('text')
+                .text(d => d.properties.route)
+                .attr('text-anchor', 'middle').attr('dy', 3.5)
+                .attr('font-size', 9.5).attr('font-weight', 700).attr('fill', '#ffffff');
+        }
+
         const labelG = svg.append('g').attr('pointer-events', 'none');
         geo.features.forEach(d => {
             const fips   = fips5(d.id);
@@ -554,6 +619,7 @@
             // uses) would be unreadable — flip to dark text with no shadow.
             const isWilkinson = fips === WILKINSON;
             const g = labelG.append('g')
+                .attr('class', isBibb ? 'county-label county-label--bibb' : 'county-label')
                 .attr('transform', `translate(${cx},${cy})`)
                 .style('text-shadow', isWilkinson ? 'none' : '1px 1px 2px rgba(0,0,0,0.85)');
 
@@ -609,6 +675,24 @@
                 tip.style.display = 'block';
             })
             .on('mouseleave', () => { tip.style.display = 'none'; });
+
+        // Click the map to swap county names/population/commuting labels
+        // (everywhere except Macon-Bibb, which stays as the map's anchor
+        // point) for the region's major highways — same underlying
+        // projection, so the overlay lines up exactly with the county
+        // shapes without any separate alignment step.
+        function applyHighwayMode(animate) {
+            (animate ? highwaysG.transition().duration(300) : highwaysG).style('opacity', showHighways ? 1 : 0);
+            const labels = svg.selectAll('.county-label:not(.county-label--bibb)');
+            (animate ? labels.transition().duration(300) : labels).style('opacity', showHighways ? 0 : 1);
+        }
+        applyHighwayMode(false);
+
+        svg.style('cursor', 'pointer')
+            .on('click', () => {
+                showHighways = !showHighways;
+                applyHighwayMode(true);
+            });
 
         // Population stats box (SVG, included in PNG export)
         const totalPop = Object.values(popLookup).reduce((s, v) => s + v, 0);
@@ -693,7 +777,7 @@
     }
 
     // ===== INIT =====
-    let cachedCommRows, cachedPopRows, cachedGeo;
+    let cachedCommRows, cachedPopRows, cachedGeo, cachedHighwaysGeo;
 
     Promise.all([
         d3.csv('data/Industry Snapshot.csv'),
@@ -702,16 +786,18 @@
         d3.csv('data/Net Commuting.csv'),
         d3.csv('data/Demographics.csv'),
         d3.json('data/counties.geojson'),
-    ]).then(([indRows, occRows, popRows, commRows, demoRows, geo]) => {
+        d3.json('data/major-highways.geojson'),
+    ]).then(([indRows, occRows, popRows, commRows, demoRows, geo, highwaysGeo]) => {
         const dataRows = indRows.filter(r => (r['NAICS'] || '').trim() !== '');
         const totalRow = indRows.find(r => !(r['NAICS'] || '').trim());
 
-        cachedCommRows = commRows;
-        cachedPopRows  = popRows;
-        cachedGeo      = geo;
+        cachedCommRows    = commRows;
+        cachedPopRows     = popRows;
+        cachedGeo         = geo;
+        cachedHighwaysGeo = highwaysGeo;
 
         loadKPIs(dataRows, totalRow, popRows, commRows);
-        buildMap(commRows, popRows, geo);
+        buildMap(commRows, popRows, geo, highwaysGeo);
 
         hierarchy = buildHierarchy(dataRows);
         renderTreemap(hierarchy);
@@ -725,7 +811,7 @@
 
     window.addEventListener('resize', debounce(function () {
         if (currentNode) renderTreemap(currentNode);
-        if (cachedGeo) buildMap(cachedCommRows, cachedPopRows, cachedGeo);
+        if (cachedGeo) buildMap(cachedCommRows, cachedPopRows, cachedGeo, cachedHighwaysGeo);
     }, 250));
 
 })();
