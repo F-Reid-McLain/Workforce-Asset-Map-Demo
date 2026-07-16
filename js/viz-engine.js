@@ -851,7 +851,7 @@ const structuralLinks = [
     return { left, top, width, height };
   }
 
-  function focusOnCluster(cx, cy, extent, duration) {
+  function focusOnCluster(cx, cy, extent, duration, strictFit, bounds) {
     const safe = getSafeViewportRect();
     const pad = 70;
     // A tapped node should genuinely fill the screen on mobile, not just
@@ -860,7 +860,16 @@ const structuralLinks = [
     // phone. Only raised while the mobile category view is active; "Show
     // Full Map" mode and desktop keep the original cap.
     const maxScale = collapseCategoriesOnMobile ? 4.5 : 2.5;
-    const fitScale = Math.min((safe.width - pad * 2) / (extent * 2), (safe.height - pad * 2) / (extent * 2), maxScale);
+    // `extent` alone assumes a square footprint around (cx,cy) — fine for a
+    // ring or a single node, but a branch-out fan is wider than it is tall
+    // (or vice versa), and squaring it off wastes room that's actually free
+    // on one axis, forcing a zoom-out deeper than the real content needs.
+    // Callers that know their true footprint pass `bounds: {halfW, halfH}`
+    // (measured off the real rendered geometry) to fit each axis on its own
+    // terms instead.
+    const halfW = bounds ? bounds.halfW : extent;
+    const halfH = bounds ? bounds.halfH : extent;
+    const fitScale = Math.min((safe.width - pad * 2) / (halfW * 2), (safe.height - pad * 2) / (halfH * 2), maxScale);
     // Tapping a child node opens the info panel, which eats into the safe
     // area (see getSafeViewportRect) — its extent-based fit-scale can end
     // up smaller than the category ring's own zoom level the user was just
@@ -868,9 +877,20 @@ const structuralLinks = [
     // should zoom further IN. Floor the new scale a bit above whatever the
     // camera's current scale already is, so a tap only ever climbs the
     // zoom level (or holds roughly steady), never visibly retreats.
+    //
+    // That floor is unsafe for callers whose extent represents real,
+    // literal content that has to be contained (branch-out satellites and
+    // their labels) rather than a single point that just looks better
+    // bigger — flooring the scale above fitScale there re-introduces
+    // exactly the overflow this floor was never meant to allow. Those
+    // callers pass strictFit=true to skip the climb-only floor and always
+    // honor fitScale.
     const currentScale = d3.zoomTransform(svg.node()).k;
-    const minScale = Math.max(0.5, currentScale * 1.15);
-    const scale = Math.min(maxScale, Math.max(minScale, fitScale));
+    // The 0.5 absolute floor is also a "never mind fitScale" override, same
+    // as the climb-only one above — a strictFit caller needs fitScale
+    // honored all the way down, even below 0.5, or a footprint that
+    // genuinely needs a smaller scale gets cut off exactly the same way.
+    const scale = strictFit ? Math.min(maxScale, fitScale) : Math.min(maxScale, Math.max(Math.max(0.5, currentScale * 1.15), fitScale));
     const targetX = safe.left + safe.width / 2;
     const targetY = safe.top + safe.height / 2;
     const transform = d3.zoomIdentity.translate(targetX - scale * cx, targetY - scale * cy).scale(scale);
@@ -888,7 +908,25 @@ const structuralLinks = [
     // rather than crowding whatever's already next to the parent toward
     // the hub's side.
     const hub = workforceData.nodes.find(n => n.id === "hub");
-    const baseAngle = hub ? Math.atan2(d.y - hub.y, d.x - hub.x) : -Math.PI / 2;
+    let baseAngle = hub ? Math.atan2(d.y - hub.y, d.x - hub.x) : -Math.PI / 2;
+    // The hub-away direction can point straight at whichever edge the info
+    // panel covers (bottom in portrait, left in landscape). Forcing that
+    // reach into frame then falls to focusOnCluster's fitScale, which has
+    // to zoom out however far it takes to contain it — shrinking every
+    // satellite and its label to stay legible in the process. Mirroring the
+    // angle across the axis the panel occludes keeps the same "extending
+    // outward" fan shape but always opens it toward the open side instead,
+    // so the fan fits in the room that's actually there without needing a
+    // compensating zoom-out at all.
+    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+    const panelEl = document.getElementById("viz-info-panel");
+    if (panelEl && panelEl.classList.contains("open")) {
+      if (isLandscape) {
+        if (Math.cos(baseAngle) < 0) baseAngle = Math.PI - baseAngle; // panel eats the left — keep the fan rightward
+      } else {
+        if (Math.sin(baseAngle) > 0) baseAngle = -baseAngle; // panel eats the bottom — keep the fan upward
+      }
+    }
     const spreadDeg = links.length <= 1 ? 0 : Math.min(150, 40 + (links.length - 1) * 25);
     const spreadRad = spreadDeg * Math.PI / 180;
     links.forEach((l, i) => {
@@ -923,7 +961,29 @@ const structuralLinks = [
     branchSatSel.append("title").text(l => l.description || l.label);
 
     updateBranchPositions();
-    focusOnCluster(d.x, d.y, BRANCH_RADIUS + BRANCH_NODE_R + 40, 700);
+    // Measure the fan's real footprint off the rendered geometry instead of
+    // assuming a worst-case square — getBBox() gives each satellite's exact
+    // local extent (circle + its label, whatever that label's actual
+    // rendered width turns out to be), which combined with its known
+    // translate offset gives the true bounding box around the focused node.
+    // A biased-but-wide fan is usually much wider than it is tall (or vice
+    // versa); fitting each axis to what's actually there — rather than
+    // squaring off to the longest reach in any direction — is what lets
+    // focusOnCluster hold a readable zoom instead of shrinking everything
+    // to cover a footprint that isn't really that big in both dimensions.
+    let halfW = BRANCH_NODE_R, halfH = BRANCH_NODE_R;
+    branchSatSel.each(function(l) {
+      const bbox = this.getBBox();
+      const px = BRANCH_RADIUS * Math.cos(l.__angle);
+      const py = BRANCH_RADIUS * Math.sin(l.__angle);
+      halfW = Math.max(halfW, Math.abs(px + bbox.x), Math.abs(px + bbox.x + bbox.width));
+      halfH = Math.max(halfH, Math.abs(py + bbox.y), Math.abs(py + bbox.y + bbox.height));
+    });
+    // strictFit=true so this framing is never overridden by focusOnCluster's
+    // climb-only zoom floor — that floor was forcing the scale back up past
+    // whatever fitScale this measured footprint actually needs, whenever a
+    // category was already zoomed in tight before the satellites appeared.
+    focusOnCluster(d.x, d.y, BRANCH_RADIUS + BRANCH_NODE_R + 65, 700, true, { halfW, halfH });
   }
 
   collapseBranch = function (duration = 600) {
