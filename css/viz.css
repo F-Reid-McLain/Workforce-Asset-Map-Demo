@@ -533,6 +533,54 @@
 
 .map-dl-btn:hover { background: rgba(60, 60, 60, 0.9); }
 
+/* First-visit hint that the map itself is clickable — a static "↓ PNG"-
+   style button reads as one more piece of chrome and gets ignored; the
+   pulsing dot is what actually catches the eye. Removed for good (see the
+   localStorage flag in workforce-data.js) the moment someone clicks the
+   map, so it never nags a visitor who's already found the feature. */
+.map-highway-hint {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius-pill);
+    padding: 6px 12px 6px 10px;
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    pointer-events: none;
+    animation: highway-hint-in 0.4s ease 0.6s both;
+}
+
+.map-highway-hint-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    flex-shrink: 0;
+    animation: highway-hint-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes highway-hint-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes highway-hint-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(175, 166, 109, 0.55); }
+    50%      { box-shadow: 0 0 0 5px rgba(175, 166, 109, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .map-highway-hint { animation: none; }
+    .map-highway-hint-dot { animation: none; }
+}
+
 /* ===== INDUSTRY TREEMAP ===== */
 .treemap-header {
     display: flex;

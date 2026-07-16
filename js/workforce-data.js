@@ -561,54 +561,125 @@
             .attr('clip-path', `url(#${clipId})`)
             .style('opacity', 0)
             .style('pointer-events', 'none');
+        // Labels live in their own sibling group, NOT inside the clipped
+        // one — a route's line correctly stops right at the county edge,
+        // but a label badge anchored near that same edge was getting its
+        // own corner sliced off by the identical clip-path, since clip-path
+        // applies to every descendant. A label should stay fully readable
+        // even when it sits close to the boundary; only the raw line needs
+        // to visually stop there.
+        const highwayLabelsG = svg.append('g')
+            .attr('class', 'map-highway-labels')
+            .style('opacity', 0)
+            .style('pointer-events', 'none');
         if (highwaysGeo && highwaysGeo.features.length) {
+            // Three tiers, pushed further apart than before so interstates
+            // read as clearly primary at a glance — thick, fully bright,
+            // and their own accent-colored "shield" label — rather than
+            // just a slightly-bolder version of the same white line/badge
+            // every other road uses. Drawn state-then-US-then-interstate so
+            // interstates paint on top at intersections.
+            const TIER = {
+                interstate: { order: 2, width: 3,   opacity: 1,    badge: C.teal,   text: '#0a2622' },
+                us:         { order: 1, width: 1.4, opacity: 0.65, badge: '#1a1a1a', text: '#ffffff' },
+                state:      { order: 0, width: 0.75,opacity: 0.4,  badge: '#1a1a1a', text: '#ffffff' },
+            };
+            const roadsSorted = [...highwaysGeo.features].sort((a, b) => TIER[a.properties.class].order - TIER[b.properties.class].order);
+
             highwaysG.selectAll('path')
-                .data(highwaysGeo.features)
+                .data(roadsSorted)
                 .join('path')
                 .attr('d', pathGen)
                 .attr('fill', 'none')
                 .attr('stroke', '#ffffff')
-                .attr('stroke-width', 2.25)
-                .attr('stroke-opacity', 0.9)
+                .attr('stroke-width', d => TIER[d.properties.class].width)
+                .attr('stroke-opacity', d => TIER[d.properties.class].opacity)
                 .attr('stroke-linecap', 'round')
                 .attr('stroke-linejoin', 'round');
 
-            // The line itself is clipped to the counties above, but a label
-            // anchored at the raw geometric centroid can still land outside
-            // that clip (e.g. I-475 loops back near itself; I-85/I-20/I-285
-            // barely clip a corner) — a badge floating in the blank
-            // background with no visible line nearby. Anchor each label to
-            // one of its own line's points that's actually inside a county
-            // instead, using real point-in-polygon tests (d3.geoContains)
-            // in geographic space rather than the projected/screen one, and
-            // drop the label entirely if the route never truly enters the
-            // displayed region (nothing meaningful to label).
-            function findLabelPoint(feature) {
+            // Anchor each label to one of the route's own points that's
+            // actually inside a county, using real point-in-polygon tests
+            // (d3.geoContains) in geographic space, and drop the label
+            // entirely if the route never truly enters the displayed
+            // region. Every route (not every line segment — a single
+            // highway is chopped into many ways in the source data, all
+            // sharing one route name) gets exactly one label, built from
+            // every segment's points pooled together, or a dense road
+            // network would carry a duplicate badge at every segment
+            // boundary.
+            function insidePoints(feature) {
                 const coords = feature.geometry.type === 'LineString'
                     ? feature.geometry.coordinates
                     : feature.geometry.coordinates.flat();
-                const inside = coords.filter(pt => geo.features.some(c => d3.geoContains(c, pt)));
-                if (!inside.length) return null;
-                return projection(inside[Math.floor(inside.length / 2)]);
+                return coords.filter(pt => geo.features.some(c => d3.geoContains(c, pt)));
             }
 
-            const labeled = highwaysGeo.features
-                .filter(f => f.properties.route)
-                .map(f => ({ feature: f, pt: findLabelPoint(f) }))
-                .filter(d => d.pt);
+            const byRoute = d3.group(highwaysGeo.features.filter(f => f.properties.route), f => f.properties.route);
+            const labeled = Array.from(byRoute, ([route, feats]) => {
+                const pts = feats.flatMap(insidePoints);
+                if (!pts.length) return null;
+                return { route, cls: feats[0].properties.class, pt: projection(pts[Math.floor(pts.length / 2)]) };
+            }).filter(Boolean)
+              // Interstates draw last (on top) so a state/US badge never
+              // covers the handful of routes this map is meant to emphasize.
+              .sort((a, b) => TIER[a.cls].order - TIER[b.cls].order);
 
-            const routeG = highwaysG.selectAll('g.route-label')
+            // Two different routes' "somewhere inside a county" midpoints
+            // can land close together (I-75 and US-23 both pick a point
+            // near where they cross, right by Bibb) and their badges
+            // overlap. Push pairs apart until they clear a minimum
+            // distance, a few passes since separating one pair can nudge
+            // a label into a new collision with a third. An interstate
+            // label never moves for a non-interstate collision — it's the
+            // one this map is meant to emphasize, so it keeps its position
+            // and the lower-priority label gets pushed clear of it instead.
+            const MIN_LABEL_DIST = 48;
+            for (let pass = 0; pass < 4; pass++) {
+                for (let i = 0; i < labeled.length; i++) {
+                    for (let j = i + 1; j < labeled.length; j++) {
+                        const a = labeled[i], b = labeled[j];
+                        const dx = b.pt[0] - a.pt[0], dy = b.pt[1] - a.pt[1];
+                        const dist = Math.hypot(dx, dy) || 0.001;
+                        if (dist >= MIN_LABEL_DIST) continue;
+                        const need = MIN_LABEL_DIST - dist;
+                        const ux = dx / dist, uy = dy / dist;
+                        const aPinned = a.cls === 'interstate' && b.cls !== 'interstate';
+                        const bPinned = b.cls === 'interstate' && a.cls !== 'interstate';
+                        if (aPinned) {
+                            b.pt = [b.pt[0] + ux * need, b.pt[1] + uy * need];
+                        } else if (bPinned) {
+                            a.pt = [a.pt[0] - ux * need, a.pt[1] - uy * need];
+                        } else {
+                            a.pt = [a.pt[0] - ux * need / 2, a.pt[1] - uy * need / 2];
+                            b.pt = [b.pt[0] + ux * need / 2, b.pt[1] + uy * need / 2];
+                        }
+                    }
+                }
+            }
+
+            const routeG = highwayLabelsG.selectAll('g.route-label')
                 .data(labeled)
                 .join('g')
-                .attr('class', 'route-label')
+                .attr('class', d => `route-label route-label--${d.cls}`)
                 .attr('transform', d => `translate(${d.pt})`);
+            const isInterstate = d => d.cls === 'interstate';
             routeG.append('rect')
-                .attr('x', -18).attr('y', -9).attr('width', 36).attr('height', 15).attr('rx', 3)
-                .attr('fill', '#1a1a1a').attr('stroke', '#ffffff').attr('stroke-width', 1);
+                .attr('x', d => (isInterstate(d) ? 4 : 0) + (d.route.length > 4 ? -22 : -18))
+                .attr('y', d => isInterstate(d) ? -10.5 : -9)
+                .attr('width', d => (d.route.length > 4 ? 44 : 36) + (isInterstate(d) ? 8 : 0))
+                .attr('height', d => isInterstate(d) ? 18 : 15)
+                .attr('rx', 3)
+                .attr('fill', d => TIER[d.cls].badge)
+                .attr('stroke', d => isInterstate(d) ? 'none' : '#ffffff')
+                .attr('stroke-opacity', d => TIER[d.cls].opacity)
+                .attr('stroke-width', 1);
             routeG.append('text')
-                .text(d => d.feature.properties.route)
+                .text(d => d.route)
                 .attr('text-anchor', 'middle').attr('dy', 3.5)
-                .attr('font-size', 9.5).attr('font-weight', 700).attr('fill', '#ffffff');
+                .attr('font-size', d => isInterstate(d) ? 10.5 : 9)
+                .attr('font-weight', 700)
+                .attr('fill', d => TIER[d.cls].text)
+                .attr('fill-opacity', d => isInterstate(d) ? 1 : TIER[d.cls].opacity);
         }
 
         const labelG = svg.append('g').attr('pointer-events', 'none');
@@ -694,6 +765,7 @@
         // the county shapes without any separate alignment step.
         function applyHighwayMode(animate) {
             (animate ? highwaysG.transition().duration(300) : highwaysG).style('opacity', showHighways ? 1 : 0);
+            (animate ? highwayLabelsG.transition().duration(300) : highwayLabelsG).style('opacity', showHighways ? 1 : 0);
             const labels = svg.selectAll('.county-label');
             (animate ? labels.transition().duration(300) : labels).style('opacity', showHighways ? 0 : 1);
         }
@@ -704,6 +776,27 @@
                 showHighways = !showHighways;
                 applyHighwayMode(true);
             });
+
+        // First-visit hint that the map itself is clickable — the section
+        // description mentions it too, but that's one clause in a longer
+        // paragraph and easy to skim past; this is the actually-noticeable
+        // version. Gone for good, this browser, the moment the map is
+        // clicked once — never shows again even on a later visit.
+        const HINT_KEY = 'mwn-highway-hint-dismissed';
+        let hintEl = null;
+        try {
+            if (!localStorage.getItem(HINT_KEY)) {
+                hintEl = document.createElement('div');
+                hintEl.className = 'map-highway-hint';
+                hintEl.innerHTML = '<span class="map-highway-hint-dot"></span>Click the map for highways';
+                container.appendChild(hintEl);
+            }
+        } catch (e) { /* localStorage unavailable (private browsing etc.) — hint just won't persist dismissal */ }
+
+        svg.on('click.hint', () => {
+            if (hintEl) { hintEl.remove(); hintEl = null; }
+            try { localStorage.setItem(HINT_KEY, '1'); } catch (e) {}
+        });
 
         // Population stats box (SVG, included in PNG export)
         const totalPop = Object.values(popLookup).reduce((s, v) => s + v, 0);
