@@ -808,11 +808,12 @@ const structuralLinks = [
     // otherwise this would flash orgs a collapsed category had hidden.
     node.transition().duration(400).style("opacity", d => active ? (d === focusedNode ? 1 : (collapseCategoriesOnMobile ? MOBILE_FADE_OPACITY : 0.15)) : (isNodeVisible(d) ? 1 : 0));
     link.transition().duration(400).style("opacity", d => active ? 0.08 : ((isNodeVisible(d.source) && isNodeVisible(d.target)) ? 1 : 0));
-    // Every node's own text label — including the focused node's — hides
-    // while focused. The panel already shows the focused node's full name,
-    // and a node label sitting right where satellites fan out was the
-    // single biggest source of unreadable overlapping text.
-    node.select(".node-label").transition().duration(250).style("opacity", active ? 0 : 1);
+    // Every OTHER node's label hides while focused — a label sitting right
+    // where satellites fan out was the single biggest source of unreadable
+    // overlapping text — but the focused node's own name should stay
+    // visible now that it's centered and filling the screen, not rely on
+    // the info panel alone to say what it's looking at.
+    node.select(".node-label").transition().duration(250).style("opacity", d => active ? (d === focusedNode ? 1 : 0) : 1);
   }
 
   // The info panel covers part of #network-visualization (left strip in
@@ -844,7 +845,17 @@ const structuralLinks = [
     // phone. Only raised while the mobile category view is active; "Show
     // Full Map" mode and desktop keep the original cap.
     const maxScale = collapseCategoriesOnMobile ? 4.5 : 2.5;
-    const scale = Math.max(0.5, Math.min((safe.width - pad * 2) / (extent * 2), (safe.height - pad * 2) / (extent * 2), maxScale));
+    const fitScale = Math.min((safe.width - pad * 2) / (extent * 2), (safe.height - pad * 2) / (extent * 2), maxScale);
+    // Tapping a child node opens the info panel, which eats into the safe
+    // area (see getSafeViewportRect) — its extent-based fit-scale can end
+    // up smaller than the category ring's own zoom level the user was just
+    // looking at, which reads as the camera zooming back OUT on a tap that
+    // should zoom further IN. Floor the new scale a bit above whatever the
+    // camera's current scale already is, so a tap only ever climbs the
+    // zoom level (or holds roughly steady), never visibly retreats.
+    const currentScale = d3.zoomTransform(svg.node()).k;
+    const minScale = Math.max(0.5, currentScale * 1.15);
+    const scale = Math.min(maxScale, Math.max(minScale, fitScale));
     const targetX = safe.left + safe.width / 2;
     const targetY = safe.top + safe.height / 2;
     const transform = d3.zoomIdentity.translate(targetX - scale * cx, targetY - scale * cy).scale(scale);
