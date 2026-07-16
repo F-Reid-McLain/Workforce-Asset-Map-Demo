@@ -210,19 +210,20 @@ body {
     max-width: 160px;
 }
 
+.main-footer__logo a {
+    display: block;
+    width: 100%;
+}
+
 .main-footer__logo img {
     display: block;
     width: 100%;
     height: auto;
+    transition: opacity var(--transition-fast);
 }
 
-/* Choose Macon's own mark is a small circular badge, not a wordmark like
-   the Chamber's — sized independently instead of stretching to the same
-   160px column width the primary logo above it uses. */
-.main-footer__logo .main-footer__logo-secondary {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
+.main-footer__logo a:hover img {
+    opacity: 0.8;
 }
 
 .main-footer__links {
