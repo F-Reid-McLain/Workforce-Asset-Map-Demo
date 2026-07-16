@@ -379,7 +379,7 @@ body {
     .page-jumpnav {
         display: flex;
         position: sticky;
-        top: 65px; /* matches .main-header's rendered height so the nav tucks snugly beneath it, not under or with a gap */
+        top: 65px; /* matches .main-header's rendered height so the nav tucks snugly beneath it, not under or with a gap — kept always-visible at that height on this breakpoint, see the hasJumpNav check in nav.js */
         left: auto;
         z-index: 150; /* below .main-header (300), above page content */
         width: auto;
@@ -387,11 +387,12 @@ body {
         overflow-x: auto;
         scrollbar-width: none;
         gap: 6px;
-        margin: 0 -20px 1.5rem;
+        margin: 0 0 1.5rem;
         padding: 10px 20px;
         border-radius: 0;
         border-left: none;
         border-right: none;
+        background: var(--color-bg-surface);
     }
     .page-jumpnav::-webkit-scrollbar { display: none; }
     .page-jumpnav a {

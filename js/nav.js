@@ -13,8 +13,18 @@
     let lastY = window.scrollY;
     const THRESHOLD = 6;
 
+    // Pages with the mobile jump-nav (currently just Workforce Data) dock it
+    // sticky right under the header at a fixed top offset — if the header
+    // were also free to hide-on-scroll here, sliding it away would leave the
+    // nav floating with an empty gap above it instead of sitting flush under
+    // the header like it's meant to. Keep the header pinned visible instead,
+    // only on this page and only at the width where the jump-nav is actually
+    // in its horizontal-bar mode.
+    const hasJumpNav = !!document.querySelector('.page-jumpnav');
+
     window.addEventListener('scroll', function () {
         const currentY = window.scrollY;
+        const suppressHide = hasJumpNav && window.innerWidth <= 768;
         // Mobile rubber-band overscroll at the top fires scroll events with
         // a real delta even though the user hasn't actually scrolled down —
         // that was tripping the hide logic and hiding the nav (hamburger
@@ -22,7 +32,7 @@
         // scroll cleared it. Never hide while at/near the top.
         if (currentY <= 0) {
             header.classList.remove('header-hidden');
-        } else if (currentY > lastY + THRESHOLD) {
+        } else if (!suppressHide && currentY > lastY + THRESHOLD) {
             header.classList.add('header-hidden');
         } else if (currentY < lastY - THRESHOLD) {
             header.classList.remove('header-hidden');

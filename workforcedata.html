@@ -34,22 +34,28 @@
     </header>
 
     <main class="main-content">
+        <!-- In-page section nav — a direct child of <main>, not nested inside
+             .container, so its sticky containing block spans the whole page
+             instead of just the short hero+KPIs box .container wraps. Nested
+             inside .container, it could only ever stay stuck for as long as
+             .container itself was still scrolling through the viewport (a
+             few hundred px), then scrolled away with it and never came back
+             for the rest of the page. -->
+        <nav class="page-jumpnav" aria-label="Page sections">
+            <a href="#section-kpis">Key Indicators</a>
+            <a href="#section-region">Regional Context</a>
+            <a href="#section-adjusted">Adjusted Picture</a>
+            <a href="#section-industries">Industries</a>
+            <a href="#section-demographics">Demographics</a>
+            <a href="#section-occupations">Occupations</a>
+            <a href="#section-hiring">Hiring Demand</a>
+        </nav>
+
         <div class="container">
             <section class="page-header">
                 <h2>Macon-Bibb County Workforce Data</h2>
                 <p>Economic indicators and workforce trends for the Greater Macon region</p>
             </section>
-
-            <!-- In-page section nav -->
-            <nav class="page-jumpnav" aria-label="Page sections">
-                <a href="#section-kpis">Key Indicators</a>
-                <a href="#section-region">Regional Context</a>
-                <a href="#section-adjusted">Adjusted Picture</a>
-                <a href="#section-industries">Industries</a>
-                <a href="#section-demographics">Demographics</a>
-                <a href="#section-occupations">Occupations</a>
-                <a href="#section-hiring">Hiring Demand</a>
-            </nav>
 
             <!-- Hero KPIs -->
             <section class="stats-section" id="section-kpis">
