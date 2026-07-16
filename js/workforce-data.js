@@ -37,6 +37,9 @@
     function fips5(v) {
         return String(v).padStart(5, '0');
     }
+    function isMobile() {
+        return window.innerWidth <= 768;
+    }
 
     // ===== INDUSTRY CONFIG (2-digit NAICS prefix -> sector) =====
     // Colors: the three largest/most-referenced sectors are pinned to the
@@ -388,15 +391,41 @@
 
         const projGroups = buildSocGroups(base, 'Ann % Growth');
 
-        renderBars('occ-proj-growth',
-            projGroups.filter(g => g.v > 0).sort((a, b) => b.v - a.v).slice(0, 8),
-            C.teal, fmtPct, 'mid-label');
+        // Both default to 5 on mobile instead of the desktop 8 — same idea
+        // as the Hiring Demand charts and the occupations table, just
+        // applied here too. The "Show More" toggle (mobile-only — see the
+        // #occ-growth-toggle/#occ-wage-toggle CSS) reveals the rest of the
+        // desktop-equivalent 8, it doesn't need its own separate full list.
+        const growthAllData = projGroups.filter(g => g.v > 0).sort((a, b) => b.v - a.v).slice(0, 8);
+        const wageAllData = base.filter(r => toNum(r['Mean Ann Wages2']) > 0)
+            .sort((a, b) => toNum(b['Mean Ann Wages2']) - toNum(a['Mean Ann Wages2'])).slice(0, 8)
+            .map(r => ({ label: r['Occupation'], v: toNum(r['Mean Ann Wages2']) }));
 
-        renderBars('occ-wage-mean',
-            base.filter(r => toNum(r['Mean Ann Wages2']) > 0)
-                .sort((a, b) => toNum(b['Mean Ann Wages2']) - toNum(a['Mean Ann Wages2'])).slice(0, 8)
-                .map(r => ({ label: r['Occupation'], v: toNum(r['Mean Ann Wages2']) })),
-            C.orange, fmtWage, 'mid-label');
+        let growthExpanded = false;
+        let wageExpanded = false;
+
+        function renderGrowth() {
+            const count = growthExpanded || !isMobile() ? 8 : 5;
+            renderBars('occ-proj-growth', growthAllData.slice(0, count), C.teal, fmtPct, 'mid-label');
+            const btn = document.getElementById('occ-growth-toggle');
+            if (btn) btn.textContent = growthExpanded ? '▲ Show Less' : '▼ Show More';
+        }
+        function renderWage() {
+            const count = wageExpanded || !isMobile() ? 8 : 5;
+            renderBars('occ-wage-mean', wageAllData.slice(0, count), C.orange, fmtWage, 'mid-label');
+            const btn = document.getElementById('occ-wage-toggle');
+            if (btn) btn.textContent = wageExpanded ? '▲ Show Less' : '▼ Show More';
+        }
+
+        renderGrowth();
+        renderWage();
+
+        const growthBtn = document.getElementById('occ-growth-toggle');
+        if (growthBtn) growthBtn.addEventListener('click', () => { growthExpanded = !growthExpanded; renderGrowth(); });
+        const wageBtn = document.getElementById('occ-wage-toggle');
+        if (wageBtn) wageBtn.addEventListener('click', () => { wageExpanded = !wageExpanded; renderWage(); });
+
+        window.addEventListener('resize', debounce(() => { renderGrowth(); renderWage(); }, 250));
 
         // Job Exits / Occupational Transfers / Net New Positions share one
         // full-width chart behind a tab switcher instead of three stacked

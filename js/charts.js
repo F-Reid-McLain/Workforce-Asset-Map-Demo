@@ -12,6 +12,9 @@
     function parseNum(str) {
         return parseInt(String(str).replace(/,/g, ''), 10);
     }
+    function isMobile() {
+        return window.innerWidth <= 768;
+    }
 
     // Same horizontal bar-row markup used by the Demographics/Occupation
     // Intelligence panels, so these two charts read as part of the same
@@ -54,7 +57,8 @@
     let hiringAllData  = [];
 
     function renderHiringChart() {
-        const rows = hiringExpanded ? hiringAllData : hiringAllData.slice(0, 10);
+        const defaultCount = isMobile() ? 5 : 10;
+        const rows = hiringExpanded ? hiringAllData : hiringAllData.slice(0, defaultCount);
         renderBarRows('hiring-chart', rows, C.accent);
 
         const btn = document.getElementById('hiring-toggle');
@@ -84,7 +88,8 @@
     let employersAllData  = [];
 
     function renderEmployersChart() {
-        const rows = employersExpanded ? employersAllData : employersAllData.slice(0, 10);
+        const defaultCount = isMobile() ? 5 : 10;
+        const rows = employersExpanded ? employersAllData : employersAllData.slice(0, defaultCount);
         renderBarRows('employers-chart', rows, C.teal);
 
         const btn = document.getElementById('employers-toggle');
@@ -112,5 +117,15 @@
     // ===== LOAD =====
     loadHiringChart();
     loadEmployersChart();
+
+    // Re-render on resize so crossing the mobile breakpoint (e.g. rotating
+    // a tablet, or resizing a desktop window) updates the default count —
+    // a no-op while a chart is already expanded, since expanded always
+    // shows the full list regardless of viewport.
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => { renderHiringChart(); renderEmployersChart(); }, 250);
+    });
 
 })();

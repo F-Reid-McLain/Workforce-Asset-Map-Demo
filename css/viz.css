@@ -791,6 +791,12 @@
    IDs outrank that unambiguously. */
 #mobile-map-toggle, #fs-mobile-map-toggle { display: none; }
 
+/* Top Growing Occupations / Top Paying Jobs show all 8 on desktop with no
+   way to shrink them further — the "Show More" toggle only exists because
+   mobile defaults to 5 of those same 8, so the button (and the affordance
+   it implies) would be a pointless no-op above this breakpoint. */
+#occ-growth-toggle, #occ-wage-toggle { display: none; }
+
 @media (max-width: 768px) {
     .viz-container, #network-visualization, #network-visualization svg {
         height: 391px;
@@ -799,6 +805,7 @@
 
     #mobile-map-toggle { display: inline-block; }
     #fs-mobile-map-toggle { display: flex; }
+    #occ-growth-toggle, #occ-wage-toggle { display: inline-block; }
 
     /* show/hide toggled by JS in enterInteractiveMode / exitInteractiveMode */
 }
