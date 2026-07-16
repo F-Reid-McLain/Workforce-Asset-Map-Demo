@@ -1098,17 +1098,21 @@ const structuralLinks = [
   simulation.on("tick", renderTick);
   if (particle) d3.timer(updateParticles);
 
-  // Nothing is freely draggable while the mobile ring is active — every
-  // node's position (hub, ring categories, and any visible/expanded org
-  // children) is managed entirely by the pin system in that mode. A touch
-  // "tap" fires a zero-distance drag lifecycle same as a real drag would,
-  // and dragended below unconditionally clears fx/fy on release; without
-  // this guard, simply tapping a category (or one of its fanned-out
-  // children) would silently un-pin that node, leaving it free to be
-  // flung outward by the charge force on the next restart since everything
-  // around it stays pinned with nothing to balance against.
+  // Nothing is freely draggable on mobile, full stop — the layout is fixed
+  // there (no more "Show Full Map" escape hatch to a freely-arranged
+  // graph), so every node's position is managed entirely by the pin
+  // system. Checked directly against viewport width rather than only
+  // collapseCategoriesOnMobile, since that flag existed to support a
+  // toggle that no longer has any UI path to flip it — this stays correct
+  // even if that variable's role changes later. A touch "tap" fires a
+  // zero-distance drag lifecycle same as a real drag would, and dragended
+  // below unconditionally clears fx/fy on release; without this guard,
+  // simply tapping a category (or one of its fanned-out children) would
+  // silently un-pin that node, leaving it free to be flung outward by the
+  // charge force on the next restart since everything around it stays
+  // pinned with nothing to balance against.
   function isDragLocked(d) {
-    return collapseCategoriesOnMobile || mapInteractionFrozen;
+    return window.innerWidth <= MOBILE_BREAKPOINT || collapseCategoriesOnMobile || mapInteractionFrozen;
   }
   function dragstarted(event, d) { if (isDragLocked(d)) return; if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; }
   function dragged(event, d) { if (isDragLocked(d)) return; d.fx = event.x; d.fy = event.y; }
