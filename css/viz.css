@@ -828,6 +828,15 @@
         display: flex;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
+        /* Without this, scroll-snap-align: start (see .kpi-block below)
+           treats the container's own padding as slack to scroll past
+           rather than an inset to respect — the browser was auto-scrolling
+           past the left 20px on load to align the first card's edge to the
+           bare scrollport, leaving that card flush against the true screen
+           edge instead of matching every other heading's 20px inset. This
+           tells the snap algorithm the scrollport itself is already inset
+           by the padding amount, so it has nothing left to scroll past. */
+        scroll-padding-inline: 20px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         margin: 0 -20px;
