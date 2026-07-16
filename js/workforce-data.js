@@ -544,9 +544,21 @@
         // (see the click handler below). Drawn with the same pathGen/
         // projection as the counties, so a real GeoJSON of I-75/I-16/I-475/
         // US-19 lines up correctly against the county boundaries with no
-        // separate alignment work needed.
+        // separate alignment work needed. The source file has a small
+        // margin beyond the 17-county extent (so lines don't look
+        // artificially truncated right at the fitted edge) — clipped here
+        // to the actual union of the county shapes, so nothing renders out
+        // in the blank background beyond the counties actually shown.
+        const clipId = 'counties-clip';
+        svg.append('defs').append('clipPath').attr('id', clipId)
+            .selectAll('path')
+            .data(geo.features)
+            .join('path')
+            .attr('d', pathGen);
+
         const highwaysG = svg.append('g')
             .attr('class', 'map-highways')
+            .attr('clip-path', `url(#${clipId})`)
             .style('opacity', 0)
             .style('pointer-events', 'none');
         if (highwaysGeo && highwaysGeo.features.length) {
@@ -561,40 +573,40 @@
                 .attr('stroke-linecap', 'round')
                 .attr('stroke-linejoin', 'round');
 
-            // I-475 loops around the west/south side of the city, so its
-            // length-weighted centroid lands right in the middle of it —
-            // directly on top of the Macon-Bibb county label. Nudge any
-            // route label that lands too close to that label clear of it,
-            // rather than hardcoding a fix for I-475 specifically (robust
-            // if the source data's exact points ever change).
-            const bibbCentroid = bibbFeature ? pathGen.centroid(bibbFeature) : null;
+            // The line itself is clipped to the counties above, but a label
+            // anchored at the raw geometric centroid can still land outside
+            // that clip (e.g. I-475 loops back near itself; I-85/I-20/I-285
+            // barely clip a corner) — a badge floating in the blank
+            // background with no visible line nearby. Anchor each label to
+            // one of its own line's points that's actually inside a county
+            // instead, using real point-in-polygon tests (d3.geoContains)
+            // in geographic space rather than the projected/screen one, and
+            // drop the label entirely if the route never truly enters the
+            // displayed region (nothing meaningful to label).
+            function findLabelPoint(feature) {
+                const coords = feature.geometry.type === 'LineString'
+                    ? feature.geometry.coordinates
+                    : feature.geometry.coordinates.flat();
+                const inside = coords.filter(pt => geo.features.some(c => d3.geoContains(c, pt)));
+                if (!inside.length) return null;
+                return projection(inside[Math.floor(inside.length / 2)]);
+            }
+
+            const labeled = highwaysGeo.features
+                .filter(f => f.properties.route)
+                .map(f => ({ feature: f, pt: findLabelPoint(f) }))
+                .filter(d => d.pt);
+
             const routeG = highwaysG.selectAll('g.route-label')
-                .data(highwaysGeo.features.filter(f => f.properties.route))
+                .data(labeled)
                 .join('g')
                 .attr('class', 'route-label')
-                .attr('transform', d => {
-                    let [x, y] = pathGen.centroid(d);
-                    if (bibbCentroid) {
-                        const dx = x - bibbCentroid[0], dy = y - bibbCentroid[1];
-                        const dist = Math.hypot(dx, dy);
-                        // Push straight out along the same direction the
-                        // point already sits from Bibb's centroid, out to a
-                        // fixed clear distance — a flat (dx,dy) offset could
-                        // land almost parallel to that direction instead of
-                        // away from it, barely changing the distance at all.
-                        if (dist < 40) {
-                            const angle = dist > 0 ? Math.atan2(dy, dx) : 0;
-                            x = bibbCentroid[0] + Math.cos(angle) * 55;
-                            y = bibbCentroid[1] + Math.sin(angle) * 55;
-                        }
-                    }
-                    return `translate(${x},${y})`;
-                });
+                .attr('transform', d => `translate(${d.pt})`);
             routeG.append('rect')
                 .attr('x', -18).attr('y', -9).attr('width', 36).attr('height', 15).attr('rx', 3)
                 .attr('fill', '#1a1a1a').attr('stroke', '#ffffff').attr('stroke-width', 1);
             routeG.append('text')
-                .text(d => d.properties.route)
+                .text(d => d.feature.properties.route)
                 .attr('text-anchor', 'middle').attr('dy', 3.5)
                 .attr('font-size', 9.5).attr('font-weight', 700).attr('fill', '#ffffff');
         }
@@ -676,14 +688,13 @@
             })
             .on('mouseleave', () => { tip.style.display = 'none'; });
 
-        // Click the map to swap county names/population/commuting labels
-        // (everywhere except Macon-Bibb, which stays as the map's anchor
-        // point) for the region's major highways — same underlying
-        // projection, so the overlay lines up exactly with the county
-        // shapes without any separate alignment step.
+        // Click the map to swap every county's name/population/commuting
+        // labels (Macon-Bibb included) for the region's major highways —
+        // same underlying projection, so the overlay lines up exactly with
+        // the county shapes without any separate alignment step.
         function applyHighwayMode(animate) {
             (animate ? highwaysG.transition().duration(300) : highwaysG).style('opacity', showHighways ? 1 : 0);
-            const labels = svg.selectAll('.county-label:not(.county-label--bibb)');
+            const labels = svg.selectAll('.county-label');
             (animate ? labels.transition().duration(300) : labels).style('opacity', showHighways ? 0 : 1);
         }
         applyHighwayMode(false);
