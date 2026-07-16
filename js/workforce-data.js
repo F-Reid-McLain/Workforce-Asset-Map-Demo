@@ -854,14 +854,22 @@
 
         // Whichever card is most visible in the scroll container gets the
         // active dot — tracks both swipes and dot-click scrolls, since both
-        // just move the container's scroll position.
+        // just move the container's scroll position. With two-up carousels
+        // (Fast Facts) more than one card can cross the threshold in the
+        // same batch; naively setting the dot per-entry as the loop went
+        // let whichever entry happened to be processed last win, which was
+        // usually the second (right-hand) card even at the very start of
+        // the scroll. Taking the lowest index among everything currently
+        // visible picks the leading card of the page instead, correct for
+        // both one-up and two-up carousels.
         const io = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (!entry.isIntersecting) return;
-                const idx = items.indexOf(entry.target);
-                if (idx === -1) return;
-                dotEls.forEach((d, i) => d.classList.toggle('active', i === idx));
-            });
+            const visibleIdxs = entries
+                .filter(e => e.isIntersecting)
+                .map(e => items.indexOf(e.target))
+                .filter(i => i !== -1);
+            if (!visibleIdxs.length) return;
+            const idx = Math.min(...visibleIdxs);
+            dotEls.forEach((d, i) => d.classList.toggle('active', i === idx));
         }, { root: container, threshold: 0.6 });
         items.forEach(item => io.observe(item));
     }

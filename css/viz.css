@@ -837,11 +837,20 @@
     .adj-metrics-grid::-webkit-scrollbar,
     .demo-grid::-webkit-scrollbar { display: none; }
 
-    .stats-grid > .kpi-block,
     .adj-metrics-grid > .adj-card,
     .demo-grid > .demo-card {
         flex: 0 0 82%;
         scroll-snap-align: center;
+    }
+
+    /* Fast Facts cards are compact (one number + a label) — two fit per
+       screen comfortably, unlike the heavier Adjusted Picture/Demographics
+       cards above, which stay one-at-a-time. ~46% (not a flat 50%) leaves a
+       sliver of the next pair peeking in as a scroll affordance, same idea
+       as the single-card carousels' 82%. */
+    .stats-grid > .kpi-block {
+        flex: 0 0 46%;
+        scroll-snap-align: start;
     }
 }
 
