@@ -564,11 +564,17 @@ const structuralLinks = [
   function updateBranchPositions() {
     if (!branchGroup || !focusedNode) return;
     const px = focusedNode.x, py = focusedNode.y;
-    branchSatSel.attr("transform", l => `translate(${px + BRANCH_RADIUS * Math.cos(l.__angle)},${py + BRANCH_RADIUS * Math.sin(l.__angle)})`);
+    // __radius is set per-link in branchOutNode, shrunk from BRANCH_RADIUS
+    // when the safe viewport is too tight to hold the full-size fan at a
+    // readable zoom — falls back to the default whenever that sizing hasn't
+    // run (shouldn't normally happen, but keeps this safe as a stand-alone
+    // function).
+    const r = l => l.__radius != null ? l.__radius : BRANCH_RADIUS;
+    branchSatSel.attr("transform", l => `translate(${px + r(l) * Math.cos(l.__angle)},${py + r(l) * Math.sin(l.__angle)})`);
     branchLineSel
       .attr("x1", px).attr("y1", py)
-      .attr("x2", l => px + BRANCH_RADIUS * Math.cos(l.__angle))
-      .attr("y2", l => py + BRANCH_RADIUS * Math.sin(l.__angle));
+      .attr("x2", l => px + r(l) * Math.cos(l.__angle))
+      .attr("y2", l => py + r(l) * Math.sin(l.__angle));
   }
 
   function removeBranchGroup() {
@@ -860,16 +866,21 @@ const structuralLinks = [
     // phone. Only raised while the mobile category view is active; "Show
     // Full Map" mode and desktop keep the original cap.
     const maxScale = collapseCategoriesOnMobile ? 4.5 : 2.5;
-    // `extent` alone assumes a square footprint around (cx,cy) — fine for a
-    // ring or a single node, but a branch-out fan is wider than it is tall
-    // (or vice versa), and squaring it off wastes room that's actually free
-    // on one axis, forcing a zoom-out deeper than the real content needs.
-    // Callers that know their true footprint pass `bounds: {halfW, halfH}`
-    // (measured off the real rendered geometry) to fit each axis on its own
-    // terms instead.
-    const halfW = bounds ? bounds.halfW : extent;
-    const halfH = bounds ? bounds.halfH : extent;
-    const fitScale = Math.min((safe.width - pad * 2) / (halfW * 2), (safe.height - pad * 2) / (halfH * 2), maxScale);
+    // `extent` alone assumes a square, (cx,cy)-centered footprint — fine for
+    // a ring or a single node, but a branch-out fan is both wider than it is
+    // tall (or vice versa) AND lopsided around the node itself (e.g. a fan
+    // that only opens upward has no footprint below it at all). Squaring it
+    // off, or centering on the node when the true content isn't centered on
+    // it, both waste room that's actually free, forcing a deeper zoom-out
+    // than the real content needs. Callers that know their true footprint
+    // pass `bounds: {left, right, top, bottom}` (measured off the real
+    // rendered geometry, relative to cx,cy) to fit and center on the actual
+    // bounding box instead.
+    const left = bounds ? bounds.left : -extent;
+    const right = bounds ? bounds.right : extent;
+    const top = bounds ? bounds.top : -extent;
+    const bottom = bounds ? bounds.bottom : extent;
+    const fitScale = Math.min((safe.width - pad * 2) / (right - left), (safe.height - pad * 2) / (bottom - top), maxScale);
     // Tapping a child node opens the info panel, which eats into the safe
     // area (see getSafeViewportRect) — its extent-based fit-scale can end
     // up smaller than the category ring's own zoom level the user was just
@@ -893,7 +904,14 @@ const structuralLinks = [
     const scale = strictFit ? Math.min(maxScale, fitScale) : Math.min(maxScale, Math.max(Math.max(0.5, currentScale * 1.15), fitScale));
     const targetX = safe.left + safe.width / 2;
     const targetY = safe.top + safe.height / 2;
-    const transform = d3.zoomIdentity.translate(targetX - scale * cx, targetY - scale * cy).scale(scale);
+    // Center the bounding box's own midpoint, not (cx,cy) itself — for a
+    // symmetric extent these are the same point, but for a lopsided bounds
+    // (like a fan that only opens upward) the box's midpoint sits well off
+    // to one side of the node, and centering the node instead would waste
+    // exactly the empty half the fan never uses.
+    const boxCx = cx + (left + right) / 2;
+    const boxCy = cy + (top + bottom) / 2;
+    const transform = d3.zoomIdentity.translate(targetX - scale * boxCx, targetY - scale * boxCy).scale(scale);
     if (duration > 0) svg.transition().duration(duration).call(zoom.transform, transform);
     else svg.call(zoom.transform, transform);
   }
@@ -903,31 +921,20 @@ const structuralLinks = [
     const links = d.links;
     const color = glowColor(d);
 
-    // Fan the satellites out AWAY from the hub, through the parent, instead
-    // of surrounding it on all sides — they read as "extending outward"
-    // rather than crowding whatever's already next to the parent toward
-    // the hub's side.
-    const hub = workforceData.nodes.find(n => n.id === "hub");
-    let baseAngle = hub ? Math.atan2(d.y - hub.y, d.x - hub.x) : -Math.PI / 2;
-    // The hub-away direction can point straight at whichever edge the info
-    // panel covers (bottom in portrait, left in landscape). Forcing that
-    // reach into frame then falls to focusOnCluster's fitScale, which has
-    // to zoom out however far it takes to contain it — shrinking every
-    // satellite and its label to stay legible in the process. Mirroring the
-    // angle across the axis the panel occludes keeps the same "extending
-    // outward" fan shape but always opens it toward the open side instead,
-    // so the fan fits in the room that's actually there without needing a
-    // compensating zoom-out at all.
+    // openAssetModal (called by this click handler just before branchOutNode)
+    // always opens the info panel first, so by this point it's reliably
+    // open — meaning there's always exactly one occluded edge to avoid
+    // (bottom in portrait, left in landscape). Aim the fan straight at the
+    // opposite, guaranteed-open edge rather than away from the hub — the
+    // hub-relative direction is arbitrary and, with a fan wide enough to
+    // need real angular room, its OUTER edges could still dip into the
+    // panel's side even after just mirroring the center. Capping the total
+    // spread at 180° keeps the entire fan — not just its center — at or
+    // above the horizon around that safe direction, guaranteed by geometry
+    // rather than by hoping the hub happened to be the right way round.
     const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-    const panelEl = document.getElementById("viz-info-panel");
-    if (panelEl && panelEl.classList.contains("open")) {
-      if (isLandscape) {
-        if (Math.cos(baseAngle) < 0) baseAngle = Math.PI - baseAngle; // panel eats the left — keep the fan rightward
-      } else {
-        if (Math.sin(baseAngle) > 0) baseAngle = -baseAngle; // panel eats the bottom — keep the fan upward
-      }
-    }
-    const spreadDeg = links.length <= 1 ? 0 : Math.min(150, 40 + (links.length - 1) * 25);
+    const baseAngle = isLandscape ? 0 : -Math.PI / 2; // rightward in landscape, upward in portrait
+    const spreadDeg = links.length <= 1 ? 0 : Math.min(170, 40 + (links.length - 1) * 30);
     const spreadRad = spreadDeg * Math.PI / 180;
     links.forEach((l, i) => {
       const t = links.length === 1 ? 0 : (i / (links.length - 1)) - 0.5;
@@ -954,36 +961,61 @@ const structuralLinks = [
       .attr("r", BRANCH_NODE_R).attr("fill", color).attr("fill-opacity", 0.3)
       .attr("stroke", color).attr("stroke-width", 1.5);
     branchSatSel.append("text")
-      .text(l => truncateLabel(l.label, 20))
+      // Much shorter than the 20-char cap used elsewhere — a satellite fan
+      // packs several of these close together (see sharedRadius below), so
+      // a narrower label footprint keeps neighbors from touching without
+      // needing the fan any wider (and the full name is always one tap
+      // away — the info panel already lists it in full).
+      .text(l => truncateLabel(l.label, 11))
       .attr("text-anchor", "middle").attr("dy", BRANCH_NODE_R + 13)
       .attr("fill", "#fff").attr("font-size", "9px")
       .style("text-shadow", "1px 1px 2px rgba(0,0,0,0.8)");
     branchSatSel.append("title").text(l => l.description || l.label);
 
+    // The fan's size is driven by its own content, not by how much safe
+    // viewport happens to be left once the info panel opens — trying to
+    // shrink the radius to whatever tiny space was available (the previous
+    // approach here) just traded one bad outcome (a zoomed-out, unreadable
+    // camera) for another (satellites packed so close their labels overlap
+    // each other, or the parent node). Solve for the radius that keeps
+    // labels legibly apart (same chord-distance approach expandCategory
+    // uses for its ring, sized off each label's own real rendered width via
+    // getBBox()), then let focusOnCluster's own honest fit — already fixed
+    // above to respect strictFit all the way down — decide however much
+    // zoom that well-spaced fan actually needs. The directional bias above
+    // (fanning toward the open side) and the shorter 11-char labels/wider
+    // spread below keep that zoom in a reasonable range in practice.
+    const bboxes = branchSatSel.nodes().map(n => n.getBBox());
+    let sharedRadius = BRANCH_RADIUS;
+    if (links.length > 1) {
+      const step = spreadRad / (links.length - 1);
+      const effectiveSize = Math.max(BRANCH_NODE_R, ...bboxes.map(b => b.width / 2));
+      const minChord = 2 * effectiveSize + effectiveSize * 0.35;
+      sharedRadius = Math.max(BRANCH_RADIUS, minChord / (2 * Math.sin(step / 2)));
+    }
+    links.forEach(l => { l.__radius = sharedRadius; });
+
     updateBranchPositions();
-    // Measure the fan's real footprint off the rendered geometry instead of
-    // assuming a worst-case square — getBBox() gives each satellite's exact
-    // local extent (circle + its label, whatever that label's actual
-    // rendered width turns out to be), which combined with its known
-    // translate offset gives the true bounding box around the focused node.
-    // A biased-but-wide fan is usually much wider than it is tall (or vice
-    // versa); fitting each axis to what's actually there — rather than
-    // squaring off to the longest reach in any direction — is what lets
-    // focusOnCluster hold a readable zoom instead of shrinking everything
-    // to cover a footprint that isn't really that big in both dimensions.
-    let halfW = BRANCH_NODE_R, halfH = BRANCH_NODE_R;
-    branchSatSel.each(function(l) {
-      const bbox = this.getBBox();
-      const px = BRANCH_RADIUS * Math.cos(l.__angle);
-      const py = BRANCH_RADIUS * Math.sin(l.__angle);
-      halfW = Math.max(halfW, Math.abs(px + bbox.x), Math.abs(px + bbox.x + bbox.width));
-      halfH = Math.max(halfH, Math.abs(py + bbox.y), Math.abs(py + bbox.y + bbox.height));
+    // Measure the fan's real, true bounding box off the rendered geometry —
+    // aiming the whole fan upward (or rightward) means it has essentially
+    // no footprint on the opposite side of the node at all, and treating it
+    // as a symmetric halfW/halfH square would center the node in the middle
+    // of the safe area, wasting exactly the empty half the fan never uses.
+    let left = -BRANCH_NODE_R, right = BRANCH_NODE_R, top = -BRANCH_NODE_R, bottom = BRANCH_NODE_R;
+    links.forEach((l, i) => {
+      const bbox = bboxes[i];
+      const px = sharedRadius * Math.cos(l.__angle);
+      const py = sharedRadius * Math.sin(l.__angle);
+      left = Math.min(left, px + bbox.x);
+      right = Math.max(right, px + bbox.x + bbox.width);
+      top = Math.min(top, py + bbox.y);
+      bottom = Math.max(bottom, py + bbox.y + bbox.height);
     });
     // strictFit=true so this framing is never overridden by focusOnCluster's
     // climb-only zoom floor — that floor was forcing the scale back up past
     // whatever fitScale this measured footprint actually needs, whenever a
     // category was already zoomed in tight before the satellites appeared.
-    focusOnCluster(d.x, d.y, BRANCH_RADIUS + BRANCH_NODE_R + 65, 700, true, { halfW, halfH });
+    focusOnCluster(d.x, d.y, BRANCH_RADIUS + BRANCH_NODE_R + 65, 700, true, { left, right, top, bottom });
   }
 
   collapseBranch = function (duration = 600) {
