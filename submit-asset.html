@@ -37,10 +37,39 @@
         <div class="container">
             <section class="page-header">
                 <h2>Suggest an Asset for the Map</h2>
-                <p>Know a workforce organization that belongs on the Macon Workforce Navigator? Tell us about it.</p>
+                <p>Know a workforce organization that belongs on the Macon Workforce Navigator? Tell us about it — whatever you write below is exactly what gets published if we approve it, so write it the way you want it seen.</p>
             </section>
 
-            <div class="submission-page">
+            <div class="submission-page submission-page--with-preview">
+                <div class="node-preview-panel">
+                    <div class="node-preview-panel-inner">
+                        <div class="node-preview-label">Live Preview</div>
+                        <svg class="node-preview-svg" viewBox="0 0 280 230" aria-hidden="true">
+                            <defs>
+                                <clipPath id="node-preview-clip"><circle cx="140" cy="140" r="38"/></clipPath>
+                            </defs>
+                            <g id="preview-satellites"></g>
+                            <circle id="preview-circle" cx="140" cy="140" r="38" fill="#4d748c" stroke="#e7decf" stroke-width="3" stroke-dasharray="6,6"/>
+                            <image id="preview-image" x="102" y="102" width="76" height="76" clip-path="url(#node-preview-clip)" preserveAspectRatio="xMidYMid slice" style="display:none"/>
+                            <text id="preview-label" x="140" y="198" text-anchor="middle" fill="#fff" font-size="14" style="text-shadow:1px 1px 2px rgba(0,0,0,0.8)">Your Organization</text>
+                        </svg>
+                        <p class="node-preview-hint">This is roughly how your submission will appear as a node on the map, once approved. The category you pick sets its color; a logo (or its absence) fills the circle. Any programs you list below will show up as smaller connected nodes branching off it.</p>
+
+                        <div class="node-preview-divider"></div>
+
+                        <div class="node-preview-info">
+                            <div class="viz-info-header">
+                                <h3 id="preview-info-title">Your Organization</h3>
+                            </div>
+                            <div class="viz-info-body" id="preview-info-body">
+                                <p class="node-preview-placeholder">Your description will show up here as you type it below — exactly as visitors will see it when they click on your organization on the map.</p>
+                            </div>
+                        </div>
+                        <p class="node-preview-hint">You're in full control of how this reads — write it the way you want it to appear.</p>
+                    </div>
+                </div>
+
+                <div class="submission-form-column">
                 <form class="submission-form" id="submit-asset-form" data-success-target="submit-asset-success">
                     <div class="form-field">
                         <label class="form-label" for="asset_name">Organization name <span class="required">*</span></label>
@@ -58,6 +87,12 @@
                             <option value="community-dev">Community and Economic Development</option>
                             <option value="k12-secondary">K-12 and Secondary</option>
                         </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="tags">Tags (optional)</label>
+                        <input class="form-input" type="text" id="tags" name="tags" placeholder="e.g. Career Services, Youth, Healthcare">
+                        <span class="form-field-hint">A few words people might search for. Separate with commas.</span>
                     </div>
 
                     <div class="form-field">
@@ -85,6 +120,12 @@
                     </div>
 
                     <div class="form-field">
+                        <label class="form-label" for="impact">Impact (optional)</label>
+                        <textarea class="form-textarea" id="impact" name="impact"></textarea>
+                        <span class="form-field-hint">Any numbers or outcomes worth highlighting — people served, jobs created, economic impact, that kind of thing.</span>
+                    </div>
+
+                    <div class="form-field">
                         <label class="form-label">Specific programs (optional)</label>
                         <span class="form-field-hint">Does this organization run individual programs, schools, or services worth calling out on their own — for example, a specific degree program at a college, or a particular training track? List them below and they'll show up as extra details when someone clicks on this organization on the map.</span>
                         <div class="dynamic-rows" id="program-rows"></div>
@@ -101,6 +142,13 @@
                         <input class="form-input" type="email" id="submitter_email" name="submitter_email" placeholder="In case we have follow-up questions">
                     </div>
 
+                    <div class="form-field form-field-confirm">
+                        <label class="form-checkbox-label">
+                            <input type="checkbox" id="confirm_ownership" name="confirm_ownership" value="yes" required>
+                            I wrote this myself and I'm responsible for how it reads. I understand the Chamber will publish it as submitted if approved, or let me know if it isn't — not rewrite or edit it.
+                        </label>
+                    </div>
+
                     <input type="hidden" name="_subject" value="">
                     <div class="form-field-hidden" aria-hidden="true">
                         <label for="_gotcha">Leave this field blank</label>
@@ -113,7 +161,8 @@
 
                 <div class="form-success" id="submit-asset-success" hidden>
                     <h3>Thank you!</h3>
-                    <p>Your suggestion has been sent to our team for review.</p>
+                    <p>Your suggestion is with our team now. We'll either publish it as submitted or let you know if we're not able to.</p>
+                </div>
                 </div>
             </div>
         </div>

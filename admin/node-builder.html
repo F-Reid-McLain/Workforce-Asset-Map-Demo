@@ -115,6 +115,11 @@
             </div>
 
             <div class="field">
+                <label for="website">Website</label>
+                <input type="text" id="website" placeholder="https://acme.example.com">
+            </div>
+
+            <div class="field">
                 <label for="description">Description</label>
                 <textarea id="description"></textarea>
             </div>
@@ -209,6 +214,8 @@
                 .filter(link => link.label || link.url || link.description);
 
             const imageName = document.getElementById('image').value.trim();
+            let website = document.getElementById('website').value.trim();
+            if (website && !/^https?:\/\//i.test(website)) website = `https://${website}`;
 
             const obj = {
                 name: nameField.value.trim(),
@@ -217,7 +224,8 @@
                 image: imageName ? `assets/logos/${imageName}` : '',
                 description: document.getElementById('description').value.trim(),
                 impact: document.getElementById('impact').value.trim(),
-                links
+                links,
+                website
             };
 
             return obj;

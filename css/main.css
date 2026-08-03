@@ -975,6 +975,134 @@ body {
     padding: 2.5rem;
 }
 
+/* Suggest-an-Asset's two-column layout: live node preview alongside the
+   form. Stacks to a single column (preview above form, per source order)
+   below the breakpoint. */
+.submission-page--with-preview {
+    max-width: 1080px;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    align-items: start;
+    gap: 2rem;
+}
+
+.node-preview-panel {
+    position: sticky;
+    top: 100px;
+}
+
+.node-preview-panel-inner {
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.node-preview-label {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+}
+
+.node-preview-svg {
+    width: 100%;
+    max-width: 180px;
+}
+
+.node-preview-hint {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    margin-top: 0.75rem;
+    text-align: left;
+}
+
+.node-preview-divider {
+    border-top: 1px solid var(--color-border);
+    margin: 1.25rem 0;
+}
+
+/* Reuses the real map's own info-panel classes (.viz-info-header,
+   .viz-info-body, .related-links from css/viz.css / css/components.css)
+   so this preview isn't a lookalike — it's pixel-for-pixel what the
+   description/impact/programs will actually render as when clicked on
+   the live map. Just unwrapped from the map's fixed/absolute positioning. */
+.node-preview-info {
+    text-align: left;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.node-preview-info .viz-info-header {
+    position: static;
+}
+
+.node-preview-placeholder {
+    color: var(--color-text-muted);
+    font-style: italic;
+}
+
+/* Request an Edit: the "form wraps the whole two-column grid" trick — the
+   <form> needs to contain the preview panel's editable fields (so they're
+   real, submittable form fields) without becoming a grid item itself and
+   breaking the .submission-page--with-preview 2-column layout. display:
+   contents removes it from the box tree while keeping its descendants
+   form-associated. The [hidden] override restores normal hiding — an
+   authored `display: contents` would otherwise beat the UA stylesheet's
+   `[hidden] { display: none }` and leave it visible after submission. */
+.form-grid-wrapper {
+    display: contents;
+}
+
+.form-grid-wrapper[hidden] {
+    display: none;
+}
+
+/* Request an Edit: the preview panel only mirrors the Related Programs
+   pills now — name/description/impact/website are edited as real,
+   properly-sized fields in the form column instead, not squeezed in here. */
+.node-preview-programs-label {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    color: var(--color-accent);
+}
+
+/* Request an Edit: live summary of what's actually different from the
+   current listing, apart from the listing itself. */
+.node-preview-change {
+    margin-top: 1.25rem;
+    border-left: 3px solid var(--color-accent-teal);
+    padding: 0.15rem 0 0.15rem 1rem;
+}
+
+.node-preview-label--change {
+    color: var(--color-accent-teal);
+}
+
+.node-preview-change-list {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+@media (max-width: 900px) {
+    .submission-page--with-preview {
+        grid-template-columns: 1fr;
+        max-width: 700px;
+    }
+    .node-preview-panel {
+        position: static;
+        max-width: 380px;
+        margin: 0 auto;
+    }
+}
+
 .form-field {
     margin-bottom: 1.5rem;
 }
@@ -1085,6 +1213,31 @@ body {
 
 .form-success p {
     color: var(--color-text-secondary);
+}
+
+.form-field-confirm {
+    background: var(--color-bg-surface-deep);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.1rem;
+}
+
+.form-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+    cursor: pointer;
+}
+
+.form-checkbox-label input[type="checkbox"] {
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-accent);
 }
 
 /* Honeypot field — present for spam bots to fill in, hidden from real users */
