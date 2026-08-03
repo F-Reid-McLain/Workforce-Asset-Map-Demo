@@ -321,12 +321,16 @@ COMPONENTS CRITERIA FOR INCLUSION:
     border-radius: var(--radius-md);
     width: 90%;
     max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     animation: slideIn var(--transition-base);
 }
 
 .modal-header {
+    flex-shrink: 0;
     padding: 1.5rem;
     border-bottom: 1px solid var(--color-border);
     background-color: var(--color-bg-surface-deep);
@@ -341,10 +345,15 @@ COMPONENTS CRITERIA FOR INCLUSION:
     font-size: var(--font-heading-size-md);
 }
 
+/* The modal's own scroll container — bounded by .modal-content's
+   max-height above, so a touch drag over long content scrolls this
+   instead of leaking through to the page behind the overlay. */
 .modal-body {
     padding: 2rem;
     color: var(--color-text-primary);
     line-height: var(--line-height-body);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .close {

@@ -66,20 +66,29 @@ function setupModalListeners() {
 
     // Close modal on 'X' click
     if (closeBtn) {
-        closeBtn.onclick = () => modal.style.display = 'none';
+        closeBtn.onclick = () => closeAssetModal(modal);
     }
 
     // Close modal on clicking outside the box
     window.onclick = (event) => {
-        if (event.target == modal) modal.style.display = "none";
+        if (event.target == modal) closeAssetModal(modal);
     };
 
     // Close modal on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.style.display === 'block') {
-            modal.style.display = 'none';
+            closeAssetModal(modal);
         }
     });
+}
+
+// iOS Safari lets a touch drag scroll the body behind a position:fixed
+// overlay even though the overlay covers the whole viewport — locking
+// body overflow while the modal's open (and restoring it on every close
+// path) keeps that scroll on the modal's own .modal-body instead.
+function closeAssetModal(modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
 }
 
 // Shows just the domain instead of the full URL — a full path (e.g.
@@ -128,6 +137,7 @@ function openAssetModal(assetId) {
     title.textContent  = asset ? asset.name : 'Asset Information';
     content.innerHTML  = html;
     modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
 }
 
 function checkUrlParameters() {
