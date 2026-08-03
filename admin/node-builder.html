@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node Builder (internal)</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="../css/theme.css">
+    <style>
+        body {
+            background: var(--color-bg-page);
+            color: var(--color-text-primary);
+            font-family: var(--font-body);
+            margin: 0;
+            padding: 2rem 1.5rem 4rem;
+        }
+        .builder {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { font: var(--font-heading-weight) var(--font-heading-size-xl)/1.2 var(--font-heading); margin-bottom: 0.25rem; }
+        .subtitle { color: var(--color-text-muted); margin-bottom: 2rem; }
+        .card {
+            background: var(--color-bg-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .field { margin-bottom: 1.25rem; }
+        label { display: block; font-weight: 500; margin-bottom: 0.4rem; }
+        .hint { display: block; color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: 0.3rem; }
+        input[type="text"], input[type="url"], select, textarea {
+            width: 100%;
+            box-sizing: border-box;
+            background: var(--color-bg-surface-deep);
+            border: 1px solid var(--color-border-control);
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            font: inherit;
+            padding: 0.6rem 0.85rem;
+        }
+        textarea { resize: vertical; min-height: 90px; }
+        .id-warning { color: var(--footer-stripe-red); font-size: var(--font-size-xs); margin-top: 0.3rem; }
+        .link-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 0.5rem;
+            margin-bottom: 0.6rem;
+            align-items: start;
+        }
+        .link-row textarea { min-height: 40px; }
+        .remove-link-btn, .add-link-btn, .generate-btn, .copy-btn {
+            background: var(--color-accent);
+            color: var(--color-bg-page);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+        .remove-link-btn { background: var(--color-border-control); color: var(--color-text-primary); padding: 0.5rem 0.7rem; }
+        .generate-btn { font-size: var(--font-size-base); padding: 0.75rem 1.5rem; }
+        pre {
+            background: var(--color-bg-surface-deep);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: var(--font-size-sm);
+        }
+        .output-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div class="builder">
+        <h1>Node Builder</h1>
+        <p class="subtitle">Internal tool — turns a reviewed submission into a JSON block ready to paste into <code>content/assets.json</code>. Not linked from the site; nothing here touches the live map until you paste and commit.</p>
+
+        <div class="card">
+            <div class="field">
+                <label for="name">Name</label>
+                <input type="text" id="name">
+            </div>
+
+            <div class="field">
+                <label for="id">Id (auto-generated slug — edit if it collides)</label>
+                <input type="text" id="id">
+                <span class="id-warning" id="id-warning" hidden></span>
+            </div>
+
+            <div class="field">
+                <label for="category">Category</label>
+                <select id="category">
+                    <option value="colleges">Colleges</option>
+                    <option value="faith-based">Faith Based</option>
+                    <option value="special-population">Special Population and Re Entry</option>
+                    <option value="job-training">Job Training and Career Services</option>
+                    <option value="community-dev">Community and Economic Development</option>
+                    <option value="k12-secondary">K-12 and Secondary</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="tags">Tags (comma-separated)</label>
+                <input type="text" id="tags" placeholder="Economic Development, Career Services, Youth">
+            </div>
+
+            <div class="field">
+                <label for="image">Logo filename</label>
+                <input type="text" id="image" placeholder="acme corp logo.png">
+                <span class="hint">Save the actual image file into <code>assets/logos/</code> under this filename — this field just records the path.</span>
+            </div>
+
+            <div class="field">
+                <label for="description">Description</label>
+                <textarea id="description"></textarea>
+            </div>
+
+            <div class="field">
+                <label for="impact">Impact</label>
+                <textarea id="impact"></textarea>
+            </div>
+
+            <div class="field">
+                <label>Links</label>
+                <div id="links-container"></div>
+                <button type="button" class="add-link-btn" id="add-link-btn">+ Add link</button>
+            </div>
+        </div>
+
+        <button type="button" class="generate-btn" id="generate-btn">Generate JSON</button>
+
+        <div class="card" id="output-card" hidden style="margin-top: 1.5rem;">
+            <div class="output-actions">
+                <button type="button" class="copy-btn" id="copy-btn">Copy</button>
+            </div>
+            <pre id="output"></pre>
+        </div>
+    </div>
+
+    <script>
+        const linksContainer = document.getElementById('links-container');
+        const idField = document.getElementById('id');
+        const nameField = document.getElementById('name');
+        const idWarning = document.getElementById('id-warning');
+
+        let existingIds = new Set();
+        let idManuallyEdited = false;
+
+        fetch('../content/assets.json')
+            .then(r => r.json())
+            .then(data => { existingIds = new Set(Object.keys(data)); checkIdCollision(); })
+            .catch(err => console.error('node-builder: could not load assets.json', err));
+
+        function slugify(text) {
+            return text.trim().toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+
+        function checkIdCollision() {
+            const id = idField.value.trim();
+            const collides = id && existingIds.has(id);
+            idWarning.hidden = !collides;
+            idWarning.textContent = collides ? `"${id}" is already used by an existing node — pick a different id.` : '';
+        }
+
+        nameField.addEventListener('input', () => {
+            if (!idManuallyEdited) {
+                idField.value = slugify(nameField.value);
+                checkIdCollision();
+            }
+        });
+
+        idField.addEventListener('input', () => {
+            idManuallyEdited = true;
+            checkIdCollision();
+        });
+
+        function addLinkRow(label = '', url = '', description = '') {
+            const row = document.createElement('div');
+            row.className = 'link-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Label" class="link-label" value="${label}">
+                <input type="url" placeholder="https://" class="link-url" value="${url}">
+                <textarea placeholder="Description" class="link-description">${description}</textarea>
+                <button type="button" class="remove-link-btn">&times;</button>
+            `;
+            row.querySelector('.remove-link-btn').addEventListener('click', () => row.remove());
+            linksContainer.appendChild(row);
+        }
+
+        document.getElementById('add-link-btn').addEventListener('click', () => addLinkRow());
+        addLinkRow();
+
+        function buildNodeObject() {
+            const tags = document.getElementById('tags').value
+                .split(',').map(t => t.trim()).filter(Boolean);
+
+            const links = Array.from(linksContainer.querySelectorAll('.link-row'))
+                .map(row => ({
+                    label: row.querySelector('.link-label').value.trim(),
+                    url: row.querySelector('.link-url').value.trim(),
+                    description: row.querySelector('.link-description').value.trim()
+                }))
+                .filter(link => link.label || link.url || link.description);
+
+            const imageName = document.getElementById('image').value.trim();
+
+            const obj = {
+                name: nameField.value.trim(),
+                category: document.getElementById('category').value,
+                tags,
+                image: imageName ? `assets/logos/${imageName}` : '',
+                description: document.getElementById('description').value.trim(),
+                impact: document.getElementById('impact').value.trim(),
+                links
+            };
+
+            return obj;
+        }
+
+        function buildSnippet(id, obj) {
+            const inner = JSON.stringify(obj, null, 2)
+                .split('\n')
+                .map(line => '  ' + line)
+                .join('\n')
+                .trimStart();
+            return `  "${id}": ${inner},`;
+        }
+
+        document.getElementById('generate-btn').addEventListener('click', () => {
+            const id = idField.value.trim() || slugify(nameField.value);
+            const snippet = buildSnippet(id, buildNodeObject());
+            document.getElementById('output').textContent = snippet;
+            document.getElementById('output-card').hidden = false;
+        });
+
+        document.getElementById('copy-btn').addEventListener('click', () => {
+            navigator.clipboard.writeText(document.getElementById('output').textContent);
+        });
+    </script>
+</body>
+</html>

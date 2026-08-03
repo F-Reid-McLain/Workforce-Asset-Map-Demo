@@ -205,7 +205,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 32px;
     width: 100%;
     max-width: 160px;
 }
@@ -259,6 +259,32 @@ body {
     font-size: var(--font-size-footer);
     color: var(--footer-text);
     opacity: 0.8;
+}
+
+/* Deliberately understated — kept separate from the main directory links
+   above so it doesn't read as a primary nav destination. */
+.main-footer__meta-links {
+    text-align: center;
+    margin-top: 14px;
+    font-size: var(--font-size-xs);
+}
+
+.main-footer__meta-link {
+    color: var(--footer-text);
+    opacity: 0.55;
+    text-decoration: none;
+}
+
+.main-footer__meta-link:hover,
+.main-footer__meta-link:focus {
+    opacity: 0.9;
+    text-decoration: underline;
+}
+
+.main-footer__meta-sep {
+    color: var(--footer-text);
+    opacity: 0.35;
+    margin: 0 0.5rem;
 }
 
 @media (max-width: 768px) {
@@ -904,4 +930,277 @@ body {
     .about-section {
         padding: 1.5rem;
     }
+}
+
+/* About page CTA (Suggest an Asset / Request an Edit) */
+.about-cta {
+    text-align: center;
+}
+
+.about-cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.about-section a.cta-btn {
+    display: inline-block;
+    background: var(--color-accent);
+    color: var(--color-bg-page);
+    font-weight: 600;
+    padding: 0.85rem 2rem;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: background var(--transition-fast);
+}
+
+.about-section a.cta-btn:hover {
+    background: var(--color-accent-hover);
+    text-decoration: none;
+}
+
+/* ===== SUBMISSION FORMS (Suggest an Asset / Request an Edit) ===== */
+.submission-page {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2rem 0 4rem;
+}
+
+.submission-form {
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+}
+
+.form-field {
+    margin-bottom: 1.5rem;
+}
+
+.form-field-hint {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    margin-top: 0.35rem;
+}
+
+.form-label {
+    display: block;
+    color: var(--color-text-primary);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-label .required {
+    color: var(--footer-stripe-red);
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+    background: var(--color-bg-surface-deep);
+    border: 1px solid var(--color-border-control);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: var(--font-size-base);
+    padding: 0.65rem 0.9rem;
+    transition: border-color var(--transition-fast);
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: var(--line-height-body);
+}
+
+.form-input[type="file"] {
+    padding: 0.5rem;
+}
+
+.form-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 1.5rem 0;
+}
+
+.form-divider::before,
+.form-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+.form-submit-btn {
+    background: var(--color-accent);
+    color: var(--color-bg-page);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: var(--font-size-base);
+    padding: 0.8rem 1.75rem;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.form-submit-btn:hover:not(:disabled) { background: var(--color-accent-hover); }
+
+.form-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.form-error {
+    color: var(--footer-stripe-red);
+    font-size: var(--font-size-sm);
+    margin-top: 1rem;
+}
+
+.form-success {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.form-success h3 {
+    color: var(--color-accent);
+    font-size: var(--font-heading-size-lg);
+    margin-bottom: 0.75rem;
+}
+
+.form-success p {
+    color: var(--color-text-secondary);
+}
+
+/* Honeypot field — present for spam bots to fill in, hidden from real users */
+.form-field-hidden {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* Node picker (Request an Edit page) — reuses the map/directory search's
+   filtered-results-list look (css/viz.css .viz-search-result) so the pattern
+   reads the same everywhere it appears on the site. */
+.node-picker {
+    position: relative;
+}
+
+.node-picker-results {
+    list-style: none;
+    margin: 0.35rem 0 0;
+    padding: 0.25rem 0;
+    max-height: 260px;
+    overflow-y: auto;
+    background: var(--color-bg-surface-deep);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 10;
+}
+
+.node-picker-result {
+    padding: 0.6rem 0.9rem;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.node-picker-result:hover,
+.node-picker-result.active {
+    background: rgba(175, 166, 109, 0.18);
+}
+
+.node-picker-result .result-category {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.node-picker-selected {
+    color: var(--color-accent);
+    font-size: var(--font-size-sm);
+    margin-top: 0.5rem;
+}
+
+/* Repeatable "program" rows (Suggest an Asset / Request an Edit) */
+.dynamic-rows {
+    margin-top: 0.75rem;
+}
+
+.dynamic-row {
+    background: var(--color-bg-surface-deep);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.dynamic-row-field {
+    margin-bottom: 0.6rem;
+}
+
+.dynamic-row-field:last-of-type {
+    margin-bottom: 0;
+}
+
+.dynamic-row-field label {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    margin-bottom: 0.3rem;
+}
+
+.form-add-btn {
+    background: transparent;
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.form-add-btn:hover {
+    background: rgba(175, 166, 109, 0.12);
+}
+
+.form-remove-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    padding: 0;
+    margin-top: 0.4rem;
+    text-decoration: underline;
+}
+
+.form-remove-btn:hover {
+    color: var(--footer-stripe-red);
+}
+
+@media (max-width: 768px) {
+    .submission-form { padding: 1.5rem; }
 }

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suggest an Asset - Greater Macon Chamber of Commerce</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+            <link rel="stylesheet" href="css/theme.css">
+            <link rel="stylesheet" href="css/main.css">
+            <link rel="stylesheet" href="css/viz.css">
+             <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html"><h1>WORKFORCE <span class="accent">macon</span></h1></a>
+            </div>
+            <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+            <nav class="main-nav" id="main-nav">
+                <ul>
+                    <li><a href="index.html" class="nav-link">Workforce Navigator</a></li>
+                    <li><a href="workforcedata.html" class="nav-link">Workforce Data</a></li>
+                    <li><a href="directory.html" class="nav-link">Directory</a></li>
+                    <li><a href="about.html" class="nav-link">About</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="page-header">
+                <h2>Suggest an Asset for the Map</h2>
+                <p>Know a workforce organization that belongs on the Macon Workforce Navigator? Tell us about it.</p>
+            </section>
+
+            <div class="submission-page">
+                <form class="submission-form" id="submit-asset-form" data-success-target="submit-asset-success">
+                    <div class="form-field">
+                        <label class="form-label" for="asset_name">Organization name <span class="required">*</span></label>
+                        <input class="form-input" type="text" id="asset_name" name="asset_name" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="category">Category <span class="required">*</span></label>
+                        <select class="form-select" id="category" name="category" required>
+                            <option value="" disabled selected>Choose the closest fit</option>
+                            <option value="colleges">Colleges</option>
+                            <option value="faith-based">Faith Based</option>
+                            <option value="special-population">Special Population and Re Entry</option>
+                            <option value="job-training">Job Training and Career Services</option>
+                            <option value="community-dev">Community and Economic Development</option>
+                            <option value="k12-secondary">K-12 and Secondary</option>
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="website">Website</label>
+                        <input class="form-input" type="text" id="website" name="website" placeholder="e.g. yourorganization.com" data-normalize-url>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="logo">Logo</label>
+                        <input class="form-input" type="file" id="logo" name="logo" accept="image/*">
+                        <span class="form-field-hint">A square or horizontal logo works best.</span>
+                    </div>
+
+                    <div class="form-divider">or</div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="logo_url">Link to your logo</label>
+                        <input class="form-input" type="text" id="logo_url" name="logo_url" placeholder="e.g. yoursite.com/logo.png" data-normalize-url>
+                        <span class="form-field-hint">If you don't have a file handy, a link to a hosted image works too.</span>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="description">What do they do, and why should they be on the map? <span class="required">*</span></label>
+                        <textarea class="form-textarea" id="description" name="description" required></textarea>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label">Specific programs (optional)</label>
+                        <span class="form-field-hint">Does this organization run individual programs, schools, or services worth calling out on their own — for example, a specific degree program at a college, or a particular training track? List them below and they'll show up as extra details when someone clicks on this organization on the map.</span>
+                        <div class="dynamic-rows" id="program-rows"></div>
+                        <button type="button" class="form-add-btn" id="add-program-btn">+ Add another program</button>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="submitter_name">Your name</label>
+                        <input class="form-input" type="text" id="submitter_name" name="submitter_name">
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label" for="submitter_email">Your email</label>
+                        <input class="form-input" type="email" id="submitter_email" name="submitter_email" placeholder="In case we have follow-up questions">
+                    </div>
+
+                    <input type="hidden" name="_subject" value="">
+                    <div class="form-field-hidden" aria-hidden="true">
+                        <label for="_gotcha">Leave this field blank</label>
+                        <input type="text" id="_gotcha" name="_gotcha" tabindex="-1" autocomplete="off">
+                    </div>
+
+                    <button class="form-submit-btn" type="submit">Submit Suggestion</button>
+                    <p class="form-error" hidden></p>
+                </form>
+
+                <div class="form-success" id="submit-asset-success" hidden>
+                    <h3>Thank you!</h3>
+                    <p>Your suggestion has been sent to our team for review.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="main-footer__wrapper">
+            <div class="main-footer__inner">
+                <div class="main-footer__contact">
+                    <span class="main-footer__eyebrow">Contact Us</span>
+                    <address class="main-footer__address">
+                        Greater Macon Chamber of Commerce<br>
+                        338 Poplar Street<br>
+                        Macon, GA 31217
+                    </address>
+                    <div class="main-footer__phone"><a href="tel:+14786212000">(478) 621-2000</a></div>
+                </div>
+                <div class="main-footer__logo">
+                    <a href="https://maconchamber.com/" target="_blank" rel="noopener">
+                        <img src="assets/logos/greater macon chamber white lockup.svg" alt="Greater Macon Chamber of Commerce">
+                    </a>
+                    <a href="https://choosemacon.com/" target="_blank" rel="noopener">
+                        <img src="assets/logos/choose-macon-white.png" alt="Choose Macon">
+                    </a>
+                </div>
+                <ul class="main-footer__links">
+                    <li><a href="index.html" class="main-footer__link">Workforce Navigator</a></li>
+                    <li><a href="workforcedata.html" class="main-footer__link">Workforce Data</a></li>
+                    <li><a href="directory.html" class="main-footer__link">Directory</a></li>
+                    <li><a href="about.html" class="main-footer__link">About</a></li>
+                </ul>
+            </div>
+            <div class="main-footer__attribution">The Macon Workforce Navigator is an initiative of the Greater Macon Chamber of Commerce.</div>
+            <div class="main-footer__meta-links">
+                <a href="submit-asset.html" class="main-footer__meta-link">Suggest an Asset</a>
+                <span class="main-footer__meta-sep">·</span>
+                <a href="request-edit.html" class="main-footer__meta-link">Request an Edit</a>
+            </div>
+        </div>
+    </footer>
+    <script src="js/nav.js"></script>
+    <script src="js/forms.js"></script>
+</body>
+</html>
