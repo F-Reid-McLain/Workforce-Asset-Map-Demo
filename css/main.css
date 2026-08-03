@@ -1345,8 +1345,11 @@ body {
     color: var(--color-text-muted);
     font-size: var(--font-size-xs);
     cursor: pointer;
-    padding: 0;
-    margin-top: 0.4rem;
+    /* Padding (not just font-size) sets the tappable area — a bare
+       15px-tall text link here sits right against three inputs above it,
+       an easy mis-tap target on a phone. */
+    padding: 0.55rem 0.2rem;
+    margin: 0.1rem 0 -0.45rem;
     text-decoration: underline;
 }
 
