@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submissions Dashboard (internal)</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="../css/theme.css">
+    <style>
+        body {
+            background: var(--color-bg-page);
+            color: var(--color-text-primary);
+            font-family: var(--font-body);
+            margin: 0;
+            padding: 2rem 1.5rem 4rem;
+        }
+        .builder { max-width: 800px; margin: 0 auto; }
+        h1 { font: var(--font-heading-weight) var(--font-heading-size-xl)/1.2 var(--font-heading); margin-bottom: 0.25rem; }
+        .subtitle { color: var(--color-text-muted); margin-bottom: 2rem; }
+        .card {
+            background: var(--color-bg-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .field { margin-bottom: 1.25rem; }
+        label { display: block; font-weight: 500; margin-bottom: 0.4rem; }
+        .hint { display: block; color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: 0.3rem; }
+        input[type="text"], input[type="url"], select, textarea {
+            width: 100%;
+            box-sizing: border-box;
+            background: var(--color-bg-surface-deep);
+            border: 1px solid var(--color-border-control);
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            font: inherit;
+            padding: 0.6rem 0.85rem;
+        }
+        input:disabled { opacity: 0.6; }
+        textarea { resize: vertical; min-height: 90px; }
+        .id-warning { color: var(--footer-stripe-red); font-size: var(--font-size-xs); margin-top: 0.3rem; }
+        .link-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 0.5rem;
+            margin-bottom: 0.6rem;
+            align-items: start;
+        }
+        .link-row textarea { min-height: 40px; }
+        .remove-link-btn, .add-link-btn, .generate-btn, .copy-btn,
+        .sign-in-btn, .approve-btn, .decline-btn, .back-btn, .mark-approved-btn {
+            background: var(--color-accent);
+            color: var(--color-bg-page);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+        .remove-link-btn { background: var(--color-border-control); color: var(--color-text-primary); padding: 0.5rem 0.7rem; }
+        .generate-btn { font-size: var(--font-size-base); padding: 0.75rem 1.5rem; }
+        .decline-btn, .back-btn { background: var(--color-border-control); color: var(--color-text-primary); }
+        pre {
+            background: var(--color-bg-surface-deep);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: var(--font-size-sm);
+        }
+        .output-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+        /* ----- List view ----- */
+        .auth-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        #signed-in-as { color: var(--color-text-muted); font-size: var(--font-size-sm); }
+        .dash-empty { color: var(--color-text-muted); }
+        .dash-card {
+            background: var(--color-bg-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .dash-card-subject { font-weight: 600; color: var(--color-accent); margin-bottom: 0.25rem; }
+        .dash-card-meta { color: var(--color-text-muted); font-size: var(--font-size-xs); margin-bottom: 0.6rem; }
+        .dash-card-preview { color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-bottom: 0.85rem; }
+        .dash-card-actions { display: flex; gap: 0.6rem; }
+
+        /* ----- Builder view ----- */
+        .entry-mode-note {
+            background: var(--color-bg-surface-deep);
+            border-left: 3px solid var(--color-accent-teal);
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+            font-size: var(--font-size-sm);
+        }
+        .attachments-row { margin-bottom: 1.5rem; }
+        .attachments-row a { color: var(--color-accent); margin-right: 1rem; }
+        .builder-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+
+        @media (max-width: 600px) {
+            body { padding: 1.25rem 1rem 3rem; }
+            .card { padding: 1.25rem; }
+            .link-row {
+                grid-template-columns: 1fr;
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-md);
+                padding: 0.75rem;
+            }
+            .remove-link-btn { justify-self: start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="builder">
+        <h1>Submissions Dashboard</h1>
+        <p class="subtitle">Internal tool — reads the "Workforce Map Submissions" Outlook folder directly and lets you approve (into the JSON builder) or decline each one. Not linked from the site. Must be opened over <code>http://localhost</code>, not as a local file, for sign-in to work.</p>
+
+        <!-- ===== LIST VIEW ===== -->
+        <div id="list-view">
+            <div class="auth-row">
+                <button type="button" class="sign-in-btn" id="sign-in-btn">Sign in with Microsoft</button>
+                <span id="signed-in-as" hidden></span>
+            </div>
+            <div id="submissions-list"><p class="dash-empty">Sign in to load submissions.</p></div>
+        </div>
+
+        <!-- ===== BUILDER VIEW (same fields/logic as node-builder.html) ===== -->
+        <div id="builder-view" hidden>
+            <button type="button" class="back-btn" id="back-to-list-btn" style="margin-bottom: 1.5rem;">&larr; Back to list</button>
+
+            <div class="entry-mode-note" id="entry-mode-note" hidden></div>
+            <div class="attachments-row" id="attachments-row"></div>
+
+            <div class="card">
+                <div class="field">
+                    <label for="name">Name</label>
+                    <input type="text" id="name">
+                </div>
+
+                <div class="field">
+                    <label for="id">Id (auto-generated slug — edit if it collides)</label>
+                    <input type="text" id="id">
+                    <span class="id-warning" id="id-warning" hidden></span>
+                </div>
+
+                <div class="field">
+                    <label for="category">Category</label>
+                    <select id="category">
+                        <option value="colleges">Colleges</option>
+                        <option value="faith-based">Faith Based</option>
+                        <option value="special-population">Special Population and Re Entry</option>
+                        <option value="job-training">Job Training and Career Services</option>
+                        <option value="community-dev">Community and Economic Development</option>
+                        <option value="k12-secondary">K-12 and Secondary</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="tags">Tags (comma-separated)</label>
+                    <input type="text" id="tags" placeholder="Economic Development, Career Services, Youth">
+                </div>
+
+                <div class="field">
+                    <label for="image">Logo filename</label>
+                    <input type="text" id="image" placeholder="acme corp logo.png">
+                    <span class="hint">Save the actual image file into <code>assets/logos/</code> under this filename (use the attachment link above if one was uploaded) — this field just records the path.</span>
+                </div>
+
+                <div class="field">
+                    <label for="website">Website</label>
+                    <input type="text" id="website" placeholder="https://acme.example.com">
+                </div>
+
+                <div class="field">
+                    <label for="description">Description</label>
+                    <textarea id="description"></textarea>
+                </div>
+
+                <div class="field">
+                    <label for="impact">Impact</label>
+                    <textarea id="impact"></textarea>
+                </div>
+
+                <div class="field">
+                    <label>Links</label>
+                    <div id="links-container"></div>
+                    <button type="button" class="add-link-btn" id="add-link-btn">+ Add link</button>
+                </div>
+            </div>
+
+            <div class="builder-actions">
+                <button type="button" class="generate-btn" id="generate-btn">Generate JSON</button>
+                <button type="button" class="mark-approved-btn" id="mark-approved-btn">Mark Approved (moves email)</button>
+            </div>
+
+            <div class="card" id="output-card" hidden style="margin-top: 1.5rem;">
+                <div class="output-actions">
+                    <button type="button" class="copy-btn" id="copy-btn">Copy</button>
+                </div>
+                <pre id="output"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+    <script src="js/node-builder-core.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
