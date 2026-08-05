@@ -14,7 +14,24 @@
             margin: 0;
             padding: 2rem 1.5rem 4rem;
         }
-        .builder { max-width: 800px; margin: 0 auto; }
+        .builder { max-width: 1100px; margin: 0 auto; }
+        .builder-layout { display: flex; gap: 1.5rem; align-items: flex-start; }
+        .builder-main { flex: 1; min-width: 0; }
+        .node-live-preview { width: 280px; flex-shrink: 0; position: sticky; top: 1.5rem; }
+        .node-live-preview-inner {
+            background: var(--color-bg-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+        }
+        .node-preview-label { font-size: var(--font-size-xs); text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 0.75rem; font-weight: 600; }
+        .node-preview-svg { width: 100%; height: auto; display: block; }
+        .node-preview-divider { height: 1px; background: var(--color-border); margin: 1rem 0; }
+        .node-preview-info h3 { margin: 0 0 0.5rem; font-size: var(--font-size-base); }
+        .node-preview-info p { margin: 0 0 0.6rem; font-size: var(--font-size-sm); }
+        .node-preview-placeholder { color: var(--color-text-muted); font-style: italic; }
+        .related-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; }
+        .related-links a { font-size: var(--font-size-xs); background: var(--color-bg-surface-deep); border: 1px solid var(--color-border); border-radius: 999px; padding: 0.2rem 0.6rem; color: var(--color-accent); text-decoration: none; }
         h1 { font: var(--font-heading-weight) var(--font-heading-size-xl)/1.2 var(--font-heading); margin-bottom: 0.25rem; }
         .subtitle { color: var(--color-text-muted); margin-bottom: 2rem; }
         .card {
@@ -74,8 +91,16 @@
         .output-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 0.5rem; }
 
         /* ----- List view ----- */
-        .auth-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .auth-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
         #signed-in-as { color: var(--color-text-muted); font-size: var(--font-size-sm); }
+        .github-token-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .github-token-row label { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+        #github-token-input {
+            flex: 1; min-width: 220px; max-width: 380px;
+            background: var(--color-bg-surface-deep); border: 1px solid var(--color-border-control);
+            border-radius: var(--radius-md); color: var(--color-text-primary); font: inherit; padding: 0.4rem 0.7rem;
+        }
+        #github-token-status { font-size: var(--font-size-xs); color: var(--color-text-muted); }
         .dash-empty { color: var(--color-text-muted); }
         .dash-card {
             background: var(--color-bg-surface);
@@ -101,6 +126,11 @@
         .attachments-row a { color: var(--color-accent); margin-right: 1rem; }
         .builder-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
 
+        @media (max-width: 900px) {
+            .builder-layout { flex-direction: column; }
+            .node-live-preview { width: 100%; position: static; }
+        }
+
         @media (max-width: 600px) {
             body { padding: 1.25rem 1rem 3rem; }
             .card { padding: 1.25rem; }
@@ -117,15 +147,36 @@
 <body>
     <div class="builder">
         <h1>Submissions Dashboard</h1>
-        <p class="subtitle">Internal tool — reads the "Workforce Map Submissions" Outlook folder directly and lets you approve (into the JSON builder) or decline each one. Not linked from the site. Must be opened over <code>http://localhost</code>, not as a local file, for sign-in to work.</p>
+        <p class="subtitle">Internal tool — reads the "Workforce Map Submissions" Outlook folder directly, lets you approve (into the JSON builder) or decline each one, and preview or <strong>publish approved entries straight to the live map</strong> with one click. Not linked from the site. Must be opened over <code>http://localhost</code>, not as a local file, for sign-in to work.</p>
 
         <!-- ===== LIST VIEW ===== -->
         <div id="list-view">
             <div class="auth-row">
                 <button type="button" class="sign-in-btn" id="sign-in-btn">Sign in with Microsoft</button>
                 <span id="signed-in-as" hidden></span>
+                <button type="button" class="back-btn" id="manage-nodes-btn">Manage Existing Nodes</button>
+                <button type="button" class="back-btn" id="activity-log-btn">Activity Log</button>
+            </div>
+            <div class="github-token-row">
+                <label for="github-token-input">GitHub token (for publishing):</label>
+                <input type="password" id="github-token-input" placeholder="fine-grained PAT, contents read/write on this repo only" autocomplete="off">
+                <button type="button" class="back-btn" id="save-github-token-btn">Save</button>
+                <span id="github-token-status"></span>
             </div>
             <div id="submissions-list"><p class="dash-empty">Sign in to load submissions.</p></div>
+        </div>
+
+        <!-- ===== MANAGE VIEW — prune existing published nodes ===== -->
+        <div id="manage-view" hidden>
+            <button type="button" class="back-btn" id="manage-back-btn" style="margin-bottom: 1rem;">&larr; Back to submissions</button>
+            <input type="text" id="manage-search" placeholder="Search by name…" style="margin-bottom: 1rem;">
+            <div id="manage-list"><p class="dash-empty">Loading…</p></div>
+        </div>
+
+        <!-- ===== ACTIVITY VIEW — recent changes made through this Dashboard ===== -->
+        <div id="activity-view" hidden>
+            <button type="button" class="back-btn" id="activity-back-btn" style="margin-bottom: 1rem;">&larr; Back to submissions</button>
+            <div id="activity-list"><p class="dash-empty">Loading…</p></div>
         </div>
 
         <!-- ===== BUILDER VIEW (same fields/logic as node-builder.html) ===== -->
@@ -135,6 +186,8 @@
             <div class="entry-mode-note" id="entry-mode-note" hidden></div>
             <div class="attachments-row" id="attachments-row"></div>
 
+            <div class="builder-layout">
+            <div class="builder-main">
             <div class="card">
                 <div class="field">
                     <label for="name">Name</label>
@@ -167,7 +220,13 @@
                 <div class="field">
                     <label for="image">Logo filename</label>
                     <input type="text" id="image" placeholder="acme corp logo.png">
-                    <span class="hint">Save the actual image file into <code>assets/logos/</code> under this filename (use the attachment link above if one was uploaded) — this field just records the path.</span>
+                    <span class="hint">Leave blank to use the uploaded file's own name below, or set it to an existing filename in <code>assets/logos/</code> to reuse an image already committed.</span>
+                </div>
+
+                <div class="field">
+                    <label for="logo-upload">Upload logo file</label>
+                    <input type="file" id="logo-upload" accept="image/*">
+                    <span class="hint">Picking a file here commits it to <code>assets/logos/</code> automatically when you publish — no separate git step needed.</span>
                 </div>
 
                 <div class="field">
@@ -194,6 +253,8 @@
 
             <div class="builder-actions">
                 <button type="button" class="generate-btn" id="generate-btn">Generate JSON</button>
+                <button type="button" class="back-btn" id="preview-map-btn">Preview on Map</button>
+                <button type="button" class="decline-btn" id="decline-in-builder-btn" hidden>Decline</button>
                 <button type="button" class="mark-approved-btn" id="mark-approved-btn">Mark Approved (moves email)</button>
             </div>
 
@@ -202,6 +263,30 @@
                     <button type="button" class="copy-btn" id="copy-btn">Copy</button>
                 </div>
                 <pre id="output"></pre>
+            </div>
+
+            <div class="card" id="map-preview-card" hidden style="margin-top: 1.5rem; padding: 0.5rem;">
+                <iframe id="map-preview-frame" title="Map preview" style="width: 100%; height: 640px; border: 0; border-radius: var(--radius-md); display: block;"></iframe>
+            </div>
+            </div>
+
+            <div class="node-live-preview">
+                <div class="node-live-preview-inner">
+                    <div class="node-preview-label">Live Preview</div>
+                    <svg class="node-preview-svg" viewBox="0 0 280 230" aria-hidden="true">
+                        <defs><clipPath id="node-preview-clip"><circle cx="140" cy="140" r="38"/></clipPath></defs>
+                        <g id="preview-satellites"></g>
+                        <circle id="preview-circle" cx="140" cy="140" r="38" fill="#4d748c" stroke="#e7decf" stroke-width="3" stroke-dasharray="6,6"/>
+                        <image id="preview-image" x="102" y="102" width="76" height="76" clip-path="url(#node-preview-clip)" preserveAspectRatio="xMidYMid slice" style="display:none"/>
+                        <text id="preview-label" x="140" y="198" text-anchor="middle" fill="#fff" font-size="14" style="text-shadow:1px 1px 2px rgba(0,0,0,0.8)">Your Organization</text>
+                    </svg>
+                    <div class="node-preview-divider"></div>
+                    <div class="node-preview-info">
+                        <h3 id="preview-info-title">Your Organization</h3>
+                        <div id="preview-info-body"><p class="node-preview-placeholder">Fill in the fields to see a preview.</p></div>
+                    </div>
+                </div>
+            </div>
             </div>
         </div>
     </div>

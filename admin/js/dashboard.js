@@ -6,12 +6,13 @@
    the parsed email; Decline/Mark Approved move the source message into
    the Declined/Processed subfolders via Graph. */
 
-// Filled in once the Entra ID app registration is done (see the setup
-// request) — no secret needed, just these two IDs.
+// Entra ID app registration: "Workforce Map Submissions Dashboard".
+// clientId/authority aren't secrets — this is a public client (SPA/PKCE),
+// safe to commit, same as the Formspree endpoint elsewhere in the repo.
 const MSAL_CONFIG = {
     auth: {
-        clientId: 'AZURE_APP_CLIENT_ID_PLACEHOLDER',
-        authority: 'https://login.microsoftonline.com/AZURE_TENANT_ID_PLACEHOLDER',
+        clientId: '54031876-203a-4adf-8e25-692794baa8fe',
+        authority: 'https://login.microsoftonline.com/77a929d8-25c0-482f-af2f-e22ff69c8e48',
         redirectUri: window.location.origin + window.location.pathname
     },
     cache: { cacheLocation: 'localStorage' }
@@ -22,16 +23,84 @@ const SUBMISSIONS_FOLDER_NAME = 'Workforce Map Submissions';
 const PROCESSED_FOLDER_NAME = 'Processed';
 const DECLINED_FOLDER_NAME = 'Declined';
 
+/* ----- Publish to GitHub -----
+   getGithubToken/githubFetch/publishNodeToGithub/the GITHUB_* constants and
+   the token input's wiring all moved to node-builder-core.js (loaded before
+   this file) so node-builder.html can publish too, not just this Dashboard —
+   see that file for the full explanation of the token/credential model. */
+
+// Reads a picked file as raw base64 (GitHub's Contents API wants raw
+// base64 bytes for binary files, same param it uses for text — no data:
+// URL prefix, so that gets stripped off FileReader's result here).
+function readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+    });
+}
+
+// A 404 here just means "no file at this path yet" (a brand new logo), not
+// an error — so this bypasses githubFetch's throw-on-any-!ok behavior and
+// tolerates that one status specifically.
+async function getExistingFileSha(path) {
+    const token = getGithubToken();
+    if (!token) throw new Error('No GitHub token set — paste one into the field above and click Save.');
+    const response = await fetch(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}?ref=${GITHUB_BRANCH}`,
+        { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' } }
+    );
+    if (response.status === 404) return null;
+    if (!response.ok) throw new Error(`GitHub API error ${response.status}: ${await response.text().catch(() => '')}`);
+    return (await response.json()).sha;
+}
+
+// Uploads the picked logo file to assets/logos/<filename> and returns the
+// filename actually used, for the caller to fold into the node's `image`
+// field. Runs before publishNodeToGithub so a failed upload never leaves
+// assets.json pointing at an image that was never actually committed.
+async function publishLogoUpload(file) {
+    const typedName = document.getElementById('image').value.trim();
+    const filename = typedName || file.name;
+    const path = `assets/logos/${filename}`;
+
+    const existingSha = await getExistingFileSha(path);
+    if (existingSha && !confirm(`"${filename}" already exists in assets/logos/ — uploading will overwrite it. Continue?`)) {
+        throw new Error('Logo upload cancelled.');
+    }
+
+    const base64 = await readFileAsBase64(file);
+    await githubFetch(`/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            message: `Add logo "${filename}" via Submissions Dashboard`,
+            content: base64,
+            branch: GITHUB_BRANCH,
+            ...(existingSha ? { sha: existingSha } : {})
+        })
+    });
+    return filename;
+}
+
 let msalInstance;
 let account = null;
 let folderIds = {};
 let currentMessages = [];
 let currentSubmission = null; // the message being approved, while in builder view
+// Which view Mark Approved / the back button return to — 'list-view' when
+// builder-view was opened from a real email (approveSubmission), 'manage-view'
+// when opened by editing an existing live node directly (editExistingNode).
+let builderReturnView = 'list-view';
+// escapeHtml is provided by node-builder-core.js, loaded before this file.
 
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
+// Shows exactly one of the four top-level views, hiding the rest — used by
+// every nav button so chaining between them (e.g. Activity Log straight to
+// Manage Existing Nodes) can never leave two views visible at once.
+const TOP_LEVEL_VIEWS = ['list-view', 'manage-view', 'activity-view', 'builder-view'];
+function showView(id) {
+    TOP_LEVEL_VIEWS.forEach(v => { document.getElementById(v).hidden = (v !== id); });
 }
 
 /* ----- Auth ----- */
@@ -130,16 +199,16 @@ function renderSubmissions() {
             <div class="dash-card-meta">${escapeHtml(m.from?.emailAddress?.address)} — ${new Date(m.receivedDateTime).toLocaleString()}</div>
             <div class="dash-card-preview">${escapeHtml((m.bodyPreview || '').slice(0, 160))}</div>
             <div class="dash-card-actions">
-                <button type="button" class="approve-btn" data-index="${i}">Approve</button>
-                <button type="button" class="decline-btn" data-index="${i}">Decline</button>
+                <button type="button" class="approve-btn" data-index="${i}">View</button>
             </div>
         </div>
     `).join('');
 
+    // Approve/Decline both live inside the detail view now (viewSubmission),
+    // reached by View — reviewing before deciding, rather than deciding
+    // straight from the list.
     listEl.querySelectorAll('.approve-btn').forEach(btn =>
-        btn.addEventListener('click', () => approveSubmission(currentMessages[+btn.dataset.index])));
-    listEl.querySelectorAll('.decline-btn').forEach(btn =>
-        btn.addEventListener('click', () => declineSubmission(currentMessages[+btn.dataset.index])));
+        btn.addEventListener('click', () => viewSubmission(currentMessages[+btn.dataset.index])));
 }
 
 async function declineSubmission(message) {
@@ -149,39 +218,41 @@ async function declineSubmission(message) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ destinationId: folderIds.declined })
     });
+    showView('list-view');
+    currentSubmission = null;
     loadSubmissions();
 }
 
 /* ----- Parsing a submission out of the email body ----- */
 /* Reads message.body.content (HTML) by the exact field `name` attributes
-   js/forms.js submits — not by guessing Formspree's own display labels.
-   NOT YET VALIDATED against a real fetched message; the matching below is
-   a best-effort first pass and will likely need adjusting once we can see
-   the actual HTML Formspree sends (there are real test submissions
-   already sitting in the folder to check this against). Any field that
-   doesn't match just comes through blank — the builder form stays fully
-   editable, so that degrades to "fill in one field by hand," not a
-   blocker. */
+   js/forms.js submits. Validated against a real fetched Formspree
+   notification: there is no "label: value" text anywhere — each field is a
+   <p><span style="color:#999999">field_name</span></p> immediately
+   followed by a SEPARATE sibling <span> holding the value, both direct
+   children of the same wrapping div.txtTinyMce-wrapper. (An earlier version
+   of this function looked for a colon-separated "label: value" string,
+   which doesn't exist in Formspree's actual template and left every field
+   blank — this was caught by testing against real submissions.) */
 function parseSubmission(message) {
     const isEdit = /Edit Request:/i.test(message.subject || '');
     const doc = new DOMParser().parseFromString(message.body?.content || '', 'text/html');
 
-    // Build a label->value map from the smallest ("leaf") block elements
-    // that look like a "label: value" row — walking the DOM structurally
-    // like this, one element at a time, avoids the bug a flat regex over
-    // doc.body.textContent has: browsers don't insert line breaks between
-    // block elements in .textContent, so every field's text just runs
-    // together on one "line" and a global regex over-matches across rows.
-    const BLOCK_SELECTOR = 'p, li, td, div';
     const fieldMap = {};
-    Array.from(doc.querySelectorAll(BLOCK_SELECTOR)).forEach(el => {
-        if (el.querySelector(BLOCK_SELECTOR)) return; // not a leaf row — skip the wrapper
-        const t = el.textContent.replace(/\s+/g, ' ').trim();
-        const colonIdx = t.indexOf(':');
-        if (colonIdx <= 0 || colonIdx > 60) return; // labels are short; long "colon" hits are false positives
-        const label = t.slice(0, colonIdx).trim().toLowerCase();
-        const value = t.slice(colonIdx + 1).trim();
-        if (label && value && !(label in fieldMap)) fieldMap[label] = value;
+    Array.from(doc.querySelectorAll('span')).forEach(labelSpan => {
+        // Formspree renders each field's label in a span explicitly colored
+        // #999999 — that's the only reliable marker, since the label text
+        // itself is just the raw field name with no colon or wrapper class.
+        if (!/#999999/i.test(labelSpan.getAttribute('style') || '')) return;
+        const label = labelSpan.textContent.trim().toLowerCase();
+        if (!label || label in fieldMap) return;
+
+        const wrapper = labelSpan.closest('.txtTinyMce-wrapper');
+        if (!wrapper) return;
+        // The value lives in a <span> that's a direct child of the same
+        // wrapper — a sibling of the <p> the label is nested in, not
+        // inside that <p> itself.
+        const valueSpan = Array.from(wrapper.children).find(child => child.tagName === 'SPAN');
+        fieldMap[label] = valueSpan ? valueSpan.textContent.trim() : '';
     });
 
     function field(name) {
@@ -264,13 +335,19 @@ async function renderAttachments(message) {
     }
 }
 
-async function approveSubmission(message) {
+// List's "View" button — shows the submission's full parsed details in the
+// builder view, with nothing decided yet. Approve (Mark Approved) and
+// Decline both live here as explicit next steps, rather than deciding
+// straight off the list preview snippet.
+async function viewSubmission(message) {
     currentSubmission = message;
+    builderReturnView = 'list-view';
+    document.getElementById('mark-approved-btn').textContent = 'Mark Approved (moves email)';
+    document.getElementById('decline-in-builder-btn').hidden = false;
     let fields = parseSubmission(message);
     fields = await mergeExistingNodeData(fields);
 
-    document.getElementById('list-view').hidden = true;
-    document.getElementById('builder-view').hidden = false;
+    showView('builder-view');
     prefillBuilder(fields);
     renderAttachments(message);
 
@@ -283,24 +360,251 @@ async function approveSubmission(message) {
     }
 }
 
-document.getElementById('back-to-list-btn').addEventListener('click', () => {
-    document.getElementById('builder-view').hidden = true;
-    document.getElementById('list-view').hidden = false;
+// Manage Existing Nodes' "Edit" button — same builder view as viewing a
+// submission, just pre-filled straight from the live node instead of a
+// parsed email, and with no email behind it to decline or move.
+function editExistingNode(node) {
     currentSubmission = null;
+    builderReturnView = 'manage-view';
+    document.getElementById('mark-approved-btn').textContent = 'Publish Update';
+    document.getElementById('decline-in-builder-btn').hidden = true;
+    document.getElementById('attachments-row').innerHTML = '';
+
+    showView('builder-view');
+    prefillBuilder({
+        name: node.name || '',
+        category: node.category || '',
+        tags: node.tags || [],
+        image: node.image ? node.image.replace(/^assets\/logos\//, '') : '',
+        website: node.website || '',
+        description: node.description || '',
+        impact: node.impact || '',
+        links: node.links || [],
+        lockId: node.id
+    });
+}
+
+document.getElementById('back-to-list-btn').addEventListener('click', () => {
+    showView(builderReturnView);
+    if (builderReturnView === 'manage-view') loadManageableNodes();
+    currentSubmission = null;
+});
+
+// Only shown when viewing a real submission (viewSubmission sets it
+// visible, editExistingNode hides it — declining doesn't apply to editing
+// an already-live node). Reuses declineSubmission, which itself now leaves
+// the builder view once the move succeeds.
+document.getElementById('decline-in-builder-btn').addEventListener('click', () => {
+    if (currentSubmission) declineSubmission(currentSubmission);
 });
 
 document.getElementById('mark-approved-btn').addEventListener('click', async () => {
-    if (!currentSubmission) return;
-    if (!confirm("Mark this approved and move the email to Processed? Only do this after you've copied the JSON and updated content/assets.json.")) return;
-    await graphFetch(`/me/messages/${currentSubmission.id}/move`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ destinationId: folderIds.processed })
-    });
-    document.getElementById('builder-view').hidden = true;
-    document.getElementById('list-view').hidden = false;
-    currentSubmission = null;
-    loadSubmissions();
+    const idField = document.getElementById('id');
+    const id = idField.value.trim();
+    const idWarning = document.getElementById('id-warning');
+    const nodeObj = buildNodeObject();
+    const logoFile = document.getElementById('logo-upload').files[0];
+
+    if (!id) { alert('Enter an id first.'); return; }
+    if (!nodeObj.name) { alert('Name is required.'); return; }
+    // idField is disabled only for the intentional "replace this existing
+    // node" edit-request path (see prefillBuilder's fields.lockId branch) —
+    // a visible collision on an otherwise-editable id means this would
+    // silently overwrite some other, unrelated node.
+    if (idWarning && !idWarning.hidden && !idField.disabled) {
+        if (!confirm(`"${id}" is already used by an existing node. Continue anyway and REPLACE it?`)) return;
+    }
+    const publishVerb = currentSubmission ? 'Publish' : 'Publish the update to';
+    if (!confirm(`${publishVerb} "${nodeObj.name}" on the live map now? This commits directly to GitHub — the site will update within a minute or two.`)) return;
+
+    const btn = document.getElementById('mark-approved-btn');
+    const originalLabel = btn.textContent;
+    btn.disabled = true;
+
+    try {
+        if (logoFile) {
+            btn.textContent = 'Uploading logo…';
+            const logoFilename = await publishLogoUpload(logoFile);
+            nodeObj.image = `assets/logos/${logoFilename}`;
+        }
+
+        btn.textContent = 'Publishing…';
+        await publishNodeToGithub(id, nodeObj);
+
+        if (currentSubmission) {
+            await graphFetch(`/me/messages/${currentSubmission.id}/move`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ destinationId: folderIds.processed })
+            });
+        }
+
+        showView(builderReturnView);
+        currentSubmission = null;
+        if (builderReturnView === 'manage-view') loadManageableNodes();
+        else loadSubmissions();
+    } catch (err) {
+        console.error('publish failed', err);
+        const emailNote = currentSubmission
+            ? '\n\nThe email was left in place — nothing was moved, and no email will be re-sent, so it\'s safe to just try again.'
+            : '';
+        alert(`Publish failed: ${err.message}${emailNote}`);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalLabel;
+    }
 });
 
-document.addEventListener('DOMContentLoaded', initMsal);
+/* ----- Manage Existing Nodes — prune published entries ----- */
+/* Reads content/assets.json the same way node-builder-core.js does for
+   collision-checking (no GitHub token needed just to list); removing one
+   goes through the GitHub API same as publishing does, since that's the
+   only thing that actually needs write access. */
+let manageableNodes = [];
+
+async function loadManageableNodes() {
+    const listEl = document.getElementById('manage-list');
+    listEl.innerHTML = '<p class="dash-empty">Loading…</p>';
+    try {
+        const data = await fetch('../content/assets.json').then(r => r.json());
+        manageableNodes = Object.entries(data).map(([id, d]) => ({ id, ...d }));
+        renderManageableNodes(manageableNodes);
+    } catch (err) {
+        console.error('manage: could not load assets.json', err);
+        listEl.innerHTML = `<p class="dash-empty">Couldn't load nodes: ${escapeHtml(err.message)}</p>`;
+    }
+}
+
+function renderManageableNodes(nodes) {
+    const listEl = document.getElementById('manage-list');
+    if (!nodes.length) {
+        listEl.innerHTML = '<p class="dash-empty">No matches.</p>';
+        return;
+    }
+    listEl.innerHTML = nodes.map(n => `
+        <div class="dash-card">
+            <div class="dash-card-subject">${escapeHtml(n.name || n.id)}</div>
+            <div class="dash-card-meta">${escapeHtml(n.category || '')} — id: ${escapeHtml(n.id)}</div>
+            <div class="dash-card-actions">
+                <button type="button" class="approve-btn" data-id="${escapeHtml(n.id)}">Edit</button>
+                <button type="button" class="decline-btn" data-id="${escapeHtml(n.id)}">Remove from map</button>
+            </div>
+        </div>
+    `).join('');
+
+    listEl.querySelectorAll('.approve-btn').forEach(btn =>
+        btn.addEventListener('click', () => {
+            const node = manageableNodes.find(n => n.id === btn.dataset.id);
+            if (node) editExistingNode(node);
+        }));
+    listEl.querySelectorAll('.decline-btn').forEach(btn =>
+        btn.addEventListener('click', () => {
+            const node = manageableNodes.find(n => n.id === btn.dataset.id);
+            if (node) removeManagedNode(node);
+        }));
+}
+
+async function removeManagedNode(node) {
+    if (!confirm(`Remove "${node.name || node.id}" from the live map? This commits directly to GitHub — the site will update within a minute or two. (Still recoverable from GitHub's commit history, just not from here.)`)) return;
+    try {
+        await deleteNodeFromGithub(node.id, node.name || node.id);
+        loadManageableNodes();
+    } catch (err) {
+        console.error('remove failed', err);
+        alert(`Removal failed: ${err.message}`);
+    }
+}
+
+async function deleteNodeFromGithub(id, name) {
+    const file = await githubFetch(
+        `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_ASSETS_PATH}?ref=${GITHUB_BRANCH}`
+    );
+    const assets = JSON.parse(base64ToUtf8(file.content.replace(/\n/g, '')));
+    if (!(id in assets)) throw new Error(`"${id}" is already gone from the live file — someone else may have removed it. Reload the list.`);
+    delete assets[id];
+
+    const newContent = JSON.stringify(assets, null, 2) + '\n';
+
+    await githubFetch(`/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_ASSETS_PATH}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            message: `Remove "${name}" via Submissions Dashboard`,
+            content: utf8ToBase64(newContent),
+            sha: file.sha,
+            branch: GITHUB_BRANCH
+        })
+    });
+}
+
+document.getElementById('manage-nodes-btn').addEventListener('click', () => {
+    showView('manage-view');
+    loadManageableNodes();
+});
+
+document.getElementById('manage-back-btn').addEventListener('click', () => {
+    showView('list-view');
+});
+
+document.getElementById('manage-search').addEventListener('input', function () {
+    const q = this.value.trim().toLowerCase();
+    renderManageableNodes(
+        q ? manageableNodes.filter(n => (n.name || '').toLowerCase().includes(q) || n.id.toLowerCase().includes(q)) : manageableNodes
+    );
+});
+
+/* ----- Activity Log — recent changes made through this Dashboard ----- */
+/* Read-only against GitHub's commits API, scoped to the assets file so it's
+   just publishes/edits/removals, not every commit in the repo's history. */
+async function loadActivityLog() {
+    const listEl = document.getElementById('activity-list');
+    listEl.innerHTML = '<p class="dash-empty">Loading…</p>';
+    try {
+        const commits = await githubFetch(
+            `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/commits?path=${GITHUB_ASSETS_PATH}&per_page=30`
+        );
+        renderActivityLog(commits);
+    } catch (err) {
+        console.error('activity: could not load commits', err);
+        listEl.innerHTML = `<p class="dash-empty">Couldn't load activity: ${escapeHtml(err.message)}</p>`;
+    }
+}
+
+function renderActivityLog(commits) {
+    const listEl = document.getElementById('activity-list');
+    if (!commits.length) {
+        listEl.innerHTML = '<p class="dash-empty">No changes yet.</p>';
+        return;
+    }
+    listEl.innerHTML = commits.map(c => `
+        <div class="dash-card">
+            <div class="dash-card-subject">${escapeHtml(c.commit.message.split('\n')[0])}</div>
+            <div class="dash-card-meta">${escapeHtml(c.commit.author.name)} — ${new Date(c.commit.author.date).toLocaleString()}</div>
+            <div class="dash-card-actions">
+                <a href="${c.html_url}" target="_blank" rel="noopener" class="back-btn" style="text-decoration: none; display: inline-block;">View on GitHub</a>
+            </div>
+        </div>
+    `).join('');
+}
+
+document.getElementById('activity-log-btn').addEventListener('click', () => {
+    showView('activity-view');
+    loadActivityLog();
+});
+
+document.getElementById('activity-back-btn').addEventListener('click', () => {
+    showView('list-view');
+});
+
+// Embedded map preview's "Close preview" button (viz-engine.js) can't call
+// window.close() on itself from inside an iframe — it posts here instead.
+window.addEventListener('message', (event) => {
+    if (event.data === 'wf-preview-close') {
+        document.getElementById('map-preview-card').hidden = true;
+        document.getElementById('map-preview-frame').src = 'about:blank';
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    initMsal();
+});
