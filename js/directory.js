@@ -2,6 +2,50 @@
 
 let assetData = {}; // Global store for data fetched from JSON
 
+// Section order + heading text for the Directory page — matches the 6
+// categories used everywhere else (admin builder's dropdown, viz-engine.js's
+// CATEGORY_COLORS). The Directory list used to be hand-written HTML that
+// silently went stale the moment a node was published anywhere else;
+// building it from assetData here means publishing a node updates the map,
+// map search, Directory listing, and Directory search all from the same
+// one write to assets.json, instead of needing a second manual HTML edit.
+const DIRECTORY_CATEGORIES = [
+    { slug: 'colleges',           heading: 'Higher Education Institutions, Colleges & Universities' },
+    { slug: 'k12-secondary',      heading: 'Secondary Education & Career Academy Programs (K-12)' },
+    { slug: 'community-dev',      heading: 'Community & Economic Development Partners' },
+    { slug: 'job-training',       heading: 'Job Training & Career Services, Adult & Workforce Programs' },
+    { slug: 'faith-based',        heading: 'Faith-Based and Community Workforce Initiatives' },
+    { slug: 'special-population', heading: 'Special Population & Re-entry Programs' }
+];
+
+function escapeHtmlDir(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+}
+
+// No-ops on index.html (loads this same file for openAssetModal/etc. but
+// has no .directory-grid) — only the actual Directory page has one.
+// Preserves assets.json's own key order within each category (whatever
+// order entries were added/published in) rather than re-sorting, so
+// existing entries don't visibly reshuffle just from switching this from
+// static HTML to a dynamic render.
+function renderDirectoryList() {
+    const grid = document.querySelector('.directory-grid');
+    if (!grid) return;
+
+    grid.innerHTML = DIRECTORY_CATEGORIES.map(({ slug, heading }) => {
+        const entries = Object.entries(assetData).filter(([, d]) => d.category === slug);
+        if (!entries.length) return '';
+        const items = entries.map(([id, d]) => `<li><a href="#${id}" class="asset-link">${escapeHtmlDir(d.name)}</a></li>`).join('');
+        return `
+                <section class="directory-group">
+                    <h3>${escapeHtmlDir(heading)}</h3>
+                    <ul class="asset-list">${items}</ul>
+                </section>`;
+    }).join('');
+}
+
 /**
  * 1. DATA LOADING
  * Pulls the written information from /content/assets.json
@@ -27,6 +71,13 @@ async function loadAssetData() {
             }
         }
 
+        // Renders (a no-op on index.html) then wires clicks on the links it
+        // just created — has to happen in this order and after the fetch
+        // resolves, not alongside it, since the links don't exist yet
+        // beforehand.
+        renderDirectoryList();
+        wireAssetLinks();
+
         console.log("Asset data loaded successfully");
 
         // Only check for URL parameters (from map clicks) AFTER data is ready
@@ -48,8 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * 3. UI FUNCTIONS
  */
-function setupModalListeners() {
-    // Add click handlers to all directory links
+function wireAssetLinks() {
     document.querySelectorAll('.asset-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
@@ -57,7 +107,9 @@ function setupModalListeners() {
             openAssetModal(assetId);
         });
     });
+}
 
+function setupModalListeners() {
     // Close inline viz panel
     const vizInfoClose = document.getElementById('viz-info-close');
     if (vizInfoClose) {

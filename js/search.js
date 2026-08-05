@@ -7,12 +7,16 @@
 
     const clearBtn = document.getElementById('directory-search-clear');
     const emptyMsg = document.getElementById('directory-empty');
-    const groups   = Array.from(document.querySelectorAll('.directory-group'));
 
     function applyFilter() {
         const q = input.value.trim().toLowerCase();
         let anyGroupVisible = false;
 
+        // Queried fresh each time rather than cached at load — the list
+        // is now built by directory.js from assets.json after an async
+        // fetch, so the groups don't exist yet at the moment this IIFE
+        // itself runs.
+        const groups = Array.from(document.querySelectorAll('.directory-group'));
         groups.forEach(group => {
             const heading = group.querySelector('h3');
             const headingMatches = !q || (heading && heading.textContent.toLowerCase().includes(q));
