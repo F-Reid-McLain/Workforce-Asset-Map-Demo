@@ -218,6 +218,25 @@ const structuralLinks = [
     console.error('viz-engine: could not load assets.json', err);
   }
 
+  // Draft-preview support: the admin tools' "Preview on Map" button stashes
+  // an unpublished node in sessionStorage and opens this page with
+  // ?preview=<id> — merge it in here so it renders exactly like a real node
+  // (same colors, physics, category link), tagged isDraft for styling below.
+  // Never touches assets.json — this only ever lives in this one tab.
+  const previewId = new URLSearchParams(location.search).get('preview');
+  let previewNodeId = null;
+  if (previewId) {
+    try {
+      const draft = JSON.parse(sessionStorage.getItem('wf_preview_node') || 'null');
+      if (draft && draft.id === previewId) {
+        assetsJson = { ...assetsJson, [draft.id]: { ...draft.data, isDraft: true } };
+        previewNodeId = draft.id;
+      }
+    } catch (err) {
+      console.error('viz-engine: could not parse preview draft', err);
+    }
+  }
+
   const assetNodes = Object.entries(assetsJson).map(([id, data]) => ({
     id,
     name: data.name,
@@ -229,7 +248,8 @@ const structuralLinks = [
     logoBg: data.logoBg || "",
     placeholder: data.placeholder || "",
     tags: data.tags || [],
-    links: data.links || []
+    links: data.links || [],
+    isDraft: !!data.isDraft
   }));
 
   const assetLinks = Object.entries(assetsJson)
@@ -246,6 +266,27 @@ const structuralLinks = [
   // at exactly the same size as before — only the slider's own numbering
   // changed (old 1.5 default -> new 1 default), not any actual node size.
   workforceData.nodes.forEach(node => { originalSizes[node.id] = node.size * 1.5; });
+
+  // Unmistakable banner while previewing an unpublished draft — this tab
+  // only, nothing published, closable since it was opened via window.open()
+  // from the admin tools.
+  if (previewId) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#f2b90c;color:#1c2530;text-align:center;padding:8px 12px;font:600 13px -apple-system,Helvetica,Arial,sans-serif;';
+    banner.textContent = 'Previewing an unpublished draft node — not live. ';
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close preview';
+    closeBtn.style.cssText = 'margin-left:12px;padding:3px 10px;border:none;border-radius:4px;background:#1c2530;color:#fff;cursor:pointer;font:600 12px inherit;';
+    // window.close() only works on a script-opened tab (node-builder.html's
+    // standalone preview) — when embedded in dashboard.html's inline iframe
+    // instead, tell the parent page to hide it there.
+    closeBtn.onclick = () => {
+      if (window.self !== window.top) window.parent.postMessage('wf-preview-close', '*');
+      else window.close();
+    };
+    banner.appendChild(closeBtn);
+    document.body.prepend(banner);
+  }
 
   // Narrow screens start with categories collapsed — see the module-level
   // comment above collapseCategoriesOnMobile for why.
@@ -464,9 +505,9 @@ const structuralLinks = [
   nodeSelection = node;
 
   node.append("circle").attr("r", d => d.size).attr("fill", fillColor)
-    .attr("stroke", d => d.type === "hub" ? "#888888" : "#e7decf")
-    .attr("stroke-width", 2)
-    .attr("stroke-dasharray", d => d.type === "asset" && !d.image && !d.placeholder ? "5,5" : "0")
+    .attr("stroke", d => d.isDraft ? "#f2b90c" : (d.type === "hub" ? "#888888" : "#e7decf"))
+    .attr("stroke-width", d => d.isDraft ? 4 : 2)
+    .attr("stroke-dasharray", d => d.isDraft ? "6,4" : (d.type === "asset" && !d.image && !d.placeholder ? "5,5" : "0"))
     .attr("opacity", 0.9)
     .style("color", glowColor)
     .attr("filter", GLOW_FILTER);
@@ -543,8 +584,8 @@ const structuralLinks = [
     .attr("preserveAspectRatio", d => d.logoFit === "contain" ? "xMidYMid meet" : "xMidYMid slice");
 
   node.append("text").attr("class", "node-label")
-    .text(d => d.type === "asset" ? truncateLabel(d.name, 24) : d.name)
-    .attr("dy", d => d.size + 18).attr("text-anchor", "middle").attr("fill", "#fff")
+    .text(d => (d.type === "asset" ? truncateLabel(d.name, 24) : d.name) + (d.isDraft ? " (draft)" : ""))
+    .attr("dy", d => d.size + 18).attr("text-anchor", "middle").attr("fill", d => d.isDraft ? "#f2b90c" : "#fff")
     .attr("font-size", d => d.type === "hub" ? "14px" : "11px").style("text-shadow", "1px 1px 2px rgba(0,0,0,0.8)");
 
   // Native tooltip so a truncated asset name is still readable on hover
@@ -1139,6 +1180,38 @@ const structuralLinks = [
   // full graph is visible on load instead of just its middle.
   renderTick();
   fitVizView(0);
+
+  // Draft preview: auto-focus the new node the instant the map loads —
+  // same branch-out/zoom a real click triggers below, just fired
+  // programmatically so the reviewer is shown exactly what it'll look like
+  // and where it lands, instead of having to spot one dashed circle
+  // somewhere in the full, unfocused graph.
+  if (previewNodeId) {
+    const draftDatum = workforceData.nodes.find(n => n.id === previewNodeId);
+    if (draftDatum) {
+      setTimeout(() => {
+        // directory.js's assetData populates from its own independent
+        // fetch of assets.json — poll briefly for it to include the draft
+        // (merged in by directory.js's own copy of this same mechanism)
+        // rather than risk opening the modal before it's there and getting
+        // the "Information coming soon" fallback instead of the real draft.
+        const openDraftModal = (attemptsLeft) => {
+          if (typeof assetData !== 'undefined' && assetData[previewNodeId]) {
+            openAssetModal(draftDatum.id);
+          } else if (attemptsLeft > 0) {
+            setTimeout(() => openDraftModal(attemptsLeft - 1), 100);
+          } else {
+            openAssetModal(draftDatum.id);
+          }
+        };
+        openDraftModal(20);
+        focusedNode = draftDatum;
+        setFocusDim(true);
+        if (draftDatum.links && draftDatum.links.length) branchOutNode(draftDatum);
+        else focusOnCluster(draftDatum.x, draftDatum.y, draftDatum.size + 80, 700);
+      }, 50);
+    }
+  }
 
   // Snapshot this settled layout so Reset View can put every node back
   // exactly here later, instead of just re-fitting the camera to wherever

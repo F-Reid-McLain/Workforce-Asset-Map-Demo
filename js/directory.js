@@ -12,10 +12,25 @@ async function loadAssetData() {
         if (!response.ok) throw new Error('Network response was not ok');
         
         assetData = await response.json();
+
+        // Same draft-preview mechanism as viz-engine.js — merges an
+        // unpublished node stashed by the admin tools' "Preview on Map"
+        // button so its info panel shows real content, never touching
+        // assets.json itself.
+        const previewId = new URLSearchParams(window.location.search).get('preview');
+        if (previewId) {
+            try {
+                const draft = JSON.parse(sessionStorage.getItem('wf_preview_node') || 'null');
+                if (draft && draft.id === previewId) assetData[draft.id] = draft.data;
+            } catch (err) {
+                console.error('directory: could not parse preview draft', err);
+            }
+        }
+
         console.log("Asset data loaded successfully");
-        
+
         // Only check for URL parameters (from map clicks) AFTER data is ready
-        checkUrlParameters(); 
+        checkUrlParameters();
     } catch (error) {
         console.error("Error loading asset JSON:", error);
     }
