@@ -99,6 +99,18 @@
     themeEl.addEventListener('change', update);
     heightEl.addEventListener('input', update);
 
+    // Chrome (and some other browsers) silently bump a focused <input
+    // type="number">'s value on mouse-wheel scroll — so simply scrolling the
+    // page with the cursor resting over the Height field, after clicking
+    // into it, keeps incrementing it by `step` on every tick. That fires
+    // `update()` each time, which is exactly what made the preview keep
+    // growing taller on its own with no obvious cause. Blur on wheel so a
+    // stray scroll never changes the value; the same quirk applies to a
+    // focused <select>, so guard the theme dropdown too.
+    [heightEl, themeEl].forEach(function (el) {
+        el.addEventListener('wheel', function () { el.blur(); }, { passive: true });
+    });
+
     if (copyBtn) {
         const defaultLabel = copyBtn.textContent;
         copyBtn.addEventListener('click', function () {
