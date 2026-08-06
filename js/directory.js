@@ -24,6 +24,23 @@ function escapeHtmlDir(str) {
     return div.innerHTML;
 }
 
+// escapeHtmlDir is safe for text-node content but not for attribute values —
+// the browser's text-node serialization doesn't escape quote characters,
+// since they're only meaningful inside a quoted attribute. openAssetModal
+// puts submitted asset/link URLs straight into href="", so this both closes
+// that quote-breakout gap and rejects non-http(s) schemes (e.g. javascript:)
+// before a submitted URL ever reaches the DOM.
+function safeHref(url) {
+    const trimmed = (url || '').trim();
+    if (!/^https?:\/\//i.test(trimmed)) return '#';
+    return trimmed
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
 // No-ops on index.html (loads this same file for openAssetModal/etc. but
 // has no .directory-grid) — only the actual Directory page has one.
 // Preserves assets.json's own key order within each category (whatever
@@ -173,15 +190,19 @@ function openAssetModal(assetId) {
     const asset = assetData[assetId];
     const inlinePanel  = document.getElementById('viz-info-panel');
 
-    // Build shared HTML content
-    let html = `<p>${asset ? (asset.description || '') : 'Information coming soon...'}</p>`;
-    if (asset && asset.impact)   html += `<p><strong>Community Impact:</strong> ${asset.impact}</p>`;
+    // Build shared HTML content. Every value below can originate from a
+    // public "Suggest an Asset"/"Request an Edit" submission that an admin
+    // approved and published as-is (see js/forms.js, admin/js/node-builder-core.js)
+    // — nothing upstream strips HTML out of it, so it must be escaped here,
+    // at the one place it's actually rendered to real site visitors.
+    let html = `<p>${asset ? escapeHtmlDir(asset.description || '') : 'Information coming soon...'}</p>`;
+    if (asset && asset.impact)   html += `<p><strong>Community Impact:</strong> ${escapeHtmlDir(asset.impact)}</p>`;
     if (asset && asset.links && asset.links.length) {
         html += `<p><strong>Related Programs:</strong></p><div class="related-links">`;
-        html += asset.links.map(l => `<a href="${l.url}" target="_blank">${l.label}</a>`).join('');
+        html += asset.links.map(l => `<a href="${safeHref(l.url)}" target="_blank" rel="noopener">${escapeHtmlDir(l.label)}</a>`).join('');
         html += `</div>`;
     }
-    if (asset && asset.website)  html += `<p><strong>Website:</strong> <a href="${asset.website}" target="_blank">${shortenUrl(asset.website)}</a></p>`;
+    if (asset && asset.website)  html += `<p><strong>Website:</strong> <a href="${safeHref(asset.website)}" target="_blank" rel="noopener">${escapeHtmlDir(shortenUrl(asset.website))}</a></p>`;
 
     // Use inline panel when it exists (orientation handles portrait/landscape layout)
     if (inlinePanel) {
