@@ -42,6 +42,30 @@ entire site. Other CSS files must not hardcode these values.
     --color-node-group:      #4a9eff;   /* Major-group nodes */
     --color-node-asset:      #66bb6a;   /* Asset leaf nodes */
 
+    /* ===== NODE RENDERING (D3 map, drawn in js/viz-engine.js) =====
+       These back js/viz-engine.js's resolveThemeColors() helper. Dark
+       values here match what used to be hardcoded hex directly in the JS,
+       so the no-theme-param default is provably unchanged. */
+    --color-node-label:         #ffffff;
+    --color-node-label-shadow:  rgba(0, 0, 0, 0.8);
+    --color-node-hub-fill:      #3a3a3a;
+    --color-node-hub-stroke:    #888888;
+    --color-node-hub-mark:      #cccccc;
+    --color-node-asset-stroke:  #e7decf;
+    --color-node-link-default:  #666666;
+
+    /* ===== VIZ FLOATING CHROME (search box, zoom/fullscreen controls,
+       info panel, SVG canvas background) — css/viz.css ===== */
+    --viz-control-bg:        rgba(0, 0, 0, 0.75);
+    --viz-control-border:    rgba(255, 255, 255, 0.3);
+    --viz-control-hover-bg:  rgba(60, 60, 60, 0.9);
+    --viz-panel-bg:          rgba(22, 22, 22, 0.96);
+    --viz-panel-header-bg:   rgba(28, 28, 28, 0.99);
+    --viz-svg-bg-inner:      #2f2f33;
+    --viz-svg-bg-dot:        rgba(255, 255, 255, 0.05);
+    --viz-slider-track:      rgba(255, 255, 255, 0.25);
+    --viz-slider-thumb:      rgba(255, 255, 255, 0.85);
+
     /* ===== FOOTER (Chamber brand chrome — matches choosemacon.com) ===== */
     --footer-bg:             #252525;   /* Footer background */
     --footer-bg-bar:         #201f1f;   /* Darker sub-bar along the bottom edge */
@@ -80,4 +104,47 @@ entire site. Other CSS files must not hardcode these values.
     /* ===== TRANSITIONS ===== */
     --transition-fast:       0.2s ease;
     --transition-base:       0.3s ease;
+}
+
+/* ================================================================
+   LIGHT THEME — opt-in via ?theme=light (see the inline script at the
+   top of index.html's <body>), for partners embedding the map who want
+   it to match a light-colored host page. Scoped in practice to what's
+   actually visible in a map-only embed (network graph + its own floating
+   controls) — see css/viz.css for where these get used. Header/footer
+   pick these up too since they already use var(--color-*) tokens, but
+   that combination isn't the primary target and hasn't been visually
+   tuned as carefully as the map itself.
+   ================================================================ */
+:root[data-theme="light"] {
+    --color-bg-page:         #f4f4f4;
+    --color-bg-surface:      #ffffff;
+    --color-bg-surface-deep: #eceff1;
+    --color-bg-surface-mid:  #eceff1;
+
+    --color-border:          #dcdcdc;
+    --color-border-subtle:   #e2e2e2;
+    --color-border-control:  #bbbbbb;
+
+    --color-text-primary:    #1a1a1a;
+    --color-text-secondary:  #444444;
+    --color-text-muted:      #6b6b6b;
+
+    --color-node-label:         #1a1a1a;
+    --color-node-label-shadow:  rgba(255, 255, 255, 0.85);
+    --color-node-hub-fill:      #e2e2e2;
+    --color-node-hub-stroke:    #8f8f8f;
+    --color-node-hub-mark:      #555555;
+    --color-node-asset-stroke:  #a9895f;
+    --color-node-link-default:  #a3a3a3;
+
+    --viz-control-bg:        rgba(255, 255, 255, 0.85);
+    --viz-control-border:    rgba(0, 0, 0, 0.15);
+    --viz-control-hover-bg:  rgba(225, 225, 225, 0.95);
+    --viz-panel-bg:          rgba(255, 255, 255, 0.97);
+    --viz-panel-header-bg:   rgba(245, 245, 245, 0.99);
+    --viz-svg-bg-inner:      #e6e6ea;
+    --viz-svg-bg-dot:        rgba(0, 0, 0, 0.05);
+    --viz-slider-track:      rgba(0, 0, 0, 0.2);
+    --viz-slider-thumb:      rgba(0, 0, 0, 0.75);
 }

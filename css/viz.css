@@ -29,8 +29,8 @@
     /* Layered for depth: the dark vignette plus a fine dot grid for
        texture — flat single-gradient before. */
     background:
-        radial-gradient(circle at center, #2f2f33 0%, var(--color-bg-page) 78%),
-        radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1.4px);
+        radial-gradient(circle at center, var(--viz-svg-bg-inner) 0%, var(--color-bg-page) 78%),
+        radial-gradient(var(--viz-svg-bg-dot) 1px, transparent 1.4px);
     background-size: 100% 100%, 24px 24px;
     background-position: center, center;
     display: block;
@@ -132,8 +132,8 @@
     gap: 0.45rem;
     height: 28px;
     padding: 0 0.65rem;
-    background: rgba(0, 0, 0, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: var(--viz-control-bg);
+    border: 1px solid var(--viz-control-border);
     border-radius: var(--radius-pill);
     color: var(--color-text-primary);
     font-size: var(--font-size-sm);
@@ -150,7 +150,7 @@
     -webkit-appearance: none;
     appearance: none;
     height: 3px;
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--viz-slider-track);
     border-radius: 2px;
     outline: none;
 }
@@ -161,7 +161,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--viz-slider-thumb);
     cursor: pointer;
 }
 
@@ -170,13 +170,13 @@
     height: 12px;
     border: none;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--viz-slider-thumb);
     cursor: pointer;
 }
 
 .fs-slider::-moz-range-track {
     height: 3px;
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--viz-slider-track);
     border-radius: 2px;
 }
 
@@ -190,8 +190,8 @@
 .fs-reset-btn {
     height: 28px;
     padding: 0 0.65rem;
-    background: rgba(0, 0, 0, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: var(--viz-control-bg);
+    border: 1px solid var(--viz-control-border);
     border-radius: var(--radius-pill);
     color: var(--color-text-primary);
     font-size: var(--font-size-sm);
@@ -201,7 +201,7 @@
     line-height: 1;
 }
 
-.fs-reset-btn:hover { background: rgba(60, 60, 60, 0.9); }
+.fs-reset-btn:hover { background: var(--viz-control-hover-bg); }
 
 /* ===== MAP SEARCH ===== */
 .viz-search {
@@ -240,8 +240,8 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    background: rgba(0, 0, 0, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: var(--viz-control-bg);
+    border: 1px solid var(--viz-control-border);
     border-radius: 6px;
     padding: 0 0.35rem 0 0.65rem;
     transition: border-color var(--transition-fast);
@@ -271,8 +271,8 @@
     padding: 0.25rem 0;
     max-height: 220px;
     overflow-y: auto;
-    background: rgba(0, 0, 0, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: var(--viz-panel-bg);
+    border: 1px solid var(--viz-control-border);
     border-radius: 6px;
 }
 
@@ -314,9 +314,9 @@
 
 .viz-fullscreen-btn,
 .viz-zoom-btn {
-    background: rgba(0, 0, 0, 0.75);
+    background: var(--viz-control-bg);
     color: var(--color-text-primary);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--viz-control-border);
     border-radius: var(--radius-pill);
     width: 32px;
     height: 28px;
@@ -328,7 +328,7 @@
 }
 
 .viz-fullscreen-btn:hover,
-.viz-zoom-btn:hover { background: rgba(60, 60, 60, 0.9); }
+.viz-zoom-btn:hover { background: var(--viz-control-hover-bg); }
 
 /* Touch devices: larger tap targets for zoom controls */
 @media (pointer: coarse) {
@@ -349,7 +349,7 @@
     left: 0;
     right: 0;
     max-height: 45%;
-    background: rgba(22, 22, 22, 0.96);
+    background: var(--viz-panel-bg);
     border-top: 1px solid var(--color-border-subtle);
     z-index: 30;
     overflow-y: auto;
@@ -400,7 +400,7 @@
     border-bottom: 1px solid var(--color-border);
     position: sticky;
     top: 0;
-    background: rgba(28, 28, 28, 0.99);
+    background: var(--viz-panel-header-bg);
 }
 
 .viz-info-header h3 {

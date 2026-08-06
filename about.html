@@ -58,6 +58,55 @@
                 </section>
 
                 <section class="about-section">
+                    <h3>Embed This Map on Your Site</h3>
+                    <p>Partners are welcome to embed the live Workforce Navigator map on their own website using an <code>&lt;iframe&gt;</code>. The embedded map stays in sync automatically — any updates published here appear in the embed with no extra work.</p>
+
+                    <div class="embed-builder">
+                        <div class="embed-builder-controls">
+                            <label class="form-checkbox-label embed-builder-checkbox">
+                                <input type="checkbox" id="embed-opt-map-only">
+                                Map only (hide site header &amp; footer)
+                            </label>
+                            <div class="form-field embed-builder-field">
+                                <label class="form-label" for="embed-opt-theme">Theme</label>
+                                <select class="form-select" id="embed-opt-theme">
+                                    <option value="dark" selected>Dark (default)</option>
+                                    <option value="light">Light</option>
+                                </select>
+                            </div>
+                            <div class="form-field embed-builder-field">
+                                <label class="form-label" for="embed-opt-height">Height (px)</label>
+                                <input class="form-input" type="number" id="embed-opt-height" value="800" min="300" max="2000" step="10">
+                            </div>
+                        </div>
+
+                        <p>Your embed code:</p>
+                        <pre class="embed-code"><code id="embed-snippet"></code></pre>
+                        <button type="button" class="control-btn embed-copy-btn" id="embed-copy-btn">Copy Code</button>
+
+                        <p class="embed-preview-label">Live preview — reflects the settings above:</p>
+                        <div class="embed-preview-toolbar">
+                            <span class="embed-preview-toolbar-label">Preview at:</span>
+                            <button type="button" class="control-btn embed-preview-preset active" data-width="auto">Your Browser</button>
+                            <button type="button" class="control-btn embed-preview-preset" data-width="1280">Desktop</button>
+                            <button type="button" class="control-btn embed-preview-preset" data-width="768">Tablet</button>
+                            <button type="button" class="control-btn embed-preview-preset" data-width="375">Mobile</button>
+                        </div>
+                        <div class="embed-preview-wrap" id="embed-preview-wrap">
+                            <iframe id="embed-preview" class="embed-preview-frame" title="Embed preview" src="index.html"></iframe>
+                        </div>
+                    </div>
+
+                    <p>Notes on embedding:</p>
+                    <ul>
+                        <li>The map only resizes to fill its iframe automatically — set whatever <code>height</code> fits your layout (a fixed pixel value works better than a percentage, since the iframe itself doesn't know your page's available height).</li>
+                        <li>Light theme is tuned for the map and its own controls (search, zoom, node labels). It doesn't need "Map only" checked — you can preview it against the full site chrome too, though partners typically use the two together.</li>
+                        <li>The map requires JavaScript and loads its data from this site, so the embedding page must allow cross-origin iframes (this is the default for most site builders and CMSs).</li>
+                        <li>Avoid placing the iframe inside another fixed-height, scrollable container on your page — the map already handles panning and zooming internally, so nesting it inside a second scrollable box just adds a confusing scrollbar-within-a-scrollbar. Give it a plain block-level spot on the page instead.</li>
+                    </ul>
+                </section>
+
+                <section class="about-section">
                     <h3>Project Overview</h3>
                     <p>The Macon Workforce Navigator is an interactive visualization showcasing the interconnected network of workforce development resources in the Greater Macon region. This comprehensive tool helps job seekers, employers, and community partners understand and navigate the rich ecosystem of training, education, and support services available locally.</p>
 
@@ -155,6 +204,7 @@
             </div>
         </div>
     </footer>
+    <script src="js/embed-builder.js"></script>
     <script src="js/nav.js"></script>
 </body>
 </html>

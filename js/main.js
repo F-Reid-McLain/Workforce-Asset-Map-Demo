@@ -114,6 +114,19 @@ function fitVizToContainer() {
     fitVizView(600);
 }
 
+// A host page embedding the map in an <iframe> can resize that iframe at any
+// time (responsive layout, orientation change, etc.) — fitVizToContainer was
+// previously only ever called on fullscreen enter/exit, so the map wouldn't
+// re-fit if the embedding page resized the iframe element itself. rAF-debounced
+// so a drag-resize doesn't thrash the viewBox/camera reframe on every tick.
+if (window.ResizeObserver) {
+    let vizResizeRAF = null;
+    new ResizeObserver(() => {
+        if (vizResizeRAF) cancelAnimationFrame(vizResizeRAF);
+        vizResizeRAF = requestAnimationFrame(fitVizToContainer);
+    }).observe(vizContainer);
+}
+
 // ===== ZOOM BUTTONS =====
 const zoomInBtn       = document.getElementById('zoom-in-btn');
 const zoomOutBtn      = document.getElementById('zoom-out-btn');

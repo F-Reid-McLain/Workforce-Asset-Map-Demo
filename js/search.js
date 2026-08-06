@@ -81,9 +81,20 @@
         return nodeSelection.data().filter(d => normalize(d.name).includes(query));
     }
 
+    // Mirrors the stroke logic in js/viz-engine.js's initial node render, so
+    // "reset"/non-match strokes match what the node looked like before any
+    // search ran instead of a value that only reads correctly in dark theme.
+    function defaultStroke(d) {
+        if (d.isDraft) return '#f2b90c';
+        return d.type === 'hub' ? THEME.hubStroke : THEME.assetStroke;
+    }
+
     function resetHighlight() {
         if (!nodeSelection) return;
-        nodeSelection.select('circle').attr('stroke', '#fff').attr('stroke-width', 2).style('opacity', null);
+        nodeSelection.each(function (d) {
+            d3.select(this).select('circle').attr('stroke', defaultStroke(d)).attr('stroke-width', d.isDraft ? 4 : 2);
+        });
+        nodeSelection.select('circle').style('opacity', null);
         nodeSelection.select('text').style('opacity', null);
         nodeSelection.select('image').style('opacity', null);
         if (linkSelection) linkSelection.style('opacity', null);
@@ -97,8 +108,8 @@
             const isMatch = matchIds.has(d.id);
             const sel = d3.select(this);
             sel.select('circle')
-                .attr('stroke', isMatch ? HIGHLIGHT_STROKE : '#fff')
-                .attr('stroke-width', isMatch ? 4 : 2)
+                .attr('stroke', isMatch ? HIGHLIGHT_STROKE : defaultStroke(d))
+                .attr('stroke-width', isMatch ? 4 : (d.isDraft ? 4 : 2))
                 .style('opacity', isMatch ? null : DIM_OPACITY);
             sel.select('text').style('opacity', isMatch ? null : DIM_OPACITY);
             sel.select('image').style('opacity', isMatch ? null : DIM_OPACITY);

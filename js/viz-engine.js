@@ -6,6 +6,7 @@ let originalSizes = {};
 let simulation, svg, zoom, g;
 let nodeSelection, linkSelection;
 let workforceData; // hoisted so main.js can re-fit the view (e.g. on Reset)
+let THEME; // resolved theme colors, shared with search.js — set in initViz below
 
 // Snapshot of every node's settled x/y right after the initial warm-start,
 // and the function to restore it — both assigned once init finishes, so
@@ -320,6 +321,27 @@ const structuralLinks = [
 
   g = svg.append("g");
 
+  // Reads the --color-node-* / --viz-* custom properties set by css/theme.css
+  // (and its :root[data-theme="light"] override, toggled by ?theme=light —
+  // see the inline script at the top of index.html) so the graph's own D3-
+  // drawn colors follow the page theme instead of being locked to dark mode.
+  // Defaults below match what used to be hardcoded directly here, so a page
+  // with no theme param renders identically to before this existed.
+  function resolveThemeColors() {
+    const cs = getComputedStyle(document.documentElement);
+    const v = (name, fallback) => cs.getPropertyValue(name).trim() || fallback;
+    return {
+      hubFill:     v('--color-node-hub-fill', '#3a3a3a'),
+      hubStroke:   v('--color-node-hub-stroke', '#888888'),
+      hubMark:     v('--color-node-hub-mark', '#cccccc'),
+      assetStroke: v('--color-node-asset-stroke', '#e7decf'),
+      labelFill:   v('--color-node-label', '#ffffff'),
+      labelShadow: v('--color-node-label-shadow', 'rgba(0,0,0,0.8)'),
+      linkDefault: v('--color-node-link-default', '#666666'),
+    };
+  }
+  THEME = resolveThemeColors();
+
   const colorScale = d3.scaleOrdinal()
     .domain(["hub", "major-group", "asset"])
     .range(["#ffffff", HUB_ACCENT, "#afa66d"]);
@@ -330,7 +352,7 @@ const structuralLinks = [
   function fillColor(d) {
     if (d.logoBg) return d.logoBg;
     if (d.image) return "#ffffff";
-    if (d.type === "hub") return "#3a3a3a"; // monochrome grey badge, matches the favicon
+    if (d.type === "hub") return THEME.hubFill; // monochrome grey badge, matches the favicon
     if (d.type === "major-group") return CATEGORY_COLORS[d.id] || colorScale(d.type);
     return CATEGORY_COLORS[d.category] || colorScale(d.type);
   }
@@ -461,7 +483,7 @@ const structuralLinks = [
   function linkColor(d) {
     if (d.source.type === "hub" || d.target.type === "hub") return HUB_ACCENT;
     const catNode = d.source.type === "major-group" ? d.source : d.target;
-    return CATEGORY_COLORS[catNode.id] || "#666";
+    return CATEGORY_COLORS[catNode.id] || THEME.linkDefault;
   }
 
   const link = g.append("g").selectAll("line").data(workforceData.links).join("line")
@@ -505,7 +527,7 @@ const structuralLinks = [
   nodeSelection = node;
 
   node.append("circle").attr("r", d => d.size).attr("fill", fillColor)
-    .attr("stroke", d => d.isDraft ? "#f2b90c" : (d.type === "hub" ? "#888888" : "#e7decf"))
+    .attr("stroke", d => d.isDraft ? "#f2b90c" : (d.type === "hub" ? THEME.hubStroke : THEME.assetStroke))
     .attr("stroke-width", d => d.isDraft ? 4 : 2)
     .attr("stroke-dasharray", d => d.isDraft ? "6,4" : (d.type === "asset" && !d.image && !d.placeholder ? "5,5" : "0"))
     .attr("opacity", 0.9)
@@ -547,7 +569,7 @@ const structuralLinks = [
   hubMark.append("path")
     .attr("d", HUB_MARK_PATH)
     .attr("fill", "none")
-    .attr("stroke", "#cccccc")
+    .attr("stroke", THEME.hubMark)
     .attr("stroke-width", 7)
     .attr("stroke-linejoin", "round")
     .attr("stroke-linecap", "round");
@@ -555,7 +577,7 @@ const structuralLinks = [
     .text("MWN")
     .attr("text-anchor", "middle")
     .attr("x", 196).attr("y", 222)
-    .attr("fill", "#cccccc")
+    .attr("fill", THEME.hubMark)
     .attr("font-weight", "700")
     .attr("font-size", 88)
     .attr("letter-spacing", 2);
@@ -585,8 +607,8 @@ const structuralLinks = [
 
   node.append("text").attr("class", "node-label")
     .text(d => (d.type === "asset" ? truncateLabel(d.name, 24) : d.name) + (d.isDraft ? " (draft)" : ""))
-    .attr("dy", d => d.size + 18).attr("text-anchor", "middle").attr("fill", d => d.isDraft ? "#f2b90c" : "#fff")
-    .attr("font-size", d => d.type === "hub" ? "14px" : "11px").style("text-shadow", "1px 1px 2px rgba(0,0,0,0.8)");
+    .attr("dy", d => d.size + 18).attr("text-anchor", "middle").attr("fill", d => d.isDraft ? "#f2b90c" : THEME.labelFill)
+    .attr("font-size", d => d.type === "hub" ? "14px" : "11px").style("text-shadow", `1px 1px 2px ${THEME.labelShadow}`);
 
   // Native tooltip so a truncated asset name is still readable on hover
   node.filter(d => d.type === "asset").append("title").text(d => d.name);
@@ -1008,8 +1030,8 @@ const structuralLinks = [
       // away — the info panel already lists it in full).
       .text(l => truncateLabel(l.label, 11))
       .attr("text-anchor", "middle").attr("dy", BRANCH_NODE_R + 13)
-      .attr("fill", "#fff").attr("font-size", "9px")
-      .style("text-shadow", "1px 1px 2px rgba(0,0,0,0.8)");
+      .attr("fill", THEME.labelFill).attr("font-size", "9px")
+      .style("text-shadow", `1px 1px 2px ${THEME.labelShadow}`);
     branchSatSel.append("title").text(l => l.description || l.label);
 
     // The fan's size is driven by its own content, not by how much safe

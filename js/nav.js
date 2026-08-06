@@ -1,7 +1,7 @@
 // ===== STICKY HEADER (hide on scroll down, show on scroll up) =====
 (function () {
     const header = document.querySelector('.main-header');
-    if (!header) return;
+    if (!header || document.body.classList.contains('embed-mode')) return;
 
     // Offset body so content doesn't hide under fixed header
     function applyOffset() {
