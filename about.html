@@ -58,6 +58,24 @@
                 </section>
 
                 <section class="about-section">
+                    <h3>Embed This Map on Your Site</h3>
+                    <p>Partners are welcome to embed the live Workforce Navigator map on their own website using an <code>&lt;iframe&gt;</code>. The embedded map stays in sync automatically — any updates published here appear in the embed with no extra work.</p>
+                    <p>Add the following HTML wherever you want the map to appear:</p>
+                    <pre class="embed-code"><code>&lt;iframe
+    src="https://maconworkforce.com/"
+    title="Macon Workforce Navigator"
+    style="width: 100%; height: 800px; border: 0;"
+    loading="lazy"&gt;
+&lt;/iframe&gt;</code></pre>
+                    <p>Notes on embedding:</p>
+                    <ul>
+                        <li>Set a fixed pixel <code>height</code> (800px works well on most layouts) — the map does not currently resize to fit its container, so keep the iframe tall enough for the network graph and its category legend.</li>
+                        <li>The embedded page includes the full site header, navigation, and footer since there's no stripped-down embed view yet. If you need a chrome-less version for a tighter embed, let us know and we can look into adding one.</li>
+                        <li>The map requires JavaScript and loads its data from this site, so the embedding page must allow cross-origin iframes (this is the default for most site builders and CMSs).</li>
+                    </ul>
+                </section>
+
+                <section class="about-section">
                     <h3>Project Overview</h3>
                     <p>The Macon Workforce Navigator is an interactive visualization showcasing the interconnected network of workforce development resources in the Greater Macon region. This comprehensive tool helps job seekers, employers, and community partners understand and navigate the rich ecosystem of training, education, and support services available locally.</p>
 
