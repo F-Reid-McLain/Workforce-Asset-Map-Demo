@@ -8,6 +8,7 @@
     const previewWrap = document.getElementById('embed-preview-wrap');
     const presetBtns = document.querySelectorAll('.embed-preview-preset');
     const copyBtn    = document.getElementById('embed-copy-btn');
+    const openLinkEl = document.getElementById('embed-preview-open-link');
     if (!mapOnlyEl || !themeEl || !heightEl || !snippetEl || !previewEl) return;
 
     function buildQuery() {
@@ -99,6 +100,7 @@
             '</iframe>';
 
         previewEl.src = 'index.html' + (query ? '?' + query : '');
+        if (openLinkEl) openLinkEl.href = 'index.html' + (query ? '?' + query : '');
         layoutPreview();
     }
 
