@@ -212,9 +212,12 @@
     width: 210px;
 }
 
-/* Fullscreen shows the Size/Hub Distance/Reset bar in this same top-center
-   spot — drop search below it so the two never overlap. */
-.viz-container.fullscreen .viz-search {
+/* Fullscreen (and map-only embed mode, which shows the same fs-controls
+   overlay outside fullscreen too — see js/main.js's setFullscreenControls)
+   put the Size/Hub Distance/Reset bar in this same top-center spot — drop
+   search below it so the two never overlap. */
+.viz-container.fullscreen .viz-search,
+body.embed-mode .viz-search {
     top: 3.5rem;
 }
 
