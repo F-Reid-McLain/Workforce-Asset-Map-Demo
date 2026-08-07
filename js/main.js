@@ -121,7 +121,17 @@ function fitVizToContainer() {
 // so a drag-resize doesn't thrash the viewBox/camera reframe on every tick.
 if (window.ResizeObserver) {
     let vizResizeRAF = null;
+    // Guards against redundant re-fits on truly no-op sub-pixel size
+    // changes (e.g. a scrollbar toggling elsewhere on the page). The
+    // container's own height is fixed via CSS (css/viz.css), so this
+    // isn't compensating for anything unstable — just avoiding pointless
+    // work when the observed size hasn't actually moved.
+    let lastVizWidth = null, lastVizHeight = null;
     new ResizeObserver(() => {
+        const r = vizContainer.getBoundingClientRect();
+        if (lastVizWidth !== null && Math.abs(r.width - lastVizWidth) < 1 && Math.abs(r.height - lastVizHeight) < 1) return;
+        lastVizWidth = r.width;
+        lastVizHeight = r.height;
         if (vizResizeRAF) cancelAnimationFrame(vizResizeRAF);
         vizResizeRAF = requestAnimationFrame(fitVizToContainer);
     }).observe(vizContainer);
