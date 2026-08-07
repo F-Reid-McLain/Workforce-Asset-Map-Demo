@@ -189,6 +189,14 @@ window.addEventListener('resize', adjustZoomForOverlap);
 
 // ===== FULLSCREEN TOGGLE =====
 let isFullscreen = false;
+// Tracks whether the real Fullscreen API is the thing actually driving the
+// current fullscreen state (as opposed to the CSS-only fallback below) \u2014
+// needed because requestFullscreen() can fail silently (no <iframe
+// allowfullscreen>, unsupported browser, automation contexts, etc.), and a
+// failed/no-op request can still dispatch a fullscreenchange event. Without
+// this flag that event would be indistinguishable from a genuine user exit
+// and would immediately cancel the CSS-only fallback right after entering it.
+let realFullscreenActive = false;
 
 function setFullscreenControls(active) {
     if (fsControls) fsControls.style.display = active ? 'flex' : 'none';
@@ -196,6 +204,7 @@ function setFullscreenControls(active) {
 }
 
 function enterFullscreen() {
+    if (isFullscreen) return;
     isFullscreen = true;
     vizContainer.classList.add('fullscreen', 'interactive');
     fullscreenBtn.textContent = '\u2715';
@@ -203,9 +212,23 @@ function enterFullscreen() {
     setWheelZoomEnabled(true);
     setFullscreenControls(true);
     requestAnimationFrame(fitVizToContainer);
+
+    // A map-only embed's "fullscreen" filling just its own small host iframe
+    // isn't actually fullscreen from the viewer's perspective \u2014 escape the
+    // iframe and take over the whole browser via the real Fullscreen API
+    // instead. Needs the partner's <iframe allowfullscreen>; if that's
+    // missing (or the browser lacks the API) this silently no-ops and we're
+    // left with the CSS-only fill-the-iframe behavior above, which is still
+    // a reasonable fallback rather than a broken one.
+    if (document.body.classList.contains('embed-mode') && vizContainer.requestFullscreen) {
+        vizContainer.requestFullscreen()
+            .then(() => { realFullscreenActive = true; })
+            .catch(() => {});
+    }
 }
 
 function exitFullscreen() {
+    if (!isFullscreen) return;
     isFullscreen = false;
     vizContainer.classList.remove('fullscreen', 'interactive');
     fullscreenBtn.textContent = '\u26F6';
@@ -213,6 +236,13 @@ function exitFullscreen() {
     setWheelZoomEnabled(false);
     setFullscreenControls(false);
     requestAnimationFrame(() => { fitVizToContainer(); adjustZoomForOverlap(); });
+
+    if (realFullscreenActive) {
+        realFullscreenActive = false;
+        if (document.fullscreenElement === vizContainer) {
+            document.exitFullscreen().catch(() => {});
+        }
+    }
 }
 
 if (fullscreenBtn) {
@@ -224,6 +254,18 @@ if (fullscreenBtn) {
 // ESC exits fullscreen
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && isFullscreen) exitFullscreen();
+});
+
+// The real Fullscreen API exits itself on ESC/browser UI without going
+// through exitFullscreen() above \u2014 listen so the button/controls/state
+// don't go stale when that happens. Gated on realFullscreenActive so a
+// failed/no-op requestFullscreen() (still capable of firing this event)
+// doesn't immediately cancel the CSS-only fallback right after entering it.
+document.addEventListener('fullscreenchange', function() {
+    if (!document.fullscreenElement && realFullscreenActive) {
+        realFullscreenActive = false;
+        if (isFullscreen) exitFullscreen();
+    }
 });
 
 // ===== SHARED RESET LOGIC =====

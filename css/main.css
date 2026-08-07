@@ -63,9 +63,10 @@ body.embed-mode .directory-link {
    stripped out — it should fill the entire iframe with nothing but the
    map's own container (search, zoom, fullscreen expand, its border) and
    no leftover page padding/max-width around it. The Node Size/Hub
-   Distance/Reset row is dropped here too since it's redundant — the same
-   controls already live inside the fullscreen view (.viz-fs-controls),
-   reachable via the expand button. */
+   Distance/Reset row stays visible (unlike the fullscreen-only copy) since
+   map-only viewers need a way to adjust the map without also going
+   fullscreen — .viz-container is flex:1 so it still fills whatever space
+   is left after this row's own natural height. */
 body.embed-mode {
     height: 100%;
     display: flex;
@@ -103,10 +104,6 @@ body.embed-mode .viz-container {
     height: auto;
     margin: 0;
     border-radius: 0;
-}
-
-body.embed-mode .viz-controls {
-    display: none;
 }
 
 /* ===== HAMBURGER BUTTON ===== */
