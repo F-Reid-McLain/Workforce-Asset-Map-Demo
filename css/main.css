@@ -7,6 +7,7 @@
 
 html {
     scroll-behavior: smooth;
+    height: 100%;
 }
 
 body {
@@ -55,6 +56,56 @@ body.embed-mode .main-header,
 body.embed-mode .main-footer,
 body.embed-mode .viz-header,
 body.embed-mode .directory-link {
+    display: none;
+}
+
+/* Map-only shouldn't just be the normal page with header/footer text
+   stripped out — it should fill the entire iframe with nothing but the
+   map's own container (search, zoom, fullscreen expand, its border) and
+   no leftover page padding/max-width around it. The Node Size/Hub
+   Distance/Reset row is dropped here too since it's redundant — the same
+   controls already live inside the fullscreen view (.viz-fs-controls),
+   reachable via the expand button. */
+body.embed-mode {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+body.embed-mode .main-content {
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+    display: flex;
+}
+
+body.embed-mode .visualization-section {
+    flex: 1;
+    min-height: 0;
+    max-width: none;
+    margin: 0;
+    display: flex;
+}
+
+body.embed-mode .visualization-section .container {
+    flex: 1;
+    min-height: 0;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+body.embed-mode .viz-container {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    border-radius: 0;
+}
+
+body.embed-mode .viz-controls {
     display: none;
 }
 
