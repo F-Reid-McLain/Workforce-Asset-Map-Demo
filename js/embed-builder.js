@@ -104,11 +104,19 @@
     // page with the cursor resting over the Height field, after clicking
     // into it, keeps incrementing it by `step` on every tick. That fires
     // `update()` each time, which is exactly what made the preview keep
-    // growing taller on its own with no obvious cause. Blur on wheel so a
-    // stray scroll never changes the value; the same quirk applies to a
-    // focused <select>, so guard the theme dropdown too.
+    // growing taller on its own with no obvious cause. The value-stepping is
+    // the wheel event's *default action*, so blur() alone isn't reliable —
+    // a trackpad gesture fires many wheel events in one burst and the step
+    // can apply before the blur from the prior tick has any effect. Calling
+    // preventDefault() (needs a non-passive listener) is what actually stops
+    // the browser from stepping the value at all; blur() stays as a
+    // belt-and-suspenders guard. Same quirk applies to a focused <select>,
+    // so guard the theme dropdown too.
     [heightEl, themeEl].forEach(function (el) {
-        el.addEventListener('wheel', function () { el.blur(); }, { passive: true });
+        el.addEventListener('wheel', function (e) {
+            e.preventDefault();
+            el.blur();
+        }, { passive: false });
     });
 
     if (copyBtn) {
