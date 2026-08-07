@@ -147,12 +147,15 @@ if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => zoom.scaleBy(svg.tran
 
 // ===== OVERLAP DETECTION: fs-controls vs zoom controls =====
 // Uses hypothetical centered position (not current DOM position) to avoid the check
-// locking once the bar shifts. When overlap detected, right-aligns fs-controls so
-// its right edge matches the zoom controls' right edge.
+// locking once the bar shifts. vizZoomControls (search/zoom/fullscreen-exit) never
+// moves — it's the one control a user in fullscreen actually needs to find reliably
+// to get back out, so it always stays pinned at its default top-right spot. When
+// overlap is detected, fs-controls (Size/Hub Distance/Reset — non-essential, only
+// present in fullscreen) is the one that drops below it instead.
 function adjustZoomForOverlap() {
     if (!fsControls || !vizZoomControls) return;
     if (fsControls.style.display === 'none' || !isFullscreen) {
-        vizZoomControls.style.top = '';
+        fsControls.style.top       = '';
         fsControls.style.left      = '';
         fsControls.style.right     = '';
         fsControls.style.transform = '';
@@ -167,18 +170,15 @@ function adjustZoomForOverlap() {
     const centeredRight = containerRect.left + containerRect.width / 2 + fsWidth / 2;
 
     if (centeredRight >= zoomRect.left) {
-        // Would overlap — right-align fs-controls to match zoom controls' right edge,
-        // then drop zoom controls below it
+        // Would overlap — right-align fs-controls to match zoom controls' right
+        // edge, then drop it below the (untouched) zoom controls column.
         fsControls.style.left      = 'auto';
         fsControls.style.right     = '0.75rem';
         fsControls.style.transform = 'none';
-
-        const containerTop = containerRect.top;
-        const fsBottom     = fsControls.getBoundingClientRect().bottom;
-        vizZoomControls.style.top = (fsBottom - containerTop + 8) + 'px';
+        fsControls.style.top       = (zoomRect.bottom - containerRect.top + 8) + 'px';
     } else {
-        // No overlap — restore centered position and zoom controls default
-        vizZoomControls.style.top = '';
+        // No overlap — restore centered position
+        fsControls.style.top       = '';
         fsControls.style.left      = '';
         fsControls.style.right     = '';
         fsControls.style.transform = '';
